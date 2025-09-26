@@ -6,15 +6,17 @@
     <title>彩色文字生成器</title>
     <style>
         :root {
-            --primary-color: #4CAF50;
-            --primary-hover: #45a049;
-            --secondary-color: #2196F3;
-            --secondary-hover: #0b7dda;
-            --copy-color: #9C27B0;
-            --copy-hover: #7B1FA2;
-            --text-color: #333;
-            --light-gray: #f5f5f5;
-            --border-color: #ddd;
+            --primary-color: #238636;
+            --primary-hover: #2ea043;
+            --secondary-color: #1f6feb;
+            --secondary-hover: #2c7be5;
+            --copy-color: #8957e5;
+            --copy-hover: #7d45e0;
+            --text-color: #e6edf3;
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --input-bg: #0d1117;
         }
         
         * {
@@ -24,11 +26,11 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.5;
             color: var(--text-color);
-            background-color: var(--light-gray);
-            padding: 20px;
+            background-color: var(--bg-color);
+            padding: 16px;
             max-width: 100%;
             min-height: 100vh;
         }
@@ -36,59 +38,64 @@
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(1, 4, 9, 0.5);
+            padding: 24px;
+            border: 1px solid var(--border-color);
         }
         
         h1 {
             text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 25px;
-            font-size: 1.8rem;
+            color: var(--text-color);
+            margin-bottom: 24px;
+            font-size: 24px;
+            font-weight: 600;
         }
         
         .section-header {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         
         h3 {
-            font-size: 1.2rem;
+            font-size: 16px;
             color: var(--text-color);
             margin: 0;
             flex-grow: 1;
+            font-weight: 600;
         }
         
         .input-section, .preview-section, .code-section {
-            margin-bottom: 25px;
+            margin-bottom: 24px;
         }
         
         textarea {
             width: 100%;
-            padding: 12px;
+            padding: 8px 12px;
+            background-color: var(--input-bg);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             resize: vertical;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 14px;
             min-height: 100px;
-            transition: border 0.3s;
+            color: var(--text-color);
+            transition: border 0.2s;
         }
         
         textarea:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.3);
         }
         
         .preview {
-            background-color: white;
+            background-color: var(--input-bg);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 20px;
+            padding: 16px;
             min-height: 80px;
             display: flex;
             align-items: center;
@@ -98,14 +105,14 @@
         }
         
         .preview span {
-            font-size: 1.5rem;
-            font-weight: bold;
-            line-height: 1.8;
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.5;
         }
         
         /* 阴影效果类 */
         .shadow-normal {
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         
         .shadow-random {
@@ -121,46 +128,45 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 6px 16px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 14px;
             font-weight: 500;
             text-align: center;
-            transition: background-color 0.3s, transform 0.2s;
-            margin-top: 15px;
+            transition: background-color 0.2s;
+            margin-top: 12px;
+            border: 1px solid rgba(240, 246, 252, 0.1);
         }
         
         .btn:hover {
             background-color: var(--primary-hover);
-            transform: translateY(-2px);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
+            border-color: rgba(240, 246, 252, 0.1);
         }
         
         #generatedCode {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #f8f8f8;
-            min-height: 150px;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            background-color: var(--input-bg);
+            min-height: 100px;
             width: 100%;
+            font-size: 14px;
         }
         
         .copy-btn {
             background-color: var(--copy-color);
             color: white;
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            border-radius: 4px;
+            padding: 5px 12px;
+            font-size: 12px;
+            border-radius: 6px;
             height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-left: 10px;
+            margin-left: 8px;
             border: none;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.2s;
+            border: 1px solid rgba(240, 246, 252, 0.1);
         }
         
         .copy-btn:hover {
@@ -169,8 +175,8 @@
         
         .button-row {
             display: flex;
-            gap: 5px;
-            margin-top: 15px;
+            gap: 8px;
+            margin-top: 12px;
         }
         
         .button-row .btn {
@@ -182,46 +188,45 @@
         .options-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 16px;
+            margin-top: 12px;
             flex-wrap: wrap;
         }
         
         .shadow-option {
             display: flex;
             align-items: center;
-            gap: 31px;
+            gap: 16px;
         }
         
         .radio-label {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 14px;
         }
         
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            
+        input[type="radio"] {
+            accent-color: var(--primary-color);
+        }
+        
+        @media (max-width: 640px) {
             .container {
-                padding: 15px;
+                padding: 16px;
             }
             
             h1 {
-                font-size: 1.6rem;
+                font-size: 20px;
                 margin-bottom: 20px;
             }
             
             .preview span {
-                font-size: 1.2rem;
+                font-size: 18px;
             }
             
-            .btn {
-                padding: 5px 10px;
-                font-size: 0.8rem;
+            .shadow-option {
+                gap: 12px;
             }
             
             .button-row {
@@ -231,6 +236,7 @@
             
             .button-row .btn {
                 min-width: 70px;
+                padding: 6px 12px;
             }
         }
     </style>
@@ -244,27 +250,26 @@
             <textarea id="inputText" placeholder="请输入要转换的文字"></textarea>
             
             <div class="options-row">
-                <span></span>
                 <div class="shadow-option">
                     <label class="radio-label">
-                        <input type="radio" name="shadowType" value="none" checked> 无影
+                        <input type="radio" name="shadowType" value="none" checked> 无阴影
                     </label>
                     <label class="radio-label">
-                        <input type="radio" name="shadowType" value="normal"> 阴影
+                        <input type="radio" name="shadowType" value="normal"> 普通阴影
                     </label>
                     <label class="radio-label">
-                        <input type="radio" name="shadowType" value="random"> 随影
+                        <input type="radio" name="shadowType" value="random"> 随机阴影
                     </label>
                     <label class="radio-label">
-                        <input type="radio" name="shadowType" value="glow"> 光影
+                        <input type="radio" name="shadowType" value="glow"> 发光效果
                     </label>
                 </div>
             </div>
             
             <div class="button-row">
-                <button id="generateRandom" class="btn">随机</button>
-                <button id="generateGradient" class="btn">渐变</button>
-                <button id="generateFixed" class="btn">固定</button>
+                <button id="generateRandom" class="btn">随机颜色</button>
+                <button id="generateGradient" class="btn">渐变颜色</button>
+                <button id="generateFixed" class="btn">固定颜色</button>
             </div>
         </div>
         
@@ -339,11 +344,38 @@
             return 'none';
         }
         
+        // 显示通知
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.left = '50%';
+            notification.style.transform = 'translateX(-50%)';
+            notification.style.backgroundColor = 'var(--card-bg)';
+            notification.style.color = 'var(--text-color)';
+            notification.style.padding = '8px 16px';
+            notification.style.borderRadius = '6px';
+            notification.style.border = '1px solid var(--border-color)';
+            notification.style.boxShadow = '0 4px 12px rgba(1, 4, 9, 0.5)';
+            notification.style.zIndex = '1000';
+            notification.style.fontSize = '14px';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 2000);
+        }
+        
         // 生成随机彩色
         function generateRandom() {
             const text = inputText.value.trim();
             if (!text) {
-                ('请输入要转换的文字');
+                showNotification('请输入要转换的文字');
                 return;
             }
             
@@ -380,13 +412,14 @@
             }
             
             generatedCode.value = htmlCode;
+            showNotification('随机颜色生成成功！');
         }
         
         // 生成渐变彩色
         function generateGradient() {
             const text = inputText.value.trim();
             if (!text) {
-                ('请输入要转换的文字');
+                showNotification('请输入要转换的文字');
                 return;
             }
             
@@ -426,13 +459,14 @@
             }
             
             generatedCode.value = htmlCode;
+            showNotification('渐变颜色生成成功！');
         }
         
         // 生成固定彩色（所有文字使用同一种颜色）
         function generateFixed() {
             const text = inputText.value.trim();
             if (!text) {
-                ('请输入要转换的文字');
+                showNotification('请输入要转换的文字');
                 return;
             }
             
@@ -471,12 +505,13 @@
             }
             
             generatedCode.value = htmlCode;
+            showNotification('固定颜色生成成功！');
         }
         
         // 复制代码函数
         function copyCode() {
             if (!generatedCode.value) {
-                ('没有可复制的代码');
+                showNotification('没有可复制的代码');
                 return;
             }
             
@@ -490,6 +525,8 @@
             setTimeout(() => {
                 copyBtn.textContent = originalText;
             }, 2000);
+            
+            showNotification('代码已复制到剪贴板！');
         }
         
         // 添加事件监听器
@@ -497,6 +534,12 @@
         generateGradientBtn.addEventListener('click', generateGradient);
         generateFixedBtn.addEventListener('click', generateFixed);
         copyBtn.addEventListener('click', copyCode);
+        
+        // 初始加载时生成示例
+        window.addEventListener('load', () => {
+            inputText.value = '彩色文字生成器';
+            generateRandom();
+        });
     </script>
 </body>
 </html>
