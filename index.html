@@ -1,1948 +1,950 @@
-<html lang="zh-CN">
- <head> 
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <meta name="referrer" content="no-referrer"> 
-  <title>小说搜索与下载</title> 
-  <!-- 自己把下面两行取消注释可用移动端开发者工具 --> 
-  <script id="gbk.js">
-      // 本来是压缩过的，结果格式化工具又给我格式化了，干脆不管了
-      'use strict'
-      let table
-      function initGbkTable() {
-        var r,
-          t,
-          e,
-          o,
-          n = new Uint16Array(23940)
-        let f = 0
-        for ([r, t, e, o] of [
-          [161, 169, 161, 254],
-          [176, 247, 161, 254],
-          [129, 160, 64, 254],
-          [170, 254, 64, 160],
-          [168, 169, 64, 160],
-          [170, 175, 161, 254],
-          [248, 254, 161, 254],
-          [161, 167, 64, 160],
-        ])
-          for (let l = e; l <= o; l++) if (127 !== l) for (let e = r; e <= t; e++) n[f++] = (l << 8) | e
-        ;(table = new Uint16Array(65536)).fill(65535)
-        var l = new TextDecoder('gbk').decode(n)
-        for (let e = 0; e < l.length; e++) table[l.charCodeAt(e)] = n[e]
-      }
-      const NodeJsBufAlloc = 'function' == typeof globalThis.Buffer && Buffer.allocUnsafe,
-        defaultOnAlloc = NodeJsBufAlloc ? e => NodeJsBufAlloc(e) : e => new Uint8Array(e),
-        defaultOnError = () => 63
-      window.encodeGBK = function (l, e = {}) {
-        table || initGbkTable()
-        var r = e.onAlloc || defaultOnAlloc,
-          t = e.onError || defaultOnError,
-          o = r(2 * l.length)
-        let n = 0
-        for (let e = 0; e < l.length; e++) {
-          var f = l.charCodeAt(e)
-          if (f < 128) o[n++] = f
-          else {
-            var a = table[f]
-            if (65535 !== a) (o[n++] = a), (o[n++] = a >> 8)
-            else if (8364 === f) o[n++] = 128
-            else {
-              a = t(e, l)
-              if (-1 === a) break
-              255 < a ? ((o[n++] = a), (o[n++] = a >> 8)) : (o[n++] = a)
-            }
-          }
-        }
-        return o.subarray(0, n)
-      }
-    </script> 
- </head> 
- <body data-theme="light"> 
-  <button class="toggle-theme" onclick="toggleTheme()"> 
-   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" id="light" display="block"> 
-    <circle cx="12" cy="12" r="10" fill="currentColor"></circle> 
-   </svg> 
-   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" id="dark" display="none"> 
-    <path fill="currentColor" d="M10 2c-1.82 0-3.53.5-5 1.35C7.99 5.08 10 8.3 10 12s-2.01 6.92-5 8.65C6.47 21.5 8.18 22 10 22c5.52 0 10-4.48 10-10S15.52 2 10 2"></path> 
-   </svg> </button> 
-  <h1 id="title">小说搜索与下载</h1> 
-  <div id="container" class="container"> 
-   <form class="search-form" id="search-form"> 
-    <select id="search-type" class="search-type"> <option value="book">书籍</option> <option value="audio">听书</option> </select> 
-    <input type="text" id="book-search" placeholder="请输入小说名称"> 
-    <button type="button" onclick="searchBooks()"> 
-     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="24" height="24" viewbox="0 0 24 24" display="inherit"> 
-      <path d="M16.296 16.996a8 8 0 11.707-.708l3.909 3.91-.707.707-3.909-3.909zM18 11a7 7 0 00-14 0 7 7 0 1014 0z"></path> 
-     </svg> </button> 
-   </form> 
-   <div id="book-list" class="book-list"></div> 
-   <div id="book-info" class="book-info"> 
-    <img src="" alt="封面" id="book-cover"> 
-    <div class="book-info-container"> 
-     <p id="book_id" style="display: none"></p> 
-     <p id="book_info" style="display: none"></p> 
-     <p id="download_lock" style="display: none"></p> 
-     <h2 id="book-title"></h2> 
-     <p><strong>作者：</strong><span id="book-author"></span></p> 
-     <p><strong>分类：</strong><span id="book-category"></span></p> 
-     <p><strong>状态：</strong><span id="creation-status"></span></p> 
-     <p><strong>最新章节：</strong><span id="latest-chapter"></span> <span id="latest-chapter-passtime"></span></p> 
-     <p id="book-description"></p> 
-     <button class="download-btn" onclick="downloadBook()">下载</button> 
-     <select id="type-selector" class="charset-selector"> <option value="text">文本</option> <option value="audio">音频</option> </select> 
-     <select id="charset-selector" class="charset-selector"> <option value="utf-8">UTF-8</option> <option value="gbk">GBK</option> </select> 
-     <select id="format-selector" class="charset-selector"> <option value="txt">TXT</option> <option value="epub">EPUB</option> </select> 
-    </div> 
-   </div> 
-  </div> 
-  <!-- 进度条弹窗 --> 
-  <div id="progress-modal" class="progress-modal" style="display: none"> 
-   <div class="progress-box"> 
-    <h3 id="progress-title" class="progress-title">下载进度</h3> 
-    <div class="progress-bar"> 
-     <div id="progress-bar-fill" class="progress-bar-fill"></div> 
-    </div> 
-    <div class="progress-text"> 
-     <p id="progress-percentage">0%</p> 
-     <p id="progress-count">0/0</p> 
-    </div> 
-    <div id="sub-progress" style="display: none"> 
-     <div class="progress-bar"> 
-      <div id="sub-progress-bar-fill" class="progress-bar-fill"></div> 
-     </div> 
-     <p id="sub-progress-title" class="progress-text">副标题</p> 
-    </div> 
-    <button id="progress-cancel" class="progress-cancel">取消</button> 
-    <button id="progress-submit" class="progress-submit" style="display: none">确定</button> 
-    <button id="button-resave" class="button-resave" style="display: none" onclick="reSave()">手动保存</button> 
-    <button id="button-redownload" class="button-redownload" style="display: none" onclick="reDownload()">重新下载</button> 
-   </div> 
-  </div> 
-  <!-- 点击书名后的弹窗 --> 
-  <dialog id="internal-alert" class="internal-alert"> 
-   <div id="internal-alert-container" class="internal-alert-container"> 
-    <span>内容</span> 
-   </div> 
-  </dialog> 
-  <hr> 
-  <div class="footer"> 
-   <div class="about-container"> 
-    <p class="about-text">本网页为 <a href="https://github.com/MeoProject/PyFQWeb">PyFQWeb</a> 项目的一部分，请遵守开源协议使用</p> 
-   </div> 
-  </div> 
-  <script>
-      const apiNode = 'https://ikun.laoguantx.top:4390'
-      if (!apiNode) alert('请配置apiNode后再使用网页（需要支持跨域）')
-
-      // TODO: 标准化API响应数据
-      function normalizeApiResponse(response) {
-        return response
-      }
-
-      function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-      }
-      
-      function btoaEh(str) {
-        const bytes = new TextEncoder().encode(str);
-
-        let binary = ''
-        bytes.forEach(b => binary += String.fromCharCode(b))
-
-        return btoa(binary)
-      }
-
-      // URL参数管理函数
-      function updateUrlParams(params) {
-        const url = new URL(window.location.href)
-        if (url.protocol === 'file:' || url.protocol === 'content:') return
-        
-        // 清除所有相关参数
-        url.searchParams.delete('book_id')
-        url.searchParams.delete('text')
-        url.searchParams.delete('search_type')
-        
-        // 设置新参数
-        Object.keys(params).forEach(key => {
-          if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
-            url.searchParams.set(key, params[key])
-          }
-        })
-        
-        // 更新URL而不刷新页面
-        window.history.pushState({ path: url.href }, '', url.href)
-      }
-
-      // 从URL参数恢复状态
-      function restoreFromUrlParams() {
-        const url = new URL(window.location.href)
-        const bookId = url.searchParams.get('book_id')
-        const searchText = url.searchParams.get('text')
-        const searchType = url.searchParams.get('search_type')
-        
-        // 恢复搜索类型
-        if (searchType) {
-          const searchTypeSelect = document.getElementById('search-type')
-          if (searchTypeSelect) {
-            searchTypeSelect.value = searchType
-          }
-        }
-        
-        // 恢复搜索框内容
-        if (searchText && !bookId) {
-          const searchInput = document.getElementById('book-search')
-          if (searchInput) {
-            searchInput.value = searchText
-          }
-        }
-        
-        // 自动执行搜索或显示书籍信息
-        if (bookId) {
-          // 如果有book_id，直接显示书籍信息
-          showBookInfo(bookId)
-        } else if (searchText) {
-          // 如果只有搜索文本，执行搜索
-          searchBooks(searchText)
-        }
-      }
-
-      // 设置页面主题
-      function setTheme(theme) {
-        document.body.dataset.theme = theme
-        document.getElementById(theme).setAttribute('display', 'block')
-        document.getElementById(theme === 'dark' ? 'light' : 'dark').setAttribute('display', 'none')
-      }
-
-      // 自动检测浏览器主题并设置页面主题
-      function setThemeBasedOnPreference() {
-        const savedTheme = localStorage.getItem('theme')
-        if (savedTheme) {
-          setTheme(savedTheme)
-        } else {
-          const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-          setTheme(systemTheme)
-        }
-      }
-
-      // 切换主题并保存到localStorage
-      function toggleTheme() {
-        const currentTheme = document.body.dataset.theme || 'light'
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark'
-        setTheme(newTheme)
-        localStorage.setItem('theme', newTheme)
-      }
-
-      // 初始化主题
-      setThemeBasedOnPreference()
-      // 初始化form提交事件
-      document.getElementById('search-form').addEventListener('submit', function (event) {
-        event.preventDefault()
-        searchBooks()
-      })
-
-      function formatCount(num, lang) {
-        const units = {
-          'zh': [{d: 1e8, s: '亿'}, {d: 1e4, s: '万'}],
-          'en': [{d: 1e9, s: 'billion'}, {d: 1e6, s: 'million'}, {d: 1e3, s: 'thousand'}],
-          'ja': [{d: 1e8, s: '億'}, {d: 1e4, s: '万'}],
-          'ko': [{d: 1e8, s: '억'}, {d: 1e4, s: '만'}],
-          'de': [{d: 1e9, s: 'Milliarde'}, {d: 1e6, s: 'Million'}, {d: 1e3, s: 'Tausend'}],
-          'es': [{d: 1e9, s: 'mil millones'}, {d: 1e6, s: 'millón'}, {d: 1e3, s: 'mil'}],
-          'ru': [{d: 1e9, s: 'миллиард'}, {d: 1e6, s: 'миллион'}, {d: 1e3, s: 'тысяча'}],
-          'ar': [{d: 1e9, s: 'مليار'}, {d: 1e6, s: 'مليون'}, {d: 1e3, s: 'ألف'}]
-        };
-
-        const browserLang = (navigator.language || 'en').substring(0,2);
-        const targetLang = units[lang] ? lang : units[browserLang] ? browserLang : 'en';
-
-        const unit = units[targetLang].find(u => num >= u.d) || {d:1, s:''};
-        const value = num / unit.d;
-
-        const formatted = value.toLocaleString(targetLang, {
-          maximumFractionDigits: 3,
-          minimumFractionDigits: 0
-        }).replace(/\.0+$/, '');
-
-        return targetLang === 'ar' 
-          ? `${formatted}\u202C${unit.s}\u202C` 
-          : `${formatted}${unit.s}`;
-      }
-      
-      function formatDuration(seconds) {
-        // 处理负数边界情况
-        const totalSeconds = Math.max(0, Math.round(seconds));
-    
-        // 时间单位分解
-        const hours = Math.floor(totalSeconds / 3600);
-        const remaining = totalSeconds % 3600;
-        const minutes = Math.floor(remaining / 60);
-        const secs = remaining % 60;
-
-        // 构建时间片段
-        const timeFragments = [];
-        if (hours > 0) {
-          timeFragments.push(
-            hours.toString().padStart(2, '0'),
-            minutes.toString().padStart(2, '0')
-          );
-        } else {
-          timeFragments.push(minutes.toString().padStart(2, '0'));
-        }
-        timeFragments.push(secs.toString().padStart(2, '0'));
-
-        return timeFragments.join(':');
-      }
-
-      function isShitBrowser() {
-        const userAgent = navigator.userAgent.toLowerCase()
-        return /qua|qqbrowser|micromessenger|quark|baidu|uc|mbrowser/i.test(userAgent)
-      }
-
-      function timeStampFormat(ts) {
-        return moment(parseInt(ts) * 1000).format('YYYY-MM-DD HH:mm:ss')
-      }
-
-      if (isShitBrowser()) {
-        let now = Date.now()
-        while (Date.now() - now < 30000) {
-          alert(
-            '本站使用JS原生下载API\n请不要使用 夸克 QQ浏览器 百度 等国产魔改浏览器，否则你将无法正常保存书籍\n建议即转下载Via使用，谢谢\n本通知持续30秒，如果您执意要使用类似浏览器，请等30秒'
-          )
-        }
-      }
-
-      function matchId(url) {
-        const regex = /(?:\/page\/(\d{19})|[\?&]book_id=(\d{19}))/
-        const match = url.match(regex)
-
-        if (match || (url.length === 19 && !Number.isNaN(parseInt(url)))) {
-          return match ? match[1] || match[2] : url
-        } else {
-          return null
-        }
-      }
-
-      // 搜索书籍
-      async function searchBooks(k) {
-        const query = k || document.getElementById('book-search').value.trim()
-        const type = document.getElementById('search-type').value || 'book'
-        const typeMap = {
-          book: 3,
-          audio: 2,
-        }
-        if (!query) {
-          return
-        }
-        
-        let _book_id = matchId(query)
-        if (_book_id) {
-          // 如果是书籍ID，更新URL参数并显示书籍信息
-          updateUrlParams({
-            book_id: _book_id,
-            search_type: type
-          })
-          return await showBookInfo(_book_id)
-        }
-        
-        // 更新URL参数 - 搜索状态
-        updateUrlParams({
-          text: query,
-          search_type: type
-        })
-        
-        // 更新搜索框内容（如果是通过参数调用的）
-        if (k && document.getElementById('book-search').value !== query) {
-          document.getElementById('book-search').value = query
-        }
-        
-        const offset = 0 // 默认偏移量
-        const tabType = typeMap[type]
-        const url = `${apiNode}/search?query=${query}&offset=${offset}&tab_type=${tabType}`
-
-        try {
-          const response = await fetch(url)
-          const rawData = await response.json()
-          const data = normalizeApiResponse(rawData)
-          
-          const resp = data.search_tabs.find(tab => tab.tab_type === typeMap[type])?.data || []
-          let searchResults = []
-          for (let i of resp) {
-            let obj = (i.book_data || [])[0]
-            if (obj) searchResults.push(obj)
-          }
-          displaySearchResults(searchResults)
-        } catch (error) {
-          console.error('搜索失败:', error)
-        }
-      }
-
-      // 显示搜索结果
-      function displaySearchResults(results) {
-        const bookList = document.getElementById('book-list')
-        bookList.innerHTML = '' // 清空列表
-        results.forEach(result => {
-          const bookItem = document.createElement('div')
-          bookItem.classList.add('book-item')
-          bookItem.dataset.bookId = result.book_id
-          bookItem.innerHTML = `
-            <div>${result.book_name}</div>
-            <div>${result.author}</div>
-          `
-          bookItem.addEventListener('click', () => showBookInfo(result.book_id))
-          bookList.appendChild(bookItem)
-        })
-        const bookInfo = document.getElementById('book-info')
-        bookInfo.style.display = 'none' // 隐藏书籍详情区域
-      }
-
-      // 显示书籍详细信息
-      async function showBookInfo(bookId) {
-        const platformMap = {
-          '1967': '番茄APP',
-          '1128': '抖音',
-          '13': '今日头条'
-        }
-        
-        // 更新URL参数 - 书籍详情状态
-        const currentSearchType = document.getElementById('search-type').value
-        updateUrlParams({
-          book_id: bookId,
-          search_type: currentSearchType
-        })
-        
-        const bookList = document.getElementById('book-list')
-        bookList.innerHTML = '' // 清空搜索列表
-        
-        const url = `${apiNode}/info?book_id=${bookId}`
-        try {
-          const response = await fetch(url)
-          const rawData = await response.json()
-          const data = normalizeApiResponse(rawData)
-          const bookData = data.data || {} // 返回的数据在`data`字段中
-
-          // 填充书籍信息到页面
-          const bookInfo = document.getElementById('book-info')
-          bookInfo.style.display = 'flex' // 显示书籍详情区域
-
-          document.getElementById('book_id').innerHTML = bookId
-          document.getElementById('book_info').innerHTML = JSON.stringify(bookData)
-          document.getElementById('book-title').textContent = bookData.book_name || '未知标题'
-          document.getElementById('book-author').textContent = bookData.author || '未知作者'
-          document.getElementById('book-category').textContent = bookData.category || '未知分类'
-          document.getElementById('book-description').textContent = bookData.abstract || '暂无简介'
-          document.getElementById('book-cover').src = bookData.thumb_url || 'default_cover.jpg' // 默认封面
-          document.getElementById('creation-status').textContent = ['未知', '完结', '连载', null, null, null, '断更'][
-            (bookData.creation_status << 0) + 1
-          ]
-          document.getElementById('latest-chapter').textContent = bookData.last_chapter_title || '未知'
-          document.getElementById('latest-chapter-passtime').textContent = timeStampFormat(bookData.last_chapter_first_pass_time)
-          document.getElementById('internal-alert-container').innerHTML = `
-<h3 align="center">基础信息</h3>
-<p>书籍ID: ${bookData.book_id}  <a href="https://fanqienovel.com/page/${bookData.book_id}" target="_blank">去官方</a> <a href="legado://import/addToBookshelf?src=https%3A%2F%2Ffanqienovel.com%2F${bookData.book_id}">在开源阅读查看</a> <a href="dragon1967://reading?bookId=${bookData.book_id}">在番茄小说查看</a></p>
-<p>当前报告返回书名: ${bookData.book_name}</p>
-<p>书籍源名（作者开书使用的名字）: ${bookData.original_book_name} <a href="https://p6-novel.byteimg.com/origin/${bookData.thumb_uri}" target="_blank">查看封面</a></p>
-<p>书籍别名（书籍宣发使用的名字）: ${bookData.book_flight_alias_name || '无'} ${bookData.book_flight_alias_name ? '<a href="https://p6-novel.byteimg.com/origin/' + bookData.book_flight_alias_thumb + '" target="_blank">查看封面</a>' : ''}</p>
-<p>短书名: ${bookData.book_short_name || '无'}</p>
-<p>字数: ${formatCount(bookData.word_number)} (${bookData.word_number})</p>
-<p>书籍创建时间: ${moment(bookData.create_time).format('YYYY-MM-DD HH:mm:ss')} (${bookData.create_time})</p>
-<p>分类: ${bookData.category}</p>
-<p>标签: ${bookData.tags}</p>
-<p>读者数: ${formatCount(bookData.read_count)} (${bookData.read_count})</p>
-<p>听书人数: ${formatCount(bookData.listen_count)} (${bookData.listen_count})</p>
-<p>书籍分类: ${bookData.gender ? (['女频', '男频', '出版'][(bookData.gender << 0)] || '未知') : '未知'} (${bookData.gender})</p>
-<p>当前状态: ${['未知', '完结', '连载', null, null, null, '断更'][(bookData.creation_status << 0) + 1] || '未知'} (${bookData.creation_status})</p>
-<p>ISBN: ${bookData.isbn || '书籍无出版数据'}</p>
-<p>${bookData.copyright_info.replace('，如有任何疑问，请通过"我的-意见反馈"告知我们', '')}。</p>
-<hr>
-<h3 align="center">简介</h3>
-<p>${('\u3000\u3000' + bookData.book_abstract_v2.split('\n').join('<br />\u3000\u3000')).replace(/[\u3000]+/g, '\u3000\u3000')}</p>
-<hr>
-<h3 align="center">数据信息</h3>
-<p>听书总时长: ${formatDuration(bookData.duration)} (${bookData.duration}s)</p>
-<p align="center"><strong>以下数据仅供参考</strong></p>
-<p>活跃读者数: ${formatCount(bookData.read_count)} (${bookData.read_count}) | 总读者数: ${formatCount(bookData.read_count_all)} (${bookData.read_count_all}) | 占比: ${(bookData.read_count / bookData.read_count_all * 100).toFixed(3)}%</p>
-<p>总加书架数: ${formatCount(bookData.shelf_cnt_history)} (${bookData.shelf_cnt_history}) | 14日加书架数: ${formatCount(bookData.add_shelf_count_14d)} (${bookData.add_shelf_count_14d}) | 占比: ${(bookData.add_shelf_count_14d / bookData.shelf_cnt_history * 100).toFixed(3)}%</p>
-<hr>
-<h3 align="center">各子平台上线时间</h3>
-<p>没做</p>
-`
-        } catch (error) {
-          console.error('获取书籍详情失败:', error)
-          alert('获取书籍详情失败')
-        }
-      }
-
-      // 返回搜索功能
-      function goBackToSearch() {
-        // 显示搜索表单
-        const searchForm = document.getElementById('search-form')
-        searchForm.style.display = 'flex'
-        
-        // 隐藏书籍信息
-        const bookInfo = document.getElementById('book-info')
-        bookInfo.style.display = 'none'
-        
-        // 清空书籍列表
-        const bookList = document.getElementById('book-list')
-        bookList.innerHTML = ''
-        
-        // 获取当前搜索参数并更新URL
-        const currentSearchText = document.getElementById('book-search').value
-        const currentSearchType = document.getElementById('search-type').value
-        
-        if (currentSearchText) {
-          updateUrlParams({
-            text: currentSearchText,
-            search_type: currentSearchType
-          })
-          // 重新执行搜索
-          searchBooks(currentSearchText)
-        } else {
-          // 如果没有搜索内容，清除所有参数
-          updateUrlParams({})
-        }
-      }
-
-      // 分割 Array
-      const chunkArray = (arr, size) => {
-        const result = []
-        for (let i = 0; i < arr.length; i += size) {
-          result.push(arr.slice(i, i + size))
-        }
-        return result
-      }
-
-      // 修复章节带特殊符号的
-      function escapeRegExp(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      }
-
-      // 高清化封面
-      const replaceCover = u => {
-        if (u.indexOf('novel-pic-r') !== -1) return u
-        if (u.startsWith('https://')) u = u.substring(8)
-        else u = u.substring(7)
-        let uArr = u.split('/')
-        uArr[0] = 'https://p6-novel.byteimg.com/origin'
-        let uArr2 = []
-        uArr.forEach(x => {
-          if (!x.includes('?') && !x.includes('~')) uArr2.push(x)
-          else uArr2.push(x.split('~')[0])
-        })
-        u = uArr2.join('/')
-        return u
-      }
-
-      async function downloadEpub(result, catalog, bookData, progress, cssMap) {
-        const saver = new EpubSaver()
-        let intr = ''
-        await saver.setInfo('title', bookData.book_name)
-        intr += `分类：${JSON.parse(bookData.category_v2)
-          .map(item => item.Name)
-          .join('、')}\n`
-        intr += `主角：${JSON.parse(bookData.roles || '[]').join('、')}\n`
-        intr += `简介：${bookData.abstract}\n`
-        intr += `${bookData.copyright_info.replace('，如有任何疑问，请通过"我的-意见反馈"告知我们', '')}。`
-        await saver.setInfo('description', intr)
-        await saver.setInfo('generator', 'PyFQWeb - WebDownloader / llepub-saver')
-        await saver.setInfo('language', 'zh-CN')
-        await saver.setInfo('creator', bookData.author)
-        await saver.setInfo('author', bookData.author)
-        await saver.cover(replaceCover(bookData.thumb_url))
-        // 这个从番茄 APP 里刷出来的
-        await saver.addCSS(
-          0,
-          `html{
-    display:block;
-}
-
-body{
-    display:block;
-}
-
-p{
-    font-size:1em;
-    text-align:justify;
-    display:block;
-    text-indent:2em;
-    margin:0.6em 0em 0.6em 0em;
-}
-
-div{
-    display:block;
-}
-
-h1{
-    display:block;
-    font-size:1.42em;
-    font-weight:bold;
-    margin:22px 0em 3em 0em;
-    text-align:left;
-    line-space:0.5em;
-}
-
-h2{
-    display:block;
-    font-size:1.2em;
-    font-weight:bold;
-    margin:1em 0em 0.6em 0em;
-    text-align:left;
-}
-
-h3{
-    display:block;
-    font-size:1em;
-    font-weight:bold;
-    margin:0em 0em 1em 0em;
-    text-align:left;
-}
-
-sup{
-    font-size:smaller;
-}
-
-.picture{
-    text-indent:0em;
-    text-align:center;
-    margin:0em 0em 0em 0em;
-    line-space:0em;
-}
-
-.pictureDesc{
-    font-size:0.73em;
-    text-indent:0em;
-    margin:0.4em 0em 1em 0em;
-    theme-color:color1#0.7;
-    line-space:0.3em;
-    text-align:left;
-}
-
-.pictureTitle{
-    font-size:0.73em;
-    text-indent:0em;
-    margin:1em 0em 0.3em 0em;
-    theme-color:color1#0.7;
-    text-align:left;
-    line-space:0em;
-}
-
-.collectTitle{
-    margin:80px 68px 0em 0px;
-    font-size:1.42em;
-    text-indent:0em;
-    text-align:left;
-}
-
-.collectAuthor{
-    margin:16px 0em 0em 0em;
-    font-size:1em;
-    text-indent:0em;
-    text-align:left;
-}
-
-.collectPicture{
-    margin:24px 0em 0em 0em;
-    text-indent:0em;
-    text-align:right;
-}
-
-.collectDetail{
-    margin:3em 44px 0em 10px;
-    text-indent:0em;
-}
-
-.quoteDefault{
-    font-size:1em;
-    margin:1.5em 0em 1.5em 2em;
-    font-family:'FZShengShiKaiShuS-M-GB';
-    line-space:0.5em;
-}
-
-.quoteStyle1{
-    text-indent:0em;
-    text-align:left;
-}
-
-.alignRight{
-    text-align:right;
-}
-
-.quoteDefaultAlignRight{
-    font-size:1em;
-    margin:0.6em 0em 1.5em 32px;
-    font-family:'FZShengShiKaiShuS-M-GB';
-    text-align:right;
-    line-space:0.5em;
-}
-.chapterTitle1{
-    display:block;
-    font-size:1.42em;
-    font-weight:bold;
-    margin:22px 0em 3em 0em;
-    text-align:left;
-    line-space:0.5em;
-}
-
-.chapterTitle2{
-    display:block;
-    font-size:1.2em;
-    font-weight:bold;
-    margin:1em 0em 0.6em 0em;
-    text-align:left;
-}
-
-.chapterTitle3{
-    display:block;
-    font-size:1em;
-    font-weight:bold;
-    margin:0em 0em 1em 0em;
-    text-align:left;
-}
-
-.bdFootnote{
-    width:0.69em;
-    height:0.84em;
-    margin-top:-0.23em;
-    vertical-align:top;
-}
-
-.bdPicturebg{
-    break-before:always;
-}`,
-          'Styles/dragon-common.css'
-        )
-        let cssMapIdx
-        if (cssMap && typeof cssMap === 'object') {
-          console.log(cssMap)
-          cssMapIdx = await saver.addCSSMap(cssMap)
-        }
-        let volname = '默认卷'
-        let curvolidx = 0
-        let cursor = 0
-        let currentVolume
-        for (const i of catalog) {
-          if (progress.isCancelled) break
-          const data = result[i.item_id]
-          if (data?.novel_data?.volume_name && volname != data.novel_data.volume_name) {
-            volname = data.novel_data.volume_name
-            currentVolume = await saver.addVolume(curvolidx++, volname)
-            console.log('更换卷', currentVolume)
-          }
-          if (typeof currentVolume === 'undefined') {
-            currentVolume = await saver.addVolume(curvolidx, volname)
-            console.log('创建新卷', currentVolume)
-          }
-          let curChapContent = data.content || '<p>正文内容为空</p>'
-          let mat = curChapContent.match(/<article>([\S\s]+)<\/article>/)
-          // console.log(mat)
-          curChapContent = (mat ? mat[1] : null) || curChapContent
-          await currentVolume.addChapter(
-            cursor++,
-            i.title,
-            curChapContent,
-            curChapContent.includes('xhtml') ? 'xhtml' : 'html',
-            true
-          )
-          progress.updateProgressBar(cursor)
-        }
-        if (progress.isCancelled) { 
-          delete saver
-          return
-        }
-        progress.updateTitle('正在生成EPUB...')
-        progress.total = 1
-        progress.updateProgressBar(0)
-        const epub = await saver.save()
-        console.log(epub)
-        progress.updateProgressBar(1)
-        progress.updateTitle('执行完成，正在保存')
-        progress.complete(false)
-        const blob = new Blob([epub], { type: 'application/epub+zip' })
-        saveAs(blob, `${bookData.book_name}_${bookData.author}.epub`)
-      }
-
-      // 检查批量下载支持
-      async function checkBatchChapterSupport() {
-        try {
-          const response = await fetch(`${apiNode}/batch_chapter`, {
-            method: 'GET'
-          })
-          const data = await response.json()
-          // 如果能解析为有效JSON，说明支持此功能
-          return true
-        } catch (err) {
-          console.warn('批量下载接口不支持:', err)
-          return false
-        }
-      }
-
-      // 批量下载章节
-      async function batchDownloadChapters(itemIds) {
-        try {
-          const response = await fetch(`${apiNode}/batch_chapter`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              item_ids: itemIds
-            })
-          })
-          
-          const result = await response.json()
-          if (result.code === 0 && result.data) {
-            return result.data
-          } else {
-            throw new Error(`批量下载失败: ${result.message || '未知错误'}`)
-          }
-        } catch (err) {
-          console.error('批量下载请求失败:', err)
-          throw err
-        }
-      }
-
-      // 重试失败的章节（单独下载）
-      async function downloadFailedChapters(failedIds, result, progress, catalog) {
-        let curr = 0
-        progress.total = failedIds.length
-        for (const item_id of failedIds) {
-          if (progress.isCancelled) break
-          
-          let success = false
-          for (let retry = 0; retry < 3 && !success; retry++) {
-            try {
-              const response = await fetch(`${apiNode}/content?item_id=${item_id}`)
-              const rawBody = await response.json()
-              const body = normalizeApiResponse(rawBody)
-
-              if (body.data?.content) {
-                result[item_id] = body.data
-                success = true
-                console.log(`重试成功: ${item_id}`)
-                curr++
-                progress.updateProgressBar(curr)
-              } else {
-                await new Promise(r => setTimeout(r, 300))
-              }
-            } catch (err) {
-              console.error(`重试失败 ${item_id}:`, err)
-              await new Promise(r => setTimeout(r, 500))
-            }
-          }
-          
-          if (!success) {
-            console.warn(`最终失败: ${item_id}`)
-          }
-        }
-      }
-
-      // 逐个下载章节（原有逻辑）
-      async function downloadChaptersIndividually(item_ids, result, progress, catalog) {
-        const maxConcurrentRequests = 64
-        const concurrencyLimit = maxConcurrentRequests
-        
-        // 创建异步任务队列
-        const queue = item_ids.map(item_id => ({
-          item_id,
-          status: 'pending',
-          retries: 0,
-        }))
-
-        let activeCount = 0
-        let cursor = 0
-        let hasError = false
-
-        return new Promise(resolve => {
-          const runWorker = async () => {
-            while (queue.length > 0 && !hasError && !progress.isCancelled) {
-              if (activeCount >= concurrencyLimit) return
-
-              const task = queue.shift()
-              if (!task || task.status === 'success') return
-
-              activeCount++
-              let success = false
-
-              try {
-                while (task.retries <= 3) {
-                  if (progress.isCancelled) break
-
-                  const response = await fetch(`${apiNode}/content?item_id=${task.item_id}`)
-                  const rawBody = await response.json()
-                  const body = normalizeApiResponse(rawBody)
-
-                  if (body.data?.content) {
-                    result[task.item_id] = body.data
-                    cursor++
-                    progress.updateProgressBar(cursor)
-                    progress.updateTitle('缓存中... | ' + (catalog[cursor] || {}).title)
-                    success = true
-                    break
-                  } else {
-                    task.retries++
-                    await new Promise(r => setTimeout(r, 300))
-                  }
-                }
-              } catch (error) {
-                console.error(`item ${task.item_id} failed:`, error)
-              } finally {
-                activeCount--
-
-                if (!success) {
-                  result[task.item_id] = { error: 'Max retries exceeded' }
-                  console.warn(`Item ${task.item_id} failed after 3 retries`)
-                }
-
-                // 立即触发下一个任务
-                if (!hasError && !progress.isCancelled) {
-                  if (queue.length > 0 || activeCount > 0) {
-                    runWorker()
-                  } else {
-                    resolve(true)
-                  }
-                }
-              }
-            }
-
-            // 所有任务完成检测
-            if (activeCount === 0 && queue.length === 0) {
-              resolve(!hasError)
-            }
-          }
-
-          // 启动初始并发数
-          for (let i = 0; i < Math.min(concurrencyLimit, queue.length); i++) {
-            runWorker()
-          }
-        })
-      }
-      
-      function getOptimalBatchSize(size) {
-        const MAX_BATCH_SIZE = 1800 // 接口最大支持
-        const MIN_BATCH_SIZE = 30 // 保证效率，防止分片过小
-        const PREFER_BATCH_SIZE = 100
-        const PREFER_BATCH_CHUNK = 5
-        
-        const sizebase = Math.ceil(size / PREFER_BATCH_CHUNK)
-        const chunkbase = Math.ceil(size / PREFER_BATCH_SIZE)
-        
-        if (sizebase > 1800) {
-          return MAX_BATCH_SIZE
-        }
-        
-        if (sizebase < MIN_BATCH_SIZE) {
-          return MIN_BATCH_SIZE
-        }
-        
-        if (Math.abs(chunkbase - PREFER_BATCH_CHUNK) <= 1) {
-          return Math.ceil(size / chunkbase)
-        }
-        
-        if (Math.abs(sizebase - PREFER_BATCH_SIZE) <= 20) {
-          return PREFER_BATCH_SIZE
-        }
-        
-        return Math.ceil(
-          sizebase +
-          size / chunkbase
-        ) / 2
-      }
-
-      // 下载书籍
-      async function downloadBookExecutor() {
-        window.downloadResult = ''
-        const Lock = document.getElementById('download_lock')
-        const charset = document.getElementById('charset-selector').value.toLowerCase()
-        const fileformat = document.getElementById('format-selector').value.toLowerCase()
-        if (fileformat === 'epub' && charset === 'gbk') {
-          alert('EPUB格式仅支持UTF-8编码')
-          return
-        }
-        console.log(charset)
-
-        let taskId = `task_${Date.now()}`
-        let startAt = Date.now()
-        console.log(`createTask taskId=${taskId}, startAt=${startAt}`)
-        if (Lock.innerHTML.trim() !== '') {
-          console.warn(Lock.innerHTML.trim() !== '', '下载按钮重复点击')
-          return
-        } else {
-          Lock.innerHTML = taskId
-        }
-
-        const bookId = document.getElementById('book_id').innerHTML
-        if (!bookId) {
-          alert('请先选择一本书籍！')
-          return
-        }
-
-        const catalogUrl = `${apiNode}/catalog?book_id=${bookId}`
-        let catalog
-        let cssMap
-
-        try {
-          const response = await fetch(catalogUrl)
-          const rawBody = await response.json()
-          const body = normalizeApiResponse(rawBody)
-          catalog = body.data?.item_data_list
-          cssMap = body.data?.css_map
-        } catch (error) {
-          console.error('获取目录失败', error)
-        }
-
-        if (!catalog) {
-          alert('获取目录失败或目录为空')
-          console.error(catalog)
-          Lock.innerHTML = ''
-          return
-        }
-
-        let progress = showProgressWindow('下载', catalog.length)
-        progress.updateTitle('检查批量下载支持...')
-
-        const item_ids = catalog.map(item => item.item_id)
-        const result = {}
-        let cursor = 0
-
-        // 检查是否支持批量下载（仅对TXT）
-        const supportsBatchDownload = (fileformat === 'txt' && await checkBatchChapterSupport())
-
-        if (supportsBatchDownload) {
-          progress.updateTitle('使用批量下载...')
-          try {
-            let batchResult = {}
-            let ts = chunkArray(item_ids, getOptimalBatchSize(item_ids.length))
-            let promises = []
-            progress.total = ts.length
-            progress.updateProgressBar(0)
-            let curr = 0
-            for (let i of ts) {
-              promises.push(
-                (async () => {
-                  if (progress.isCancelled) return
-                  let r = await batchDownloadChapters(i)
-                  curr++
-                  progress.updateProgressBar(curr)
-                  progress.updateTitle(`第${curr}批完成，共${ts.length}批`)
-                  // console.log(r)
-                  for (let j of Object.keys(r)) {
-                    batchResult[j] = r[j]
-                    // console.log(j)
-                  }
-                })()
-              )
-            }
-            await Promise.allSettled(promises)
-            // console.log(batchResult)
-            
-            /*
-            for (let res of results) {
-              if (res.status === 'fulfilled') {
-                Object.assign(batchResult, res.value)
-              }
-            }
-            */
-            
-            // 处理批量下载结果
-            let successCount = 0
-            let failedCount = 0
-            if (progress.isCancelled) return
-            
-            for (const item_id of item_ids) {
-              const itemResult = batchResult[item_id]
-              if (itemResult && itemResult.code === 0) {
-                result[item_id] = itemResult
-                successCount++
-              } else {
-                result[item_id] = { error: itemResult?.message || '批量下载失败' }
-                failedCount++
-                console.warn(`Item ${item_id} failed in batch download:`, itemResult?.message)
-              }
-              // progress.updateProgressBar(cursor)
-            }
-            
-            console.log(`批量下载完成: 成功 ${successCount}, 失败 ${failedCount}`)
-            
-            // 如果有失败的章节，尝试单独下载
-            if (failedCount > 0) {
-              progress.updateTitle('重试失败章节...')
-              const failedIds = item_ids.filter(id => result[id]?.error)
-              await downloadFailedChapters(failedIds, result, progress, catalog)
-            }
-          } catch (err) {
-            console.error('批量下载失败，回退到逐个下载:', err)
-            // 批量下载失败时回退到原有逻辑
-            cursor = 0 // 重置进度
-            await downloadChaptersIndividually(item_ids, result, progress, catalog)
-          }
-        } else {
-          // 不支持批量下载或非TXT格式，使用原有逻辑
-          await downloadChaptersIndividually(item_ids, result, progress, catalog)
-        }
-
-        if (progress.isCancelled) {
-          return
-        }
-
-        // console.log()
-        progress.updateTitle('处理章节中...')
-        progress.total = Object.keys(result).length
-        cursor = 0
-        progress.updateProgressBar(cursor)
-        let content = ''
-        let bookData = JSON.parse(document.getElementById('book_info').innerHTML)
-
-        if (fileformat === 'epub') return await downloadEpub(result, catalog, bookData, progress, cssMap)
-
-        content += bookData.book_name + '\n'
-        content += `作者：${bookData.author}\n`
-        content += `分类：${JSON.parse(bookData.category_v2 || '[]')
-          .map(item => item.Name)
-          .join('、')}\n`
-        content += `主角：${JSON.parse(bookData.roles || '[]').join('、')}\n`
-        content += `简介：${bookData.abstract}\n`
-        content += `${bookData.copyright_info.replace('，如有任何疑问，请通过"我的-意见反馈"告知我们', '')}。\n\n\n`
-
-        let volname
-        for (let i of catalog) {
-          let data = result[i.item_id]
-          cursor++
-          if (data?.novel_data?.volume_name && volname != data.novel_data.volume_name) {
-            content += `${data.novel_data.volume_name.replace('：默认', '')}\n\n`
-            volname = data.novel_data.volume_name
-          }
-          let text =
-            `${i.title}\n\u3000\u3000` +
-            htmlToTextArray((data?.content || '<p>章节内容为空</p>').replace(new RegExp(escapeRegExp(i.title), 'g'), ''))
-              .join('\n\u3000\u3000')
-              .trim() +
-            '\n\n\n' // .replace(`${i.title}\n\u3000\u3000${i.title}`, i.title) + '\n\n\n';
-          content += text
-          progress.updateProgressBar(cursor)
-        }
-
-        progress.updateTitle('执行完成，正在保存')
-        const file = `${bookData.book_name}_${bookData.author}.txt`
-        window.downloadResult = {
-          content,
-          file,
-        }
-        progress.complete()
-        let encoded = charset === 'gbk' ? encodeGBK(content) : new TextEncoder(charset).encode(content)
-        const blob = new Blob([encoded], { type: `text/plain;charset=${charset}` })
-        saveAs(blob, file)
-        Lock.innerHTML = ''
-      }
-
-      async function getCORSAvailableAudioURL(item_id, tone_id, try_num = 0) {
-        if (try_num > 3) {
-          throw new Error('try max num')
-        }
-        try {
-          const apiUrl = `${apiNode}/audio?item_ids=${item_id}`
-          const response = await fetch(apiUrl)
-          const rawBody = await response.json()
-          const body = normalizeApiResponse(rawBody)
-          const item = body.data[0]
-          let urls = [item.main_url, item.backup_url]
-          urls = urls.filter(_ => !_.includes('://v3-'))
-          return urls[0] || getCORSAvailableAudioURL(item_id, tone_id, try_num++)
-        } catch(e) {
-          console.error(e)
-          return getCORSAvailableAudioURL(item_id, tone_id, try_num++)
-        }
-      }
-
-      async function downloadAudioExecutor() {
-        const tone_id = prompt('部分浏览器会弹出警告，网页尝试下载多个文件，请允许请求！\n请输入音色ID（对于番茄畅听类真人朗读，这个值会被忽略）: ', '1')
-        window.downloadResult = ''
-        const Lock = document.getElementById('download_lock')
-
-        let taskId = `task_${Date.now()}`
-        console.log(taskId)
-        if (Lock.innerHTML.trim() !== '') {
-          console.warn(Lock.innerHTML.trim() !== '', '下载按钮重复点击')
-          return
-        } else {
-          Lock.innerHTML = taskId
-        }
-
-        const bookId = document.getElementById('book_id').innerHTML
-        if (!bookId) {
-          alert('请先选择一本书籍！')
-          return
-        }
-
-        let catalog
-        const catalogUrl = `${apiNode}/catalog?book_id=${bookId}`
-        try {
-          const response = await fetch(catalogUrl)
-          const rawBody = await response.json()
-          const body = normalizeApiResponse(rawBody)
-          catalog = body.data?.item_data_list
-        } catch (error) {
-          console.error('获取目录失败', error)
-        }
-
-        if (!catalog) {
-          alert('获取目录失败或目录为空')
-          console.error(catalog)
-          Lock.innerHTML = ''
-          return
-        }
-      
-        const progress = showProgressWindow('下载', catalog.length, true);
-        progress.updateTitle('准备中...');
-        progress.subProgress.updateTitle('准备中');
-        
-        // 添加取消监听
-        let activeXHR = null;
-        progress.onCancel = () => {
-          console.log(activeXHR)
-          if (activeXHR) {
-            activeXHR.abort();
-            activeXHR = null;
-          }
-          Lock.innerHTML = '';
-        };
-      
-        try {
-          for (let index = 0; index < catalog.length; index++) {
-            // 检查取消状态
-            if (progress.isCancelled) {
-              console.warn('aborting...')
-              break;
-            }
-      
-            const item = catalog[index];
-            
-            // 更新主进度
-            progress.updateProgressBar(index);
-            progress.updateTitle(`缓存中: ${item.title}`);
-            
-            // 重置副进度
-            progress.subProgress.updateProgressBar(0);
-            progress.subProgress.updateTitle('等待开始...');
-      
-            // 获取下载链接
-            const aurl = await getCORSAvailableAudioURL(item.item_id, tone_id).catch(() => null);
-            if (!aurl) {
-              console.error('目录', item.item_id, item.title, '解析失败');
-              continue;
-            }
-
-            // 创建下载任务
-            const { promise, xhr } = createDownloadTask(aurl, item, progress);
-            activeXHR = xhr; // 保存当前XHR引用
-
-            try {
-              await promise;
-              progress.updateProgressBar(index + 1);
-            } catch (e) {
-              if (e.name !== 'AbortError') {
-                console.error(`下载失败: ${item.title}`, e);
-              }
-              if (progress.isCancelled) break;
-            }
-          }
-        } finally {
-          activeXHR = null;
-          if (!progress.isCancelled) {
-            progress.updateTitle('完成');
-            progress.complete(false);
-          }
-          Lock.innerHTML = '';
-        }
-      }
-
-      // 创建下载任务
-      function createDownloadTask(url, item, progress) {
-        const callback = {
-          ptext: '',
-          stext: '',
-          onProgress(recv, total) {
-            this.ptext = `${formatSize(recv)}/${formatSize(total)}`;
-            progress.subProgress.updateProgressBar(Math.ceil(recv / total * 100));
-            progress.subProgress.updateTitle(`${this.ptext} | ${this.stext}`);
-          },
-          onNetSpeed(bps) {
-            this.stext = formatSpeed(bps);
-            progress.subProgress.updateTitle(`${this.ptext} | ${this.stext}`);
-          },
-          onComplete: () => {},
-          onError: () => {}
-        };
-      
-        const { xhr, promise } = downloadFile(url, `${item.title}.mp3`, callback);
-      
-        const wrappedPromise = promise.catch((e) => {
-          if (e.name !== 'AbortError') throw e;
-        });
-      
-        return { promise: wrappedPromise, xhr };
-      }
-
-      async function downloadBook() {
-        const typeSelector = document.getElementById('type-selector')
-        let startAt = Date.now()
-        const dlType = typeSelector.value || 'text'
-        let ret
-        try {
-          switch (dlType) {
-            case 'text':
-              ret = await downloadBookExecutor()
-              break
-            case 'audio':
-              ret = await downloadAudioExecutor()
-              break
-            default:
-              console.error('Unknown download type: ', dlType)
-              return
-          }
-        } catch (e) {
-          console.error(e)
-        }
-        console.log(`Executor end: total=${Date.now() - startAt}ms`)
-      }
-
-      function reSave() {
-        // 检查 window.downloadResult 是否存在
-        if (!window.downloadResult) {
-          console.error('window.downloadResult is not defined.')
-          return
-        }
-
-        alert('请全选新页面内容进行手动保存')
-        // 打开新的空白页面
-        const newWindow = window.open()
-
-        if (newWindow) {
-          newWindow.document.write(`<pre>${window.downloadResult.content}</pre>`) // 显示文本内容
-          newWindow.document.close()
-        } else {
-          console.error('Failed to open a new window.')
-        }
-      }
-
-      function reDownload() {
-        const charset = document.getElementById('charset-selector').value.toLowerCase()
-        let encoded =
-          charset === 'gbk' ? encodeGBK(window.downloadResult.content) : new TextEncoder(charset).encode(window.downloadResult.content)
-        const blob = new Blob([encoded], { type: `text/plain;charset=${charset}` })
-        saveAs(blob, window.downloadResult.file)
-      }
-
-      function getAllTextElements(element, textArray) {
-        // 获取当前元素的所有子节点
-        const childNodes = element.childNodes
-
-        // 遍历每一个子节点
-        childNodes.forEach(node => {
-          // 如果是文本节点，将其内容加入到数组中
-          if (node.nodeType === Node.TEXT_NODE) {
-            textArray.push(node.textContent.trim())
-          } else if (node.nodeType === Node.ELEMENT_NODE) {
-            // 如果是元素节点，递归调用该函数处理其子元素
-            getAllTextElements(node, textArray)
-          }
-        })
-      }
-
-      function htmlToTextArray(html) {
-        // 创建一个div，用于存放html内容
-        const div = document.createElement('div')
-
-        // 修改div的内容为给定的html
-        div.innerHTML = html
-
-        // 获取div中的所有文本内容
-        let textArray = []
-        getAllTextElements(div, textArray)
-
-        return textArray
-      }
-
-      // 已弃用
-      async function multiDownloadExecutor(book_id, item_ids, depth = 0) {
-        if (!item_ids.length) {
-          return {}
-        }
-        if (depth > 3) {
-          alert('下载失败')
-          throw new Error('try max num')
-        }
-        try {
-          const response = await fetch(`${apiNode}/multi-content?book_id=${book_id}&item_ids=${item_ids.join(',')}`)
-          const result = await response.json()
-          // console.log(item_ids, result)
-          return result.data
-        } catch (err) {
-          console.warn('error downloading...', book_id, item_ids, 'retry', depth)
-          return await multiDownloadExecutor(book_id, item_ids, depth + 1)
-        }
-      }
-
-      function showProgressWindow(title, total, showSubProgress) {
-        const progressModal = document.getElementById('progress-modal')
-        const progressBarFill = document.getElementById('progress-bar-fill')
-        const progressPercentage = document.getElementById('progress-percentage')
-        const progressCount = document.getElementById('progress-count')
-        const progressTitle = document.getElementById('progress-title')
-        const progressCancelBtn = document.getElementById('progress-cancel')
-        const progressSubmitBtn = document.getElementById('progress-submit')
-        const resaveButton = document.getElementById('button-resave')
-        const redlButton = document.getElementById('button-redownload')
-        const subProgressModal = document.getElementById('sub-progress')
-        const subProgressBarFill = document.getElementById('sub-progress-bar-fill')
-        const subProgressTitle = document.getElementById('sub-progress-title')
-
-        // 显示进度窗口
-        progressModal.style.display = 'flex'
-        progressTitle.textContent = title
-        progressCount.textContent = `0/${total}`
-        progressPercentage.textContent = '0%'
-        progressBarFill.style.width = '0%'
-        if (showSubProgress) {
-          subProgressModal.style = ''
-        } else {
-          // 必须要加这一步，不然第二次下载不显示副进度条的时候会显示一个空的副进度条
-          subProgressModal.style.display = 'none'
-        }
-
-        let isCancelled = false
-        // 操作对象
-        const subProgress = {
-          updateTitle(title) {
-            subProgressTitle.textContent = title
-          },
-          updateProgressBar(fillPercent) {
-            subProgressBarFill.style.width = `${fillPercent}%`
-          }
-        }
-        const obj = {
-          total,
-          title,
-          isCancelled,
-          subProgress,
-          updateTitle(title) {
-            const progressTitle = document.getElementById('progress-title')
-            progressTitle.textContent = title
-            this.title = title
-          },
-          updateProgressBar(current) {
-            if (this.isCancelled) return
-
-            const percentage = ((current / this.total) * 100).toFixed(2)
-            progressBarFill.style.width = `${percentage}%`
-            progressPercentage.textContent = `${percentage}%`
-            progressCount.textContent = `${current}/${this.total}`
-          },
-          cancel() {
-            this.isCancelled = true
-            progressModal.style.display = 'none'
-            document.getElementById('download_lock').innerHTML = ''
-            progressCancelBtn.style = ''
-            progressSubmitBtn.style.display = 'none'
-            redlButton.style.display = 'none'
-            resaveButton.style.display = 'none'
-            subProgressModal.style.display = 'none'
-            if (this.onCancel) this.onCancel()
-          },
-          complete(allowResave = true) {
-            progressSubmitBtn.style = ''
-            if (allowResave) {
-              resaveButton.style = ''
-              redlButton.style = ''
-            }
-            progressCancelBtn.style.display = 'none'
-            subProgressModal.style.display = 'none'
-          },
-          finish() {
-            progressModal.style.display = 'none'
-            progressCancelBtn.style = ''
-            progressSubmitBtn.style.display = 'none'
-            redlButton.style.display = 'none'
-            resaveButton.style.display = 'none'
-            document.getElementById('download_lock').innerHTML = ''
-          },
-        }
-
-        // 按钮事件
-        progressCancelBtn.onclick = () => {
-          obj.cancel()
-        }
-        progressSubmitBtn.onclick = () => {
-          obj.finish()
-        }
-
-        return obj
-      }
-
-      function downloadFile(url, filename, callback) {
-        // 参数标准化处理
-        if (typeof filename === 'object' || typeof filename === 'function') {
-          callback = filename;
-          filename = null;
-        }
-        callback = callback || {};
-      
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.responseType = 'blob';
-        xhr.withCredentials = false;
-      
-        let currentLoaded = 0;
-        let lastLoaded = 0;
-        let lastTime = Date.now();
-        let netSpeedTimer = null;
-      
-        xhr.onprogress = (event) => {
-          currentLoaded = event.loaded;
-          callback.onProgress?.(event.loaded, event.lengthComputable ? event.total : 0);
-        };
-      
-        netSpeedTimer = setInterval(() => {
-          const now = Date.now();
-          const timeDiff = (now - lastTime) / 1000;
-          if (timeDiff > 0) {
-            const speed = (currentLoaded - lastLoaded) / timeDiff;
-            callback.onNetSpeed?.(speed);
-            lastLoaded = currentLoaded;
-            lastTime = now;
-          }
-        }, 500);
-      
-        const promise = new Promise((resolve, reject) => {
-          xhr.onload = () => {
-            clearInterval(netSpeedTimer);
-            if (xhr.status >= 200 && xhr.status < 300) {
-              try {
-                const blob = xhr.response;
-                const urlObject = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = urlObject;
-                a.download = filename || getFilenameFromHeaders(xhr) || getFilenameFromUrl(url);
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(urlObject);
-                  callback.onComplete?.();
-                  resolve();
-                }, 300);
-              } catch (e) {
-                callback.onError?.(e);
-                reject(e);
-              }
-            } else {
-              handleError(new Error(`HTTP Error ${xhr.status}`));
-            }
-          };
-      
-          const handleError = (e) => {
-            clearInterval(netSpeedTimer);
-            callback.onError?.(e);
-            reject(e);
-          };
-      
-          xhr.onabort = () => handleError(new DOMException('Aborted', 'AbortError'));
-          xhr.onerror = handleError;
-        });
-      
-        xhr.send();
-      
-        return { xhr, promise }; // 返回xhr和promise
-      }
-
-      // 从响应头获取文件名
-      function getFilenameFromHeaders(xhr) {
-        try {
-          const disposition = xhr.getResponseHeader('Content-Disposition') || '';
-          const filename = disposition.split('filename=')[1]?.split(/[;,\r\n]/)[0];
-          return filename ? filename.replace(/^['"]|['"]$/g, '') : null;
-        } catch {
-          return null;
-        }
-      }
-      
-      function formatSize(bytes) {
-        if (bytes === 0) return '0 B'
-        const units = ['B', 'KB', 'MB', 'GB']
-        const i = Math.floor(Math.log(bytes) / Math.log(1024))
-        return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${units[i]}`
-      }
-      
-      function formatSpeed(bytesPerSecond) {
-        if (bytesPerSecond > 1024 * 1024) {
-          return `${(bytesPerSecond / 1024 / 1024).toFixed(2)} MB/s`
-        }
-        return `${(bytesPerSecond / 1024).toFixed(2)} KB/s`
-      }
-
-      // 从URL路径获取文件名
-      function getFilenameFromUrl(url) {
-        try {
-          return new URL(url).pathname.split('/').pop() || 'download';
-        } catch {
-          return 'download';
-        }
-      }
-
-      const bookNameDialog = document.getElementById('internal-alert')
-      bookNameDialog.addEventListener('click', event => {
-        const content = bookNameDialog.querySelector('.internal-alert-container')
-        const rect = content.getBoundingClientRect()
-        const isOutside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom
-        if (isOutside) bookNameDialog.close()
-      })
-      document.getElementById('book-title').onclick = () => {
-        bookNameDialog.showModal()
-      }
-
-      // 页面加载完成后执行初始化
-      document.addEventListener('DOMContentLoaded', function() {
-        restoreFromUrlParams()
-      })
-
-      // 监听浏览器前进/后退按钮
-      window.addEventListener('popstate', function(event) {
-        restoreFromUrlParams()
-      })
-
-      console.log(`hello ^(。･ω･。)^`)
-      console.log('apiNode', apiNode)
-      console.log('saveAs', saveAs)
-      console.log('encodeGBK', encodeGBK)
-      console.log('EpubSaver', EpubSaver)
-    </script> 
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>初心软件库11.0Pro</title>
+  </head>
+  <title>Q群398357716快手chuxinyydd</title>
   <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        transition: background-color 0.3s, color 0.3s;
-      }
+		body {
+  background-image:url("icon.png");
+  background-size:cover;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+ 
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation: rainbow 10s infinite;
+}
 
-      :root {
-        --bg-color: #fffafe;
-        --text-color: #000;
-        --button-bg: #69b3f0;
-        --button-text: #fff;
-        --button-hover-bg: #58a2e9;
-        --info-bg: #f9f9f9;
-        --download-bg: #28a745;
-        --download-text: #fff;
-        --download-hover-bg: #1e7e34;
-        --toggle-bg: #6c757d;
-        --toggle-text: #fff;
-        --toggle-hover-bg: #5a6268;
-        --jump-text: #8898ff;
-      }
+@keyframes rainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
-      [data-theme='dark'] {
-        --bg-color: #121212;
-        --text-color: #e0e0e0;
-        --button-bg: #3498db;
-        --button-text: #fff;
-        --button-hover-bg: #2980b9;
-        --info-bg: #1e1e1e;
-        --download-bg: #4caf50;
-        --download-text: #fff;
-        --download-hover-bg: #3e8e41;
-        --toggle-bg: #95a5a6;
-        --toggle-text: #fff;
-        --toggle-hover-bg: #7f8c8d;
-        --jump-text: #c3cbff;
-      }
+		.tox {
+			text-align: center;
+			margin-top: 20px;
+		}
 
-      #title {
-        text-align: center;
-        padding: 20px;
-      }
+		.tox img {
+			width: 100px;
+			height: 100px;
+			border-radius: 5px;
+			transition: transform 0.5s;
+		}
 
-      .container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
-      }
+		.tox img:hover {
+			transform: rotateY(180deg);
+		}
 
-      .search-form {
-        display: flex;
-        justify-content: center;
-        /* width: 800px; */
-        margin-bottom: 20px;
-      }
+		.gnlieb {
+			display: flex;
+			justify-content: space-evenly;
+			margin-top: 20px;
+		}
 
-      .search-form input {
-        padding: 10px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 0 0 0 0;
-        /* width: 250px; */
-        /* max-width: 85%; */
-        transition: width 0.3s;
-      }
+		.gnlieb .card {
+			width: 150px;
+			height: 50px;
+			background-color: rgba(16, 52, 166, 0.7);
+			text-align: center;
+			border-radius: 10px;
+			font-size: 18px;
+			color: #fff;
+			box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+		}
 
-      .search-form button {
-        padding: 10px 20px;
-        font-size: 16px;
-        border: none;
-        width: 40%;
-        max-width: 80px;
-        background-color: var(--button-bg);
-        color: var(--button-text);
-        border-radius: 0 15px 15px 0;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
+		.gnlieb .card:hover {
+			background-color: rgba(16, 52, 166, 0.9);
+			cursor: pointer;
+			transition: background-color 0.3s ease-in-out;
+		}
 
-      .search-form select {
-        padding: 0 5px;
-        font-size: 16px;
-        border: none;
-        width: 40%;
-        min-width: 70px;
-        background-color: var(--button-bg);
-        color: var(--button-text);
-        border-radius: 15px 0 0 15px;
-        transition: background-color 0.3s;
-        text-align: left;
-      }
+		.gnlieb .card a {
+			color: #fff;
+			text-decoration: none;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100%;
+		}
 
-      a {
-        color: var(--jump-text);
-      }
+#progress-bar {
+  width: 340px;
+  height: 10px;
+  border: 1px solid #ccc;
+  position: relative;
+  overflow: hidden;
+}
 
-      .search-form button:hover {
-        background-color: var(--button-hover-bg);
-      }
-
-      .book-list {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 90%;
-        max-width: 600px;
-      }
-
-      .book-item {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        padding: 10px;
-        border-bottom: 1px solid #ccc;
-        cursor: pointer;
-      }
-
-      .book-item:hover {
-        background-color: #777;
-      }
-
-      .book-info {
-        display: none;
-        flex-direction: row;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        padding: 20px;
-        width: 60%;
-        background-color: var(--info-bg);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        margin-top: 20px;
-        transition: background-color 0.3s;
-      }
-
-      .book-info img {
-        display: flex;
-        max-width: 40%;
-        border-radius: 10px;
-        margin-right: 20px;
-      }
-
-      .book-info h2 {
-        margin: 0 0 10px;
-      }
-
-      .book-info p {
-        margin: 5px 0;
-        text-align: justify;
-      }
-
-      .book-info .download-btn {
-        padding: 10px 20px;
-        font-size: 16px;
-        border: none;
-        background-color: var(--download-bg);
-        color: var(--download-text);
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
-
-      .book-info .download-btn:hover {
-        background-color: var(--download-hover-bg);
-      }
-
-      .book-info .charset-selector {
-        padding: 10px 20px;
-        font-size: 16px;
-        border: none;
-        background-color: var(--download-bg);
-        color: var(--download-text);
-        border-radius: 5px;
-      }
-
-      .internal-alert {
-        outline: none;
-        border: 1px solid #ccc;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-        width: 75%;
-        height: 55%;
-        background: var(--bg-color);
-        border-radius: 8px;
-      }
-      .internal-alert-container {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        color: var(--text-color);
-        /*
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        */
-      }
-
-      .toggle-theme {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 10px;
-        font-size: 16px;
-        border: none;
-        background-color: var(--toggle-bg);
-        color: var(--toggle-text);
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
-
-      .toggle-theme:hover {
-        background-color: var(--toggle-hover-bg);
-      }
-
-      .book-info-container {
-        flex: 1;
-      }
-
-      @media (orientation: portrait) {
-        .internal-alert {
-          height: 75% !important;
-        }
-        .book-info {
-          width: 90%;
-          flex-direction: column;
-        }
-        .book-info img {
-          max-width: 100%;
-          border-radius: 10px;
-          margin-bottom: 10px;
-        }
-      }
-
-      .progress-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-
-      .progress-box {
-        background: var(--bg-color);
-        padding: 20px;
-        border-radius: 8px;
-        text-align: center;
-        width: 300px;
-      }
-
-      .progress-title {
-        position: relative;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        width: 100%;
-      }
-
-      .progress-bar {
-        width: 100%;
-        background: #f3f3f3;
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 10px;
-      }
-
-      .progress-bar-fill {
-        height: 20px;
-        background: #4caf50;
-        width: 0%;
-        transition: width 0.2s;
-      }
-
-      .progress-text {
-        margin-bottom: 10px;
-      }
-
-      .progress-cancel {
-        padding: 5px 10px;
-        background: #ff5722;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-
-      .button-resave,
-      .button-redownload,
-      .progress-submit {
-        padding: 5px 10px;
-        background: var(--download-bg);
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
-
-      .button-resave:hover,
-      .button-redownload:hover,
-      .progress-submit:hover {
-        background: var(--download-hover-bg);
-      }
-      
-      .footer {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-      }
-
-      .about-container {
-        text-align: center;
-        max-width: 75%;
-      }
-
-      .about-text {
-        color: #878787;
-        margin: 0;
-      }
-    </style> 
- </body>
+#progress-bar hr {
+  height: 100%;
+  width: 0;
+  background-color: #00aaff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: width 0.5s ease;
+}
+	</style> 
+ </head> 
+ <body id="v1"> 
+  <div id="v2" class="tox"> 
+   <img id="v3" src="https://i1.qyimage.store/i/dce406ecf09d4ff2" alt=""
+   > 
+   <br id="v4"> 
+   <br id="v5"> 
+   <h1 id="v6">初心软件库</h1> 
+  </div>
+     <div id="progress-bar"> 
+   <hr id="v7" style="width: 100%;"> 
+  </div> <h2>核心区<h2>
+  <div id="v8" class="gnlieb"> 
+   <div id="v9" class="card"> 
+       <a id="v10" href="https://v.kuaishou.com/2ALoqac">联系作者</a> 
+   </div> 
+   <div id="v11" class="card"> 
+    <a id="v12" href="http://a.ruansky.com/user/3111818/">初心软天空主页</a> 
+   </div> 
+  </div> 
+  <div id="v13" class="gnlieb"> 
+   <div id="v14" class="card"> 
+    <a id="v15" href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=Ke0Q-gHH0m4xff5HfphhgU9oM9eCV0W9&authKey=pIPHNEeGAy1O3tw1xoUwE04hNStNJH9J4aO3dyV1KGTI8SskLdIN9XgAO3hk%2BwHP&noverify=0&group_code=1007121451">加入总部群</a> 
+   </div> 
+   <div id="v16" class="card"> 
+    <a id="v17" href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=_f1C9k21-Z21hMUaQU6dj1X0UaK5Ohrj&authKey=f5xZQS3%2BdNQCZlpLOIebJCAbkMTxeqKXm%2FTuZ%2FYkvbpoDYrDHng7aS1zlhkn3qVU&noverify=0&group_code=1031851571">加入交流群②</a> 
+   </div> 
+  </div> 
+  <div id="v18" class="gnlieb"> 
+   <div id="v19" class="card"> 
+    <a id="v20" href="zy">个人引导页</a> 
+   </div>
+   <div id="v21" class="card"> 
+    <a id="v22" href="https://qun.qq.com/universal-share/share?ac=1&authKey=%2BNXQdOWXMNnHqoG27EEdst98xo0KeQv%2FM%2FqKSrD6ArC1au3H49ueMyXwMqez0HJd&busi_data=eyJncm91cENvZGUiOiIxMDE4MTE4MDg0IiwidG9rZW4iOiI0TFhLcXhvb1RtQXFhMXl5SG9tdlROaWlEMDBqZ0lWRGVSKzNHdmtDRGlZd3dqUVNDSmw5M2xQT0hMbUQ2ZnhRIiwidWluIjoiMjY0MDU3OTM1MyJ9&data=-aSOF_Yv2cjunYqaqg-VGe76bPRhPkywjQpTWGHtRnJzbJYYsBBzVKsVhCQrJyPLuDTnInC50l34SEK-6j-MHw&svctype=4&tempid=h5_group_info">加入交流群③</a> 
+   </div> 
+  </div><h2>破解区<h2> 
+  <div id="v23" class="gnlieb"> 
+   <div id="v24" class="card"> 
+    <a id="v25" href="https://www.123865.com/s/PkLtjv-6QFb">输入法破解大全</a> 
+   </div> 
+   <div id="v26" class="card"> 
+    <a id="v27" href="https://wwm.lanzoum.com/b04q42b3g">小说破解大全</a> 
+   </div> 
+  </div> 
+  <div id="v28" class="gnlieb"> 
+   <div id="v29" class="card"> 
+    <a id="v30" href="https://xjie.lanzouu.com/b04whscji">黑科技软件大全</a> 
+   </div> 
+   <div id="v31" class="card"> 
+    <a id="v32" href="https://lanzouy.com/b00wmg56ha">音乐破解大全</a> 
+   </div> 
+ </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://qjrjk.lanzoui.com/b04rzij5e">小游戏破解大全</a>
+		</div>
+		<div class="card">
+			<a href="https://wwl.lanzoul.com/b00y37ghi">精选软件大全</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://ypziyuanshare.lanzoul.com/b0epegxzi">精选软件大全2</a>
+		</div>
+		<div class="card">
+			<a href="https://tool.wotianna.com/">影视在线观看</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://lanzouy.com/b08upyf3g">影视软件大全1</a>
+		</div>
+		<div class="card">
+			<a href="https://lanzouy.com/b0evapjte">影视软件大全2</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://lanzouy.com/b00efg3tti">影视软件大全3</a>
+		</div>
+		<div class="card">
+			<a href="https://lanzouy.com/b00efg3tsh">实用软件大全</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://lanzouy.com/b00wmagm6f">翻墙软件大全</a>
+		</div>
+		<div class="card">
+			<a href="https://lanzouy.com/b00wmagltc">各类软件大全1</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://yq6.lanzouy.com/s/yqrj7">各类软件大全2</a>
+		</div>
+		<div class="card">
+			<a href="https://wwwx.qyshare.com/s/id8vag">更新地址</a>
+		</div>
+  </div>
+  
+   
+     </div>
+    <div id="v33" class="gnlieb"> 
+   <div id="v34" class="card"> 
+    <a id="v35" href="https://www.123865.com/s/PkLtjv-yQFb">迅雷永久VIP</a> 
+   </div> 
+   <div id="v36" class="card"> 
+    <a id="v37" href="https://www.123865.com/s/PkLtjv-VQFb">快手刷赞破解大全</a> 
+   </div> 
+  </div> 
+  <div id="v38" class="gnlieb"> 
+   <div id="v39" class="card"> 
+    <a id="v40" href="https://www.123865.com/s/PkLtjv-jQFb">录屏软件破解</a> 
+   </div> 
+   <div id="v41" class="card"> 
+    <a id="v42" href="https://www.123865.com/s/PkLtjv-TEFb">剪辑软件破解</a> 
+   </div> 
+  </div><h2>管理器<h2> 
+  <div id="v43" class="gnlieb"> 
+   <div id="v44" class="card"> 
+    <a id="v45" href="https://www.123865.com/s/PkLtjv-Y6Mb">MT管理器(破)</a> 
+   </div> 
+   <div id="v46" class="card"> 
+    <a id="v47" href="https://www.123865.com/s/PkLtjv-vEFb">NP管理器(破)</a> 
+   </div> 
+  </div> <h2>外挂区<h2>
+  <div id="v48" class="gnlieb"> 
+   <div id="v49" class="card"> 
+    <a id="v50" href="https://www.123865.com/s/PkLtjv-dEFb">和平精英</a> 
+   </div> 
+   <div id="v51" class="card"> 
+    <a id="v52" href="https://www.123865.com/s/PkLtjv-3EFb">王者荣耀</a> 
+   </div> 
+  </div> 
+  <div id="v53" class="gnlieb"> 
+   <div id="v54" class="card"> 
+    <a id="v55" href="https://www.123865.com/s/PkLtjv-hEFb">暗区突围</a> 
+   </div> 
+   <div id="v56" class="card"> 
+    <a id="v57" href="https://www.123865.com/s/PkLtjv-HEFb">pubg改帧率</a> 
+   </div> 
+  </div> 
+  <div id="v58" class="gnlieb"> 
+   <div id="v59" class="card"> 
+    <a id="v60" href="https://www.123865.com/s/PkLtjv-9EFb">连点器</a> 
+   </div> 
+   <div id="v61" class="card"> 
+    <a id="v62" href="https://www.123865.com/s/PkLtjv-QEFb">PUBG</a> 
+   </div> 
+  </div> 
+  <div id="v63" class="gnlieb"> 
+   <div id="v64" class="card"> 
+    <a id="v65" href="https://www.123865.com/s/PkLtjv-kEFb">国体</a> 
+   </div> 
+   <div id="v66" class="card"> 
+    <a id="v67" href="https://www.123865.com/s/PkLtjv-oEFb">pubg优甜(推)</a> 
+   </div> 
+  </div> 
+  <div id="v68" class="gnlieb"> 
+   <div id="v69" class="card"> 
+    <a id="v70" href="https://www.123865.com/s/PkLtjv-mEFb">王牌竞速</a> 
+   </div> 
+   <div id="v71" class="card"> 
+    <a id="v72" href="https://www.123865.com/s/PkLtjv-1EFb">中野三玖美化</a> 
+   </div> 
+  </div> 
+  <div id="v73" class="gnlieb"> 
+   <div id="v74" class="card"> 
+    <a id="v75" href="https://www.123912.com/s/2fqQTd-s2XFv">和平精英美化文件</a> 
+   </div> 
+   <div id="v76" class="card"> 
+    <a id="v77" href="https://www.123684.com/s/P7jRVv-qYPN3">小月月改文件</a> 
+   </div> 
+  </div> 
+  <div id="v78" class="gnlieb"> 
+   <div id="v79" class="card"> 
+    <a id="v80" href="https://drive.uc.cn/s/8731fe498c214
+">王者改文件1</a> 
+   </div> 
+   <div id="v81" class="card"> 
+    <a id="v82" href="https://www.123865.com/s/PkLtjv-4EFb">逃跑吧少年</a> 
+   </div> 
+  </div> 
+  <div id="v83" class="gnlieb"> 
+   <div id="v84" class="card"> 
+    <a id="v85" href="https://www.123865.com/s/PkLtjv-xEFb">元气骑士</a> 
+   </div> 
+   <div id="v86" class="card"> 
+    <a id="v87" href="https://www.123865.com/s/PkLtjv-pEFb">香肠派对</a> 
+   </div> 
+  </div> 
+  <div id="v88" class="gnlieb"> 
+   <div id="v89" class="card"> 
+    <a id="v90" href="https://www.123865.com/s/9t3Hvd-tMwvd">香肠派对小毛</a> 
+   </div> 
+   <div id="v91" class="card"> 
+    <a id="v92" href="https://wwr.lanzoui.com/b00yactiaf">香肠派对改文件</a> 
+   </div> 
+  </div> 
+  <div id="v93" class="gnlieb"> 
+   <div id="v94" class="card"> 
+    <a id="v95" href="https://www.123865.com/s/PkLtjv-fEFb">穿越火线</a> 
+   </div> 
+   <div id="v96" class="card"> 
+    <a id="v97" href="https://www.123865.com/s/PkLtjv-aEFb">使命召唤</a> 
+   </div> 
+  </div> 
+  <div id="v98" class="gnlieb"> 
+   <div id="v99" class="card"> 
+    <a id="v100" href="https://www.123865.com/s/PkLtjv-BEFb">第五人格</a> 
+   </div> 
+   <div id="v101" class="card"> 
+    <a id="v102" href="https://www.123865.com/s/PkLtjv-JEFb">萤火土鸡</a> 
+   </div> 
+  </div> 
+  <div id="v103" class="gnlieb"> 
+   <div id="v104" class="card"> 
+    <a id="v105" href="https://www.123865.com/s/PkLtjv-IEFb">地铁跑酷</a> 
+   </div> 
+   <div id="v106" class="card"> 
+    <a id="v107" href="https://www.123865.com/s/PkLtjv-MEFb">QQ飞车</a> 
+   </div> 
+  </div> 
+  <div id="v108" class="gnlieb"> 
+   <div id="v109" class="card"> 
+    <a id="v110" href="https://wwwx.qyshare.com/s/hsbhju">我的世界</a> 
+   </div> 
+   <div id="v111" class="card"> 
+    <a id="v112" href="https://wwwx.qyshare.com/s/mrqba0">迷你世界</a> 
+   </div> 
+  </div> 
+  <div id="v113" class="gnlieb"> 
+   <div id="v114" class="card"> 
+    <a id="v115" href="https://www.123865.com/s/PkLtjv-wEFb">迷你世界破解版</a> 
+   </div> 
+   <div id="v116" class="card"> 
+    <a id="v117" href="https://www.123865.com/s/PkLtjv-gEFb">锁机生成大全</a> 
+   </div> 
+  </div> 
+  <div id="v118" class="gnlieb"> 
+   <div id="v119" class="card"> 
+    <a id="v120" href="https://www.123865.com/s/PkLtjv-FEFb">游戏端口</a> 
+   </div> 
+   <div id="v121" class="card"> 
+    <a id="v122" href="https://www.123865.com/s/PkLtjv-YEFb">超自然</a> 
+   </div> 
+  </div> 
+  <div id="v123" class="gnlieb"> 
+   <div id="v124" class="card"> 
+    <a id="v125" href="https://www.123865.com/s/PkLtjv-GEFb">地铁跑酷直装</a> 
+   </div> 
+   <div id="v126" class="card"> 
+    <a id="v127" href="https://www.123684.com/s/v13uVv-NGTE3">光遇科技三件套</a> 
+   </div> 
+  </div> 
+  <div id="v128" class="gnlieb"> 
+   <div id="v129" class="card"> 
+    <a id="v130" href="https://www.123865.com/s/PkLtjv-PEFb">台球辅助</a> 
+   </div> 
+   <div id="v131" class="card"> 
+    <a id="v132" href="https://www.123865.com/s/PkLtjv-XEFb">三角洲</a> 
+   </div> 
+  </div> 
+  <div id="v133" class="gnlieb"> 
+   <div id="v134" class="card"> 
+    <a id="v135" href="https://www.123865.com/s/40pVVv-UGSKv">光遇沐雪</a> 
+   </div> 
+   <div id="v136" class="card"> 
+    <a id="v137" href="https://drive.uc.cn/s/1b06dff602814?public=1">光遇小懒猫</a> 
+     </div> 
+  </div> 
+  <div id="v138" class="gnlieb"> 
+   <div id="v139" class="card"> 
+    <a id="v140" href="https://drive.uc.cn/s/10e8519b1a074?public=1">光遇开心果</a> 
+   </div> 
+   <div id="v141" class="card"> 
+    <a id="v142" href="https://www.123865.com/s/PkLtjv-Uigb">光遇小喵呜</a> 
+   </div> 
+  </div> 
+  <div id="v143" class="gnlieb"> 
+   <div id="v144" class="card"> 
+    <a id="v145" href="https://www.123865.com/s/PkLtjv-nEFb">金铲铲</a> 
+   </div> 
+   <div id="v146" class="card"> 
+    <a id="v147" href="https://caiyun.139.com/w/i/2oxwDm2ar5Z4c">光遇烛灵</a> 
+   </div> 
+  </div> 
+  <div id="v148" class="gnlieb"> 
+   <div id="v149" class="card"> 
+    <a id="v150" href="https://share.feijipan.com/s/15Nok94R">pubg白鲟(推)</a> 
+   </div> 
+   <div id="v151" class="card"> 
+    <a id="v152" href="https://www.123912.com/s/PuQlVv-4vLw3">光遇来财</a> 
+   </div> 
+  </div> 
+  <div id="v153" class="gnlieb"> 
+   <div id="v154" class="card"> 
+    <a id="v155" href="https://www.123865.com/s/PkLtjv-2EFb">曙光英雄</a> 
+   </div> 
+   <div id="v156" class="card"> 
+    <a id="v157" href="https://caiyun.139.com/w/i/2nFZ6XEXasN9p">光遇梓零</a> 
+   </div> 
+  </div> 
+  <div id="v158" class="gnlieb"> 
+   <div id="v159" class="card"> 
+    <a id="v160" href="https://pan.xunlei.com/s/VOVbone6lUR2UyvcuUktVwOoA1?pwd=dj3d#">光遇波龙</a> 
+   </div> 
+   <div id="v161" class="card"> 
+    <a id="v162" href="https://pan.baidu.com/s/1Xe4UPffw0oGUoILhHBsn7g?pwd=guy2">光遇亚斯娜</a> 
+   </div> 
+  </div> 
+  <div id="v163" class="gnlieb"> 
+   <div id="v164" class="card"> 
+    <a id="v165" href="https://www.123865.com/s/PkLtjv-sEFb">鬼魂辅助</a> 
+   </div> 
+   <div id="v166" class="card"> 
+    <a id="v167" href="https://xc77.49fk.cn/">PUBG低价卡网(推)</a> 
+   </div> 
+  </div> 
+  <div id="v168" class="gnlieb"> 
+   <div id="v169" class="card"> 
+    <a id="v170" href="https://www.123865.com/s/PkLtjv-WEFb">球球大作战</a> 
+   </div> 
+   <div id="v171" class="card"> 
+    <a id="v172" href="https://www.123865.com/s/PkLtjv-eYgb">3.9赛季obb</a> 
+   </div> 
+  </div> <h2>框架<h2>
+  <div id="v173" class="gnlieb"> 
+   <div id="v174" class="card"> 
+    <a id="v175" href="https://wwxl.lanzoul.com/b009h9rzze">全网框架</a> 
+   </div> 
+   <div id="v176" class="card"> 
+    <a id="v177" href="https://www.123865.com/s/PkLtjv-CEFb">框架②</a> 
+   </div> 
+  </div> <h2>实用软件<h2>
+  <div id="v178" class="gnlieb"> 
+   <div id="v179" class="card"> 
+    <a id="v180" href="https://wwxl.lanzoul.com/b03q596fa">生活实用软件</a> 
+   </div> 
+   <div id="v181" class="card"> 
+    <a id="v182" href="https://wwwx.qyshare.com/s/emfzy2">追剧软件</a> 
+   </div> 
+  </div> 
+  <div id="v183" class="gnlieb"> 
+   <div id="v184" class="card"> 
+    <a id="v185" href="https://www.123865.com/s/PkLtjv-NEFb">虚拟机</a> 
+   </div> 
+   <div id="v186" class="card"> 
+    <a id="v187" href="https://www.123865.com/s/PkLtjv-OEFb">定制v</a> 
+   </div> 
+  </div> <h2>社工<h2>
+  <div id="v188" class="gnlieb"> 
+   <div id="v189" class="card"> 
+    <a id="v190" href="https://wwwx.qyshare.com/s/cucgyi">黑客开户软件库</a> 
+   </div> 
+   <div id="v191" class="card"> 
+    <a id="v192" href="https://wwp.lanzoup.com/i64AE30ulvri">跑现工具</a> 
+   </div> 
+  </div> 
+  <div id="v193" class="gnlieb"> 
+   <div id="v194" class="card"> 
+    <a id="v195" href="https://pan.xunlei.com/s/VOKJzJoZERHZjPW12r3ZBgJ5A1?pwd=kti8#">离别黑猫社工</a> 
+   </div> 
+   <div id="v196" class="card"> 
+    <a id="v197" href="https://www.123865.com/s/PkLtjv-cqMb">开户魔盒</a> 
+   </div> 
+  </div> 
+  <div id="v198" class="gnlieb"> 
+   <div id="v199" class="card"> 
+    <a id="v200" href="https://www.123865.com/s/PkLtjv-bqMb">NL社工</a> 
+   </div> 
+   <div id="v201" class="card"> 
+    <a id="v202" href="https://www.123865.com/s/PkLtjv-eqMb">秋霜社工</a> 
+   </div> 
+  </div> 
+  <div id="v203" class="gnlieb"> 
+   <div id="v204" class="card"> 
+    <a id="v205" href="https://wwp.lanzoup.com/iT20T30ulwuh">实用社工(新)</a> 
+   </div> 
+   <div id="v206" class="card"> 
+    <a id="v207" href="https://pan.xunlei.com/s/VOKK-KvPICFQ-QvijNke07CqA1?pwd=kiim#">kk社工</a> 
+   </div> 
+  </div> 
+  <div id="v208" class="gnlieb"> 
+   <div id="v209" class="card"> 
+    <a id="v210" href="https://www.123865.com/s/PkLtjv-REFb">锁机生成器</a> 
+   </div> 
+   <div id="v211" class="card"> 
+    <a id="v212" href="https://pan.xunlei.com/s/VOKJzrqipI7HyrJll7itYRozA1?pwd=xyyg#">短信测压</a> 
+   </div> 
+  </div> 
+  <div id="v213" class="gnlieb"> 
+   <div id="v214" class="card"> 
+    <a id="v215" href="https://azheds.com/zyj/">照妖镜(新)</a> 
+   </div> 
+   <div id="v216" class="card"> 
+    <a id="v217" href="https://xjie.lanzouu.com/b04whscji">黑科技库大全</a> 
+   </div> 
+  </div> <h2>软件库在线使用<h2>
+  <div id="v218" class="gnlieb"> 
+   <div id="v219" class="card"> 
+    <a id="v220" href="66">极客软件库</a> 
+   </div> 
+   <div id="v221" class="card"> 
+    <a id="v222" href="6v">泽轩软件库</a> 
+   </div> 
+  </div> 
+  <div id="v223" class="gnlieb"> 
+   <div id="v224" class="card"> 
+    <a id="v225" href="8b">初凉软件库高级版</a> 
+   </div> 
+   <div id="v226" class="card"> 
+    <a id="v227" href="78">海盒软件库</a> 
+   </div> 
+  </div> 
+  <div id="v228" class="gnlieb"> 
+   <div id="v229" class="card"> 
+    <a id="v230" href="7o">初凉软件库Pro</a> 
+   </div> 
+   <div id="v231" class="card"> 
+    <a id="v232" href="smr">神秘人软件库</a> 
+   </div> 
+   
+  </div>
+     <div class="gnlieb">
+		<div class="card">
+			<a href="sz">乐于软件库收费版</a>
+		</div>
+		<div class="card">
+			<a href="lz">乐于软件库免费版</a>
+		</div>
+  </div>
+  
+    <div class="gnlieb">
+		<div class="card">
+			<a href="lzfxb">乐于软件库分享版</a>
+		</div>
+		<div class="card">
+			<a href="ua/11">小凯软件库</a>
+		</div>
+  </div>
+  
+    <div class="gnlieb">
+		<div class="card">
+			<a href="uv/11">羽雫软件库</a>
+		</div>
+		<div class="card">
+			<a href="jc">江辞软件库</a>
+		</div>
+  </div>
+  
+     <div class="gnlieb">
+		<div class="card">
+			<a href="tg">太极软件库</a>
+		</div>
+		<div class="card">
+			<a href="91">学习资料软件库</a>
+		</div>
+  </div>
+		
+	  <div class="gnlieb">
+		<div class="card">
+			<a href="smcc">车车软件库</a>
+		</div>
+		<div class="card">
+			<a href="https://wwtg.lanzouo.com/s/fdas">精品学习资料</a>
+		</div>
+  </div>
+  	
+  	  <div class="gnlieb">
+		<div class="card">
+			<a href="http://250805.0yl.cc/download/download.html">幺蓝软件库</a>
+		</div>
+		<div class="card">
+			<a href="https://www.123684.com/s/mVxFTd-Mkeeh">chip软件库</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="wg">无感软件库</a>
+		</div>
+		<div class="card">
+			<a href="https://lanzouy.com/b00efg3c1i">子欲软件库</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://lanzouy.com/b01tpiah3a">学习资料大全</a>
+		</div>
+		<div class="card">
+			<a href="https://lanzouy.com/s/ccdd">小陈软件库</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://qjrjk.lanzoui.com/s/qjrjkj">棋迹软件库</a>
+		</div>
+		<div class="card">
+			<a href="index.html">初心工具箱</a>
+		</div>
+  </div>
+  
+  </div>
+  </div> <h2>逆向<h2>
+  <div id="v233" class="gnlieb"> 
+   <div id="v234" class="card"> 
+    <a id="v235" href="https://www.123865.com/s/PkLtjv-rfwb">逆向必备工具</a> 
+   </div> 
+   <div id="v236" class="card"> 
+    <a id="v237" href="https://wwwz.qyshare.com/s/igyd4v">iapp破解版</a> 
+   </div> 
+  </div> <h2>禁区<h2>
+  <div id="v238" class="gnlieb"> 
+   <div id="v239" class="card"> 
+    <a id="v240" href="https://wwp.lanzoup.com/iHTL02vb8kkd">纸飞机.新</a> 
+   </div> 
+   <div id="v241" class="card"> 
+    <a id="v242" href="https://wwwx.qyshare.com/s/v6myiq">旧版推特</a> 
+   </div> 
+  </div> 
+  <div id="v243" class="gnlieb"> 
+   <div id="v244" class="card"> 
+    <a id="v245" href="https://www.tesicn.com/hongzhaji/index.php">短信轰炸</a> 
+   </div> 
+   <div id="v246" class="card"> 
+    <a id="v247" href="https://wwwx.qyshare.com/s/2rz8gi">绿茶VPN</a> 
+   </div> 
+  </div> <h2>学习区<h2>
+  <div id="v248" class="gnlieb"> 
+   <div id="v249" class="card"> 
+    <a id="v250" href="https://wwxl.lanzoul.com/b009h9ruaj">学习资料大全</a> 
+   </div> 
+   <div id="v251" class="card"> 
+    <a id="v252" href="91">独家学习资料库</a> 
+   </div> 
+  </div> <h2>其他游戏辅助<h2>
+  <div id="v253" class="gnlieb"> 
+   <div id="v254" class="card"> 
+    <a id="v255" href="https://www.123684.com/s/PkLtjv-BPgb">觉醒次神破解版</a> 
+   </div>
+   <div id="v256" class="card"> 
+    <a id="v257" href="https://wwp.lanzoup.com/i46WG30xdoqf">三角洲行动</a> 
+   </div> 
+  </div> 
+  <div id="v258" class="gnlieb"> 
+   <div id="v259" class="card"> 
+    <a id="v260" href="https://drive.uc.cn/s/c1f71a922ac34?public=1
+">破解资源大全1</a> 
+   </div> 
+   <div id="v261" class="card"> 
+    <a id="v262" href="https://www.123865.com/s/OndSjv-F4Vwd">九九科技大全</a> 
+   </div> 
+  </div> 
+  <div id="v263" class="gnlieb"> 
+   <div id="v264" class="card"> 
+    <a id="v265" href="https://www.123865.com/s/PkLtjv-gPgb">暗区突围破解版(私服)</a> 
+   </div> 
+   <div id="v266" class="card"> 
+    <a id="v267" href="https://www.123865.com/s/PkLtjv-OPgb">迷你枪战</a> 
+   </div> 
+  </div> 
+  <div id="v268" class="gnlieb"> 
+   <div id="v269" class="card"> 
+    <a id="v270" href="https://www.123865.com/s/PkLtjv-RPgb">我的世界矿透</a> 
+   </div> 
+   <div id="v271" class="card"> 
+    <a id="v272" href="https://wwxl.lanzoul.com/b009h9rpxc">火影忍者</a> 
+   </div> 
+  </div> <h2>APK加固<h2>
+  <div id="v273" class="gnlieb"> 
+   <div id="v274" class="card"> 
+    <a id="v275" href="https://jiagu.360.cn">360加固</a> 
+   </div> 
+   <div id="v276" class="card"> 
+    <a id="v277" href="https://dev.bangcle.com">梆梆加固</a> 
+   </div> 
+  </div> 
+  <div id="v278" class="gnlieb"> 
+   <div id="v279" class="card"> 
+    <a id="v280" href="https://www.ijiami.cn/">爱加密</a> 
+   </div> 
+   <div id="v281" class="card"> 
+    <a id="v282" href="https://wwp.lanzoup.com/iD3HY30xhxtg">各大加固免费使用</a> 
+   </div> 
+  </div> <h2>实用工具<h2>
+  <div id="v283" class="gnlieb"> 
+   <div id="v284" class="card"> 
+    <a id="v285" href="https://blackace.app/?src=inject&v=2">网页转应用</a> 
+   </div> 
+   <div id="v286" class="card"> 
+    <a id="v287" href="https://www.123865.com/s/PkLtjv-FPgb">音乐播放器(游戏必备)</a> 
+   </div> 
+  </div> 
+  <div id="v288" class="gnlieb"> 
+   <div id="v289" class="card"> 
+    <a id="v290" href="https://m.bilibili.com/">b站</a> 
+   </div> 
+   <div id="v291" class="card"> 
+    <a id="v292" href="http://txckk.kkcnm.com/admin/">kk偷相册</a> 
+   </div> 
+  </div> 
+  <div id="v293" class="gnlieb"> 
+   <div id="v294" class="card"> 
+    <a id="v295" href="https://pan.jl8.top/">图转链接</a> 
+   </div> 
+   <div id="v296" class="card"> 
+    <a id="v297" href="https://www.uugai.com/">LOGO设计</a> 
+   </div> 
+  </div> 
+  <div id="v298" class="gnlieb"> 
+   <div id="v299" class="card"> 
+    <a id="v300" href="http://fengjiufk.xyz/4399-account-system/">4399小白号</a> 
+   </div> 
+   <div id="v301" class="card"> 
+    <a id="v302" href="https://www.freereceivesms.com">无限手机号</a> 
+   </div> 
+  </div> 
+  <div id="v303" class="gnlieb"> 
+   <div id="v304" class="card"> 
+    <a id="v305" href="https://daga.cc/yin/">VIP视频解析</a> 
+   </div> 
+   <div id="v306" class="card"> 
+    <a id="v307" href="http://tool.mkblog.cn/">工具箱</a> 
+   </div> 
+  </div> 
+    <div id="v308" class="gnlieb"> 
+   <div id="v309" class="card"> 
+    <a id="v310" href="https://uutool.cn/">工具箱2</a> 
+   </div> 
+   <div id="v311" class="card"> 
+    <a id="v312" href="https://m.liantu.com/">二维码生成器</a> 
+   </div> 
+   </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://www.dute.org/about">工具箱3</a>
+		</div>
+		<div class="card">
+			<a href="https://ai-kit.cn/">工具箱4</a>
+		</div>
+  </div>
+   
+     <div class="gnlieb">
+		<div class="card">
+			<a href="https://www.sgdiy.cn/">工具箱5</a>
+		</div>
+		<div class="card">
+			<a href="https://www.tool12.com/">工具箱6</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="http://www.xsdggw.cn/">工具箱7</a>
+		</div>
+		<div class="card">
+			<a href="https://www.toolbon.com/">工具箱8</a>
+		</div>
+  </div>
+  
+     <div class="gnlieb">
+		<div class="card">
+			<a href="https://tools.miku.ac/">工具箱9</a>
+		</div>
+		<div class="card">
+			<a href="https://toolwa.com/">工具箱10</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="http://tool.mkblog.cn/">工具箱11</a>
+		</div>
+		<div class="card">
+			<a href="https://www.qiwangming.com/">工具箱12</a>
+		</div>
+  </div>
+  
+     <div class="gnlieb">
+		<div class="card">
+			<a href="https://www.iamwawa.cn/">工具箱13</a>
+		</div>
+		<div class="card">
+			<a href="https://tool.caoniang.com">工具箱总网站</a>
+		</div>
+  </div>
+  
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://coderschool.cn/tool/index.php/Index/radix">多进制转换</a>
+		</div>
+		<div class="card">
+			<a href="https://bj.96weixin.com/tools/symbol">特殊符号生成</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://www.gseen.com/online_tools/QRcode/qr">二维码生成</a>
+		</div>
+		<div class="card">
+			<a href="https://www.logoko.com.cn/">logo生成</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://api.toubiec.cn/wyapi.html">网易云音乐解析</a>
+		</div>
+		<div class="card">
+			<a href="https://www.oicq88.com/">QQ网名生成</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://www.toolzl.com/tools/getHttpData.html">网站取源</a>
+		</div>
+		<div class="card">
+			<a href="http://www.hacku.cn/i/DDoS">DDos攻击</a>
+		</div>
+  </div>
+  
+  </div> 
+  <div id="v313" class="gnlieb"> 
+   <div id="v314" class="card"> 
+    <a id="v315" href="http://www.hacku.cn/i/DDoS">DDos攻击</a> 
+   </div> 
+   <div id="v316" class="card"> 
+    <a id="v317" href="https://www.toolzl.com/">网页取源</a> 
+   </div> 
+  </div> 
+  <div id="v318" class="gnlieb"> 
+   <div id="v319" class="card"> 
+    <a id="v320" href="https://blackace.app/">链接转应用</a> 
+   </div> 
+   <div id="v321" class="card"> 
+    <a id="v322" href="http://suo.im/">链接缩短</a> 
+   </div> 
+   
+   </div><h2>小游戏<h2>
+     <div class="gnlieb">
+		<div class="card">
+			<a href="https://game.moe.ms/">植物大战僵尸</a>
+		</div>
+		<div class="card">
+			<a href="http://guozhivip.com/fun/wzq/">五子棋</a>
+		</div>
+  </div>
+    <div class="gnlieb">
+		<div class="card">
+			<a href="https://www.3699.cc/p/11273.htm">井字棋</a>
+		</div>
+		<div class="card">
+			<a href="http://m.19x19.com/engine/play/set">围棋</a>
+		</div>
+  </div>
+  
+     <div class="gnlieb">
+		<div class="card">
+			<a href="https://www.playok.com/zh/ludo/">飞行棋</a>
+		</div>
+		<div class="card">
+			<a href="https://poki.com/zh">小游戏大全</a>
+		</div>
+  </div>
+  
+   
+   
+  </div> <h2>其他内容<h2>
+<div id="v323" class="gnlieb"> 
+   <div id="v324" class="card"> 
+    <a id="v325" href="https://wwr.lanzoui.com/b00yactkna">王者荣耀改文件</a> 
+   </div> 
+   <div id="v326" class="card"> 
+    <a id="v327" href=https://wwr.lanzoui.com/b00yactkmj">和平改文件(新)</a> 
+   </div> 
+  </div> 
+  <div id="v328" class="gnlieb"> 
+   <div id="v329" class="card"> 
+    <a id="v330" href="https://wwr.lanzoui.com/b00yactiaf">香肠派对改文件</a> 
+   </div> 
+   <div id="v331" class="card"> 
+    <a id="v332" href="https://drive.uc.cn/s/952fa6c484de4?public=1">游戏破解</a> 
+   </div> 
+  </div> 
+  <div id="v333" class="gnlieb"> 
+   <div id="v334" class="card"> 
+    <a id="v335" href="https://www.kdocs.cn/l/cdDM9yOpMvWb">破解软件大全2</a> 
+   </div> 
+   <div id="v336" class="card"> 
+    <a id="v337" href="https://www.123684.com/s/Q9pFjv-nNc4H">小游戏科技</a> 
+   </div> 
+   </div> 
+  <div id="v378" class="gnlieb"> 
+   <div id="v379" class="card"> 
+    <a id="v380" href="https://www.123865.com/s/PkLtjv-ncgb">表白墙</a> 
+   </div> 
+   <div id="v381" class="card"> 
+    <a id="v382" href="https://wwp.lanzoup.com/ixFL12vb4syb">Q绑查询</a> 
+   </div> 
+  </div> 
+  <div id="v383" class="gnlieb"> 
+   <div id="v384" class="card"> 
+    <a id="v385" href="https://wwp.lanzoup.com/iGK2Q2vb72kj">户籍猎手</a> 
+   </div> 
+   <div id="v386" class="card"> 
+    <a id="v387" href="https://wwp.lanzoup.com/iSTBR2vb7g1e">网页攻击</a> 
+   </div> 
+  </div> 
+  <div id="v388" class="gnlieb"> 
+   <div id="v389" class="card"> 
+    <a id="v390" href="https://wwwx.qyshare.com/s/dgboez">黄鸟抓包</a> 
+   </div> 
+   <div id="v391" class="card"> 
+    <a id="v392" href="https://wwp.lanzoup.com/i11RK2vb80kd">去水印</a> 
+   </div> 
+  </div> 
+  <div id="v393" class="gnlieb"> 
+   <div id="v394" class="card"> 
+    <a id="v395" href="https://www.123pan.cn/s/WTCDVv-hG1WA.html">各大游戏改文件</a> 
+   </div> 
+   <div id="v396" class="card"> 
+    <a id="v397" href="https://wwwx.qyshare.com/s/bfjpow">王牌战争</a> 
+   </div> 
+  </div> 
+  <div id="v398" class="gnlieb"> 
+   <div id="v399" class="card"> 
+    <a id="v400" href="https://007cc.lanzouu.com/i8NBr302qbtc?sec=BDVRMQFpUzNTMQNgVDdTYwdkV2ZefQExAzIDMVE4U2FXblM0CClSNFEzVDFQM1FhAGMGNFA7UWFVLlI3XWJTawQ2UWQBblNiUzcDN1Q3U2EHO1czXjcBZgM9AzVRbFNrV2dTNwhlUjFRNFQ0UD1RNAA_aBmBQPFEyVWY_c">MotionNinja Pro破解</a> 
+   </div> 
+   <div id="v401" class="card"> 
+    <a id="v402" href="https://wwp.lanzoup.com/i3WO62vb84kh">毒舌加速器</a> 
+   </div> 
+  </div> 
+  <div id="v403" class="gnlieb"> 
+   <div id="v404" class="card"> 
+    <a id="v405" href="https://wwp.lanzoup.com/iGJLV2vbbsba">猎魔多合一</a> 
+   </div> 
+   <div id="v406" class="card"> 
+    <a id="v407" href="https://link3.cc/bychuxin">点我查看最新内容</a> 
+ </div> 
+  </div> 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <script>
+                // 添加点击动画
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+    </script>
+</body>
 </html>
