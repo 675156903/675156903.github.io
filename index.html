@@ -1,8 +1,10 @@
 <html lang="zh-CN">
- <head> 
+<head> 
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <title>图片转PDF神器</title> 
+  <!-- 添加jsPDF库的CDN引用 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
         :root {
             --primary-color: #4a6ee0;
@@ -224,10 +226,10 @@
     <div class="upload-icon">
      📁
     </div> 
-    <h3></h3> 
+    <h3>拖放图片文件到此处或点击选择文件夹</h3> 
     <p>支持常见图片格式（JPG, PNG, GIF, BMP等）</p> 
-    <input type="file" id="imageInput" class="file-input" multiple accept="image/*" webkitdirectory="" directory=""> 
-    <button class="btn" onclick="document.getElementById('imageInput').click()"> <span>选择文件夹</span> </button> 
+    <input type="file" id="imageInput" class="file-input" multiple accept="image/*"> 
+    <button class="btn" onclick="document.getElementById('imageInput').click()"> <span>选择图片</span> </button> 
    </div> 
    <div class="file-count" id="fileCount"></div> 
    <div class="image-list" id="imageList"></div> 
@@ -244,10 +246,11 @@
     </div> 
    </div> 
    <div class="status" id="status">
-    请选择包含图片的文件夹
+    请选择图片文件或将图片拖放到上方区域
    </div> 
   </div> 
   <script>
+        // 使用jsPDF库
         const { jsPDF } = window.jspdf;
         let selectedImages = [];
         
@@ -417,7 +420,7 @@
             const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
             
             if (imageFiles.length === 0) {
-                status.textContent = '未找到图片文件，请选择包含图片的文件夹';
+                status.textContent = '未找到图片文件，请选择图片文件';
                 status.className = 'status error';
                 return;
             }
@@ -440,7 +443,7 @@
             convertBtn.disabled = true;
             progressFill.style.width = '0%';
             progressText.textContent = '准备就绪';
-            status.textContent = '请选择包含图片的文件夹';
+            status.textContent = '请选择图片文件或将图片拖放到上方区域';
             status.className = 'status';
         }
         
@@ -474,10 +477,11 @@
                             try {
                                 if (i > 0) pdf.addPage();
                                 
-                                const imgWidth = pdf.internal.pageSize.getWidth();
+                                const imgWidth = pdf.internal.pageSize.getWidth() - 20;
                                 const imgHeight = (img.height * imgWidth) / img.width;
                                 
-                                pdf.addImage(img, 'JPEG', 0, 0, imgWidth, imgHeight);
+                                // 添加图片到PDF，留10px的边距
+                                pdf.addImage(img, 'JPEG', 10, 10, imgWidth, imgHeight);
                                 URL.revokeObjectURL(imgUrl);
                                 resolve();
                             } catch (error) {
@@ -495,7 +499,7 @@
                 }
                 
                 // 保存PDF
-                pdf.save('converted_book.pdf');
+                pdf.save('converted_images.pdf');
                 
                 // 更新状态
                 status.textContent = `转换完成！共处理 ${selectedImages.length} 张图片`;
