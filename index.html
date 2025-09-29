@@ -1,950 +1,516 @@
-<!DOCTYPE html>
-<html>
-  <head>
-	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<title>初心软件库11.0Pro</title>
-  </head>
-  <title>Q群398357716快手chuxinyydd</title>
+<html lang="zh-CN">
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>图片转PDF神器</title> 
   <style>
-		body {
-  background-image:url("icon.png");
-  background-size:cover;
-  background-repeat:no-repeat;
-  background-attachment:fixed;
- 
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: cover;
-  animation: rainbow 10s infinite;
-}
-
-@keyframes rainbow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-		.tox {
-			text-align: center;
-			margin-top: 20px;
-		}
-
-		.tox img {
-			width: 100px;
-			height: 100px;
-			border-radius: 5px;
-			transition: transform 0.5s;
-		}
-
-		.tox img:hover {
-			transform: rotateY(180deg);
-		}
-
-		.gnlieb {
-			display: flex;
-			justify-content: space-evenly;
-			margin-top: 20px;
-		}
-
-		.gnlieb .card {
-			width: 150px;
-			height: 50px;
-			background-color: rgba(16, 52, 166, 0.7);
-			text-align: center;
-			border-radius: 10px;
-			font-size: 18px;
-			color: #fff;
-			box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-		}
-
-		.gnlieb .card:hover {
-			background-color: rgba(16, 52, 166, 0.9);
-			cursor: pointer;
-			transition: background-color 0.3s ease-in-out;
-		}
-
-		.gnlieb .card a {
-			color: #fff;
-			text-decoration: none;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			height: 100%;
-		}
-
-#progress-bar {
-  width: 340px;
-  height: 10px;
-  border: 1px solid #ccc;
-  position: relative;
-  overflow: hidden;
-}
-
-#progress-bar hr {
-  height: 100%;
-  width: 0;
-  background-color: #00aaff;
-  position: absolute;
-  top: 0;
-  left: 0;
-  transition: width 0.5s ease;
-}
-	</style> 
+        :root {
+            --primary-color: #4a6ee0;
+            --primary-dark: #3a5ac8;
+            --secondary-color: #f0f4ff;
+            --text-color: #333;
+            --light-gray: #f5f5f5;
+            --border-color: #ddd;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: var(--secondary-color);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary-color);
+            background-color: #e8eeff;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn:disabled {
+            background-color: #a0a0a0;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .progress-container {
+            margin: 30px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: var(--light-gray);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            background-color: var(--light-gray);
+            min-height: 60px;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .image-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .image-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .image-item:last-child {
+            border-bottom: none;
+        }
+        
+        .image-preview {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+        
+        .image-info {
+            flex-grow: 1;
+        }
+        
+        .image-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .image-size {
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        .drag-handle {
+            cursor: move;
+            padding: 5px;
+            color: #888;
+        }
+        
+        .file-count {
+            margin-top: 10px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style> 
  </head> 
- <body id="v1"> 
-  <div id="v2" class="tox"> 
-   <img id="v3" src="https://i1.qyimage.store/i/dce406ecf09d4ff2" alt=""
-   > 
-   <br id="v4"> 
-   <br id="v5"> 
-   <h1 id="v6">初心软件库</h1> 
-  </div>
-     <div id="progress-bar"> 
-   <hr id="v7" style="width: 100%;"> 
-  </div> <h2>核心区<h2>
-  <div id="v8" class="gnlieb"> 
-   <div id="v9" class="card"> 
-       <a id="v10" href="https://v.kuaishou.com/2ALoqac">联系作者</a> 
+ <body> 
+  <div class="container"> 
+   <h1>UVZ图片转PDF转换器</h1> 
+   <div class="upload-area" id="dropArea"> 
+    <div class="upload-icon">
+     📁
+    </div> 
+    <h3>选择文件夹或拖拽图片到此区域</h3> 
+    <p>支持常见图片格式（JPG, PNG, GIF, BMP等）</p> 
+    <input type="file" id="imageInput" class="file-input" multiple accept="image/*" webkitdirectory="" directory=""> 
+    <button class="btn" onclick="document.getElementById('imageInput').click()"> <span>选择文件夹</span> </button> 
    </div> 
-   <div id="v11" class="card"> 
-    <a id="v12" href="http://a.ruansky.com/user/3111818/">初心软天空主页</a> 
+   <div class="file-count" id="fileCount"></div> 
+   <div class="image-list" id="imageList"></div> 
+   <div class="controls"> 
+    <button class="btn" id="convertBtn" onclick="startConversion()" disabled> <span>开始转换PDF</span> </button> 
+    <button class="btn btn-secondary" onclick="clearSelection()"> <span>清空选择</span> </button> 
    </div> 
-  </div> 
-  <div id="v13" class="gnlieb"> 
-   <div id="v14" class="card"> 
-    <a id="v15" href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=Ke0Q-gHH0m4xff5HfphhgU9oM9eCV0W9&authKey=pIPHNEeGAy1O3tw1xoUwE04hNStNJH9J4aO3dyV1KGTI8SskLdIN9XgAO3hk%2BwHP&noverify=0&group_code=1007121451">加入总部群</a> 
+   <div class="progress-container"> 
+    <div class="progress-bar"> 
+     <div class="progress-fill" id="progressFill"></div> 
+    </div> 
+    <div id="progressText">
+     准备就绪
+    </div> 
    </div> 
-   <div id="v16" class="card"> 
-    <a id="v17" href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=_f1C9k21-Z21hMUaQU6dj1X0UaK5Ohrj&authKey=f5xZQS3%2BdNQCZlpLOIebJCAbkMTxeqKXm%2FTuZ%2FYkvbpoDYrDHng7aS1zlhkn3qVU&noverify=0&group_code=1031851571">加入交流群②</a> 
-   </div> 
-  </div> 
-  <div id="v18" class="gnlieb"> 
-   <div id="v19" class="card"> 
-    <a id="v20" href="zy">个人引导页</a> 
-   </div>
-   <div id="v21" class="card"> 
-    <a id="v22" href="https://qun.qq.com/universal-share/share?ac=1&authKey=%2BNXQdOWXMNnHqoG27EEdst98xo0KeQv%2FM%2FqKSrD6ArC1au3H49ueMyXwMqez0HJd&busi_data=eyJncm91cENvZGUiOiIxMDE4MTE4MDg0IiwidG9rZW4iOiI0TFhLcXhvb1RtQXFhMXl5SG9tdlROaWlEMDBqZ0lWRGVSKzNHdmtDRGlZd3dqUVNDSmw5M2xQT0hMbUQ2ZnhRIiwidWluIjoiMjY0MDU3OTM1MyJ9&data=-aSOF_Yv2cjunYqaqg-VGe76bPRhPkywjQpTWGHtRnJzbJYYsBBzVKsVhCQrJyPLuDTnInC50l34SEK-6j-MHw&svctype=4&tempid=h5_group_info">加入交流群③</a> 
-   </div> 
-  </div><h2>破解区<h2> 
-  <div id="v23" class="gnlieb"> 
-   <div id="v24" class="card"> 
-    <a id="v25" href="https://www.123865.com/s/PkLtjv-6QFb">输入法破解大全</a> 
-   </div> 
-   <div id="v26" class="card"> 
-    <a id="v27" href="https://wwm.lanzoum.com/b04q42b3g">小说破解大全</a> 
+   <div class="status" id="status">
+    请选择包含图片的文件夹
    </div> 
   </div> 
-  <div id="v28" class="gnlieb"> 
-   <div id="v29" class="card"> 
-    <a id="v30" href="https://xjie.lanzouu.com/b04whscji">黑科技软件大全</a> 
-   </div> 
-   <div id="v31" class="card"> 
-    <a id="v32" href="https://lanzouy.com/b00wmg56ha">音乐破解大全</a> 
-   </div> 
- </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://qjrjk.lanzoui.com/b04rzij5e">小游戏破解大全</a>
-		</div>
-		<div class="card">
-			<a href="https://wwl.lanzoul.com/b00y37ghi">精选软件大全</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://ypziyuanshare.lanzoul.com/b0epegxzi">精选软件大全2</a>
-		</div>
-		<div class="card">
-			<a href="https://tool.wotianna.com/">影视在线观看</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://lanzouy.com/b08upyf3g">影视软件大全1</a>
-		</div>
-		<div class="card">
-			<a href="https://lanzouy.com/b0evapjte">影视软件大全2</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://lanzouy.com/b00efg3tti">影视软件大全3</a>
-		</div>
-		<div class="card">
-			<a href="https://lanzouy.com/b00efg3tsh">实用软件大全</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://lanzouy.com/b00wmagm6f">翻墙软件大全</a>
-		</div>
-		<div class="card">
-			<a href="https://lanzouy.com/b00wmagltc">各类软件大全1</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://yq6.lanzouy.com/s/yqrj7">各类软件大全2</a>
-		</div>
-		<div class="card">
-			<a href="https://wwwx.qyshare.com/s/id8vag">更新地址</a>
-		</div>
-  </div>
-  
-   
-     </div>
-    <div id="v33" class="gnlieb"> 
-   <div id="v34" class="card"> 
-    <a id="v35" href="https://www.123865.com/s/PkLtjv-yQFb">迅雷永久VIP</a> 
-   </div> 
-   <div id="v36" class="card"> 
-    <a id="v37" href="https://www.123865.com/s/PkLtjv-VQFb">快手刷赞破解大全</a> 
-   </div> 
-  </div> 
-  <div id="v38" class="gnlieb"> 
-   <div id="v39" class="card"> 
-    <a id="v40" href="https://www.123865.com/s/PkLtjv-jQFb">录屏软件破解</a> 
-   </div> 
-   <div id="v41" class="card"> 
-    <a id="v42" href="https://www.123865.com/s/PkLtjv-TEFb">剪辑软件破解</a> 
-   </div> 
-  </div><h2>管理器<h2> 
-  <div id="v43" class="gnlieb"> 
-   <div id="v44" class="card"> 
-    <a id="v45" href="https://www.123865.com/s/PkLtjv-Y6Mb">MT管理器(破)</a> 
-   </div> 
-   <div id="v46" class="card"> 
-    <a id="v47" href="https://www.123865.com/s/PkLtjv-vEFb">NP管理器(破)</a> 
-   </div> 
-  </div> <h2>外挂区<h2>
-  <div id="v48" class="gnlieb"> 
-   <div id="v49" class="card"> 
-    <a id="v50" href="https://www.123865.com/s/PkLtjv-dEFb">和平精英</a> 
-   </div> 
-   <div id="v51" class="card"> 
-    <a id="v52" href="https://www.123865.com/s/PkLtjv-3EFb">王者荣耀</a> 
-   </div> 
-  </div> 
-  <div id="v53" class="gnlieb"> 
-   <div id="v54" class="card"> 
-    <a id="v55" href="https://www.123865.com/s/PkLtjv-hEFb">暗区突围</a> 
-   </div> 
-   <div id="v56" class="card"> 
-    <a id="v57" href="https://www.123865.com/s/PkLtjv-HEFb">pubg改帧率</a> 
-   </div> 
-  </div> 
-  <div id="v58" class="gnlieb"> 
-   <div id="v59" class="card"> 
-    <a id="v60" href="https://www.123865.com/s/PkLtjv-9EFb">连点器</a> 
-   </div> 
-   <div id="v61" class="card"> 
-    <a id="v62" href="https://www.123865.com/s/PkLtjv-QEFb">PUBG</a> 
-   </div> 
-  </div> 
-  <div id="v63" class="gnlieb"> 
-   <div id="v64" class="card"> 
-    <a id="v65" href="https://www.123865.com/s/PkLtjv-kEFb">国体</a> 
-   </div> 
-   <div id="v66" class="card"> 
-    <a id="v67" href="https://www.123865.com/s/PkLtjv-oEFb">pubg优甜(推)</a> 
-   </div> 
-  </div> 
-  <div id="v68" class="gnlieb"> 
-   <div id="v69" class="card"> 
-    <a id="v70" href="https://www.123865.com/s/PkLtjv-mEFb">王牌竞速</a> 
-   </div> 
-   <div id="v71" class="card"> 
-    <a id="v72" href="https://www.123865.com/s/PkLtjv-1EFb">中野三玖美化</a> 
-   </div> 
-  </div> 
-  <div id="v73" class="gnlieb"> 
-   <div id="v74" class="card"> 
-    <a id="v75" href="https://www.123912.com/s/2fqQTd-s2XFv">和平精英美化文件</a> 
-   </div> 
-   <div id="v76" class="card"> 
-    <a id="v77" href="https://www.123684.com/s/P7jRVv-qYPN3">小月月改文件</a> 
-   </div> 
-  </div> 
-  <div id="v78" class="gnlieb"> 
-   <div id="v79" class="card"> 
-    <a id="v80" href="https://drive.uc.cn/s/8731fe498c214
-">王者改文件1</a> 
-   </div> 
-   <div id="v81" class="card"> 
-    <a id="v82" href="https://www.123865.com/s/PkLtjv-4EFb">逃跑吧少年</a> 
-   </div> 
-  </div> 
-  <div id="v83" class="gnlieb"> 
-   <div id="v84" class="card"> 
-    <a id="v85" href="https://www.123865.com/s/PkLtjv-xEFb">元气骑士</a> 
-   </div> 
-   <div id="v86" class="card"> 
-    <a id="v87" href="https://www.123865.com/s/PkLtjv-pEFb">香肠派对</a> 
-   </div> 
-  </div> 
-  <div id="v88" class="gnlieb"> 
-   <div id="v89" class="card"> 
-    <a id="v90" href="https://www.123865.com/s/9t3Hvd-tMwvd">香肠派对小毛</a> 
-   </div> 
-   <div id="v91" class="card"> 
-    <a id="v92" href="https://wwr.lanzoui.com/b00yactiaf">香肠派对改文件</a> 
-   </div> 
-  </div> 
-  <div id="v93" class="gnlieb"> 
-   <div id="v94" class="card"> 
-    <a id="v95" href="https://www.123865.com/s/PkLtjv-fEFb">穿越火线</a> 
-   </div> 
-   <div id="v96" class="card"> 
-    <a id="v97" href="https://www.123865.com/s/PkLtjv-aEFb">使命召唤</a> 
-   </div> 
-  </div> 
-  <div id="v98" class="gnlieb"> 
-   <div id="v99" class="card"> 
-    <a id="v100" href="https://www.123865.com/s/PkLtjv-BEFb">第五人格</a> 
-   </div> 
-   <div id="v101" class="card"> 
-    <a id="v102" href="https://www.123865.com/s/PkLtjv-JEFb">萤火土鸡</a> 
-   </div> 
-  </div> 
-  <div id="v103" class="gnlieb"> 
-   <div id="v104" class="card"> 
-    <a id="v105" href="https://www.123865.com/s/PkLtjv-IEFb">地铁跑酷</a> 
-   </div> 
-   <div id="v106" class="card"> 
-    <a id="v107" href="https://www.123865.com/s/PkLtjv-MEFb">QQ飞车</a> 
-   </div> 
-  </div> 
-  <div id="v108" class="gnlieb"> 
-   <div id="v109" class="card"> 
-    <a id="v110" href="https://wwwx.qyshare.com/s/hsbhju">我的世界</a> 
-   </div> 
-   <div id="v111" class="card"> 
-    <a id="v112" href="https://wwwx.qyshare.com/s/mrqba0">迷你世界</a> 
-   </div> 
-  </div> 
-  <div id="v113" class="gnlieb"> 
-   <div id="v114" class="card"> 
-    <a id="v115" href="https://www.123865.com/s/PkLtjv-wEFb">迷你世界破解版</a> 
-   </div> 
-   <div id="v116" class="card"> 
-    <a id="v117" href="https://www.123865.com/s/PkLtjv-gEFb">锁机生成大全</a> 
-   </div> 
-  </div> 
-  <div id="v118" class="gnlieb"> 
-   <div id="v119" class="card"> 
-    <a id="v120" href="https://www.123865.com/s/PkLtjv-FEFb">游戏端口</a> 
-   </div> 
-   <div id="v121" class="card"> 
-    <a id="v122" href="https://www.123865.com/s/PkLtjv-YEFb">超自然</a> 
-   </div> 
-  </div> 
-  <div id="v123" class="gnlieb"> 
-   <div id="v124" class="card"> 
-    <a id="v125" href="https://www.123865.com/s/PkLtjv-GEFb">地铁跑酷直装</a> 
-   </div> 
-   <div id="v126" class="card"> 
-    <a id="v127" href="https://www.123684.com/s/v13uVv-NGTE3">光遇科技三件套</a> 
-   </div> 
-  </div> 
-  <div id="v128" class="gnlieb"> 
-   <div id="v129" class="card"> 
-    <a id="v130" href="https://www.123865.com/s/PkLtjv-PEFb">台球辅助</a> 
-   </div> 
-   <div id="v131" class="card"> 
-    <a id="v132" href="https://www.123865.com/s/PkLtjv-XEFb">三角洲</a> 
-   </div> 
-  </div> 
-  <div id="v133" class="gnlieb"> 
-   <div id="v134" class="card"> 
-    <a id="v135" href="https://www.123865.com/s/40pVVv-UGSKv">光遇沐雪</a> 
-   </div> 
-   <div id="v136" class="card"> 
-    <a id="v137" href="https://drive.uc.cn/s/1b06dff602814?public=1">光遇小懒猫</a> 
-     </div> 
-  </div> 
-  <div id="v138" class="gnlieb"> 
-   <div id="v139" class="card"> 
-    <a id="v140" href="https://drive.uc.cn/s/10e8519b1a074?public=1">光遇开心果</a> 
-   </div> 
-   <div id="v141" class="card"> 
-    <a id="v142" href="https://www.123865.com/s/PkLtjv-Uigb">光遇小喵呜</a> 
-   </div> 
-  </div> 
-  <div id="v143" class="gnlieb"> 
-   <div id="v144" class="card"> 
-    <a id="v145" href="https://www.123865.com/s/PkLtjv-nEFb">金铲铲</a> 
-   </div> 
-   <div id="v146" class="card"> 
-    <a id="v147" href="https://caiyun.139.com/w/i/2oxwDm2ar5Z4c">光遇烛灵</a> 
-   </div> 
-  </div> 
-  <div id="v148" class="gnlieb"> 
-   <div id="v149" class="card"> 
-    <a id="v150" href="https://share.feijipan.com/s/15Nok94R">pubg白鲟(推)</a> 
-   </div> 
-   <div id="v151" class="card"> 
-    <a id="v152" href="https://www.123912.com/s/PuQlVv-4vLw3">光遇来财</a> 
-   </div> 
-  </div> 
-  <div id="v153" class="gnlieb"> 
-   <div id="v154" class="card"> 
-    <a id="v155" href="https://www.123865.com/s/PkLtjv-2EFb">曙光英雄</a> 
-   </div> 
-   <div id="v156" class="card"> 
-    <a id="v157" href="https://caiyun.139.com/w/i/2nFZ6XEXasN9p">光遇梓零</a> 
-   </div> 
-  </div> 
-  <div id="v158" class="gnlieb"> 
-   <div id="v159" class="card"> 
-    <a id="v160" href="https://pan.xunlei.com/s/VOVbone6lUR2UyvcuUktVwOoA1?pwd=dj3d#">光遇波龙</a> 
-   </div> 
-   <div id="v161" class="card"> 
-    <a id="v162" href="https://pan.baidu.com/s/1Xe4UPffw0oGUoILhHBsn7g?pwd=guy2">光遇亚斯娜</a> 
-   </div> 
-  </div> 
-  <div id="v163" class="gnlieb"> 
-   <div id="v164" class="card"> 
-    <a id="v165" href="https://www.123865.com/s/PkLtjv-sEFb">鬼魂辅助</a> 
-   </div> 
-   <div id="v166" class="card"> 
-    <a id="v167" href="https://xc77.49fk.cn/">PUBG低价卡网(推)</a> 
-   </div> 
-  </div> 
-  <div id="v168" class="gnlieb"> 
-   <div id="v169" class="card"> 
-    <a id="v170" href="https://www.123865.com/s/PkLtjv-WEFb">球球大作战</a> 
-   </div> 
-   <div id="v171" class="card"> 
-    <a id="v172" href="https://www.123865.com/s/PkLtjv-eYgb">3.9赛季obb</a> 
-   </div> 
-  </div> <h2>框架<h2>
-  <div id="v173" class="gnlieb"> 
-   <div id="v174" class="card"> 
-    <a id="v175" href="https://wwxl.lanzoul.com/b009h9rzze">全网框架</a> 
-   </div> 
-   <div id="v176" class="card"> 
-    <a id="v177" href="https://www.123865.com/s/PkLtjv-CEFb">框架②</a> 
-   </div> 
-  </div> <h2>实用软件<h2>
-  <div id="v178" class="gnlieb"> 
-   <div id="v179" class="card"> 
-    <a id="v180" href="https://wwxl.lanzoul.com/b03q596fa">生活实用软件</a> 
-   </div> 
-   <div id="v181" class="card"> 
-    <a id="v182" href="https://wwwx.qyshare.com/s/emfzy2">追剧软件</a> 
-   </div> 
-  </div> 
-  <div id="v183" class="gnlieb"> 
-   <div id="v184" class="card"> 
-    <a id="v185" href="https://www.123865.com/s/PkLtjv-NEFb">虚拟机</a> 
-   </div> 
-   <div id="v186" class="card"> 
-    <a id="v187" href="https://www.123865.com/s/PkLtjv-OEFb">定制v</a> 
-   </div> 
-  </div> <h2>社工<h2>
-  <div id="v188" class="gnlieb"> 
-   <div id="v189" class="card"> 
-    <a id="v190" href="https://wwwx.qyshare.com/s/cucgyi">黑客开户软件库</a> 
-   </div> 
-   <div id="v191" class="card"> 
-    <a id="v192" href="https://wwp.lanzoup.com/i64AE30ulvri">跑现工具</a> 
-   </div> 
-  </div> 
-  <div id="v193" class="gnlieb"> 
-   <div id="v194" class="card"> 
-    <a id="v195" href="https://pan.xunlei.com/s/VOKJzJoZERHZjPW12r3ZBgJ5A1?pwd=kti8#">离别黑猫社工</a> 
-   </div> 
-   <div id="v196" class="card"> 
-    <a id="v197" href="https://www.123865.com/s/PkLtjv-cqMb">开户魔盒</a> 
-   </div> 
-  </div> 
-  <div id="v198" class="gnlieb"> 
-   <div id="v199" class="card"> 
-    <a id="v200" href="https://www.123865.com/s/PkLtjv-bqMb">NL社工</a> 
-   </div> 
-   <div id="v201" class="card"> 
-    <a id="v202" href="https://www.123865.com/s/PkLtjv-eqMb">秋霜社工</a> 
-   </div> 
-  </div> 
-  <div id="v203" class="gnlieb"> 
-   <div id="v204" class="card"> 
-    <a id="v205" href="https://wwp.lanzoup.com/iT20T30ulwuh">实用社工(新)</a> 
-   </div> 
-   <div id="v206" class="card"> 
-    <a id="v207" href="https://pan.xunlei.com/s/VOKK-KvPICFQ-QvijNke07CqA1?pwd=kiim#">kk社工</a> 
-   </div> 
-  </div> 
-  <div id="v208" class="gnlieb"> 
-   <div id="v209" class="card"> 
-    <a id="v210" href="https://www.123865.com/s/PkLtjv-REFb">锁机生成器</a> 
-   </div> 
-   <div id="v211" class="card"> 
-    <a id="v212" href="https://pan.xunlei.com/s/VOKJzrqipI7HyrJll7itYRozA1?pwd=xyyg#">短信测压</a> 
-   </div> 
-  </div> 
-  <div id="v213" class="gnlieb"> 
-   <div id="v214" class="card"> 
-    <a id="v215" href="https://azheds.com/zyj/">照妖镜(新)</a> 
-   </div> 
-   <div id="v216" class="card"> 
-    <a id="v217" href="https://xjie.lanzouu.com/b04whscji">黑科技库大全</a> 
-   </div> 
-  </div> <h2>软件库在线使用<h2>
-  <div id="v218" class="gnlieb"> 
-   <div id="v219" class="card"> 
-    <a id="v220" href="66">极客软件库</a> 
-   </div> 
-   <div id="v221" class="card"> 
-    <a id="v222" href="6v">泽轩软件库</a> 
-   </div> 
-  </div> 
-  <div id="v223" class="gnlieb"> 
-   <div id="v224" class="card"> 
-    <a id="v225" href="8b">初凉软件库高级版</a> 
-   </div> 
-   <div id="v226" class="card"> 
-    <a id="v227" href="78">海盒软件库</a> 
-   </div> 
-  </div> 
-  <div id="v228" class="gnlieb"> 
-   <div id="v229" class="card"> 
-    <a id="v230" href="7o">初凉软件库Pro</a> 
-   </div> 
-   <div id="v231" class="card"> 
-    <a id="v232" href="smr">神秘人软件库</a> 
-   </div> 
-   
-  </div>
-     <div class="gnlieb">
-		<div class="card">
-			<a href="sz">乐于软件库收费版</a>
-		</div>
-		<div class="card">
-			<a href="lz">乐于软件库免费版</a>
-		</div>
-  </div>
-  
-    <div class="gnlieb">
-		<div class="card">
-			<a href="lzfxb">乐于软件库分享版</a>
-		</div>
-		<div class="card">
-			<a href="ua/11">小凯软件库</a>
-		</div>
-  </div>
-  
-    <div class="gnlieb">
-		<div class="card">
-			<a href="uv/11">羽雫软件库</a>
-		</div>
-		<div class="card">
-			<a href="jc">江辞软件库</a>
-		</div>
-  </div>
-  
-     <div class="gnlieb">
-		<div class="card">
-			<a href="tg">太极软件库</a>
-		</div>
-		<div class="card">
-			<a href="91">学习资料软件库</a>
-		</div>
-  </div>
-		
-	  <div class="gnlieb">
-		<div class="card">
-			<a href="smcc">车车软件库</a>
-		</div>
-		<div class="card">
-			<a href="https://wwtg.lanzouo.com/s/fdas">精品学习资料</a>
-		</div>
-  </div>
-  	
-  	  <div class="gnlieb">
-		<div class="card">
-			<a href="http://250805.0yl.cc/download/download.html">幺蓝软件库</a>
-		</div>
-		<div class="card">
-			<a href="https://www.123684.com/s/mVxFTd-Mkeeh">chip软件库</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="wg">无感软件库</a>
-		</div>
-		<div class="card">
-			<a href="https://lanzouy.com/b00efg3c1i">子欲软件库</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://lanzouy.com/b01tpiah3a">学习资料大全</a>
-		</div>
-		<div class="card">
-			<a href="https://lanzouy.com/s/ccdd">小陈软件库</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://qjrjk.lanzoui.com/s/qjrjkj">棋迹软件库</a>
-		</div>
-		<div class="card">
-			<a href="index.html">初心工具箱</a>
-		</div>
-  </div>
-  
-  </div>
-  </div> <h2>逆向<h2>
-  <div id="v233" class="gnlieb"> 
-   <div id="v234" class="card"> 
-    <a id="v235" href="https://www.123865.com/s/PkLtjv-rfwb">逆向必备工具</a> 
-   </div> 
-   <div id="v236" class="card"> 
-    <a id="v237" href="https://wwwz.qyshare.com/s/igyd4v">iapp破解版</a> 
-   </div> 
-  </div> <h2>禁区<h2>
-  <div id="v238" class="gnlieb"> 
-   <div id="v239" class="card"> 
-    <a id="v240" href="https://wwp.lanzoup.com/iHTL02vb8kkd">纸飞机.新</a> 
-   </div> 
-   <div id="v241" class="card"> 
-    <a id="v242" href="https://wwwx.qyshare.com/s/v6myiq">旧版推特</a> 
-   </div> 
-  </div> 
-  <div id="v243" class="gnlieb"> 
-   <div id="v244" class="card"> 
-    <a id="v245" href="https://www.tesicn.com/hongzhaji/index.php">短信轰炸</a> 
-   </div> 
-   <div id="v246" class="card"> 
-    <a id="v247" href="https://wwwx.qyshare.com/s/2rz8gi">绿茶VPN</a> 
-   </div> 
-  </div> <h2>学习区<h2>
-  <div id="v248" class="gnlieb"> 
-   <div id="v249" class="card"> 
-    <a id="v250" href="https://wwxl.lanzoul.com/b009h9ruaj">学习资料大全</a> 
-   </div> 
-   <div id="v251" class="card"> 
-    <a id="v252" href="91">独家学习资料库</a> 
-   </div> 
-  </div> <h2>其他游戏辅助<h2>
-  <div id="v253" class="gnlieb"> 
-   <div id="v254" class="card"> 
-    <a id="v255" href="https://www.123684.com/s/PkLtjv-BPgb">觉醒次神破解版</a> 
-   </div>
-   <div id="v256" class="card"> 
-    <a id="v257" href="https://wwp.lanzoup.com/i46WG30xdoqf">三角洲行动</a> 
-   </div> 
-  </div> 
-  <div id="v258" class="gnlieb"> 
-   <div id="v259" class="card"> 
-    <a id="v260" href="https://drive.uc.cn/s/c1f71a922ac34?public=1
-">破解资源大全1</a> 
-   </div> 
-   <div id="v261" class="card"> 
-    <a id="v262" href="https://www.123865.com/s/OndSjv-F4Vwd">九九科技大全</a> 
-   </div> 
-  </div> 
-  <div id="v263" class="gnlieb"> 
-   <div id="v264" class="card"> 
-    <a id="v265" href="https://www.123865.com/s/PkLtjv-gPgb">暗区突围破解版(私服)</a> 
-   </div> 
-   <div id="v266" class="card"> 
-    <a id="v267" href="https://www.123865.com/s/PkLtjv-OPgb">迷你枪战</a> 
-   </div> 
-  </div> 
-  <div id="v268" class="gnlieb"> 
-   <div id="v269" class="card"> 
-    <a id="v270" href="https://www.123865.com/s/PkLtjv-RPgb">我的世界矿透</a> 
-   </div> 
-   <div id="v271" class="card"> 
-    <a id="v272" href="https://wwxl.lanzoul.com/b009h9rpxc">火影忍者</a> 
-   </div> 
-  </div> <h2>APK加固<h2>
-  <div id="v273" class="gnlieb"> 
-   <div id="v274" class="card"> 
-    <a id="v275" href="https://jiagu.360.cn">360加固</a> 
-   </div> 
-   <div id="v276" class="card"> 
-    <a id="v277" href="https://dev.bangcle.com">梆梆加固</a> 
-   </div> 
-  </div> 
-  <div id="v278" class="gnlieb"> 
-   <div id="v279" class="card"> 
-    <a id="v280" href="https://www.ijiami.cn/">爱加密</a> 
-   </div> 
-   <div id="v281" class="card"> 
-    <a id="v282" href="https://wwp.lanzoup.com/iD3HY30xhxtg">各大加固免费使用</a> 
-   </div> 
-  </div> <h2>实用工具<h2>
-  <div id="v283" class="gnlieb"> 
-   <div id="v284" class="card"> 
-    <a id="v285" href="https://blackace.app/?src=inject&v=2">网页转应用</a> 
-   </div> 
-   <div id="v286" class="card"> 
-    <a id="v287" href="https://www.123865.com/s/PkLtjv-FPgb">音乐播放器(游戏必备)</a> 
-   </div> 
-  </div> 
-  <div id="v288" class="gnlieb"> 
-   <div id="v289" class="card"> 
-    <a id="v290" href="https://m.bilibili.com/">b站</a> 
-   </div> 
-   <div id="v291" class="card"> 
-    <a id="v292" href="http://txckk.kkcnm.com/admin/">kk偷相册</a> 
-   </div> 
-  </div> 
-  <div id="v293" class="gnlieb"> 
-   <div id="v294" class="card"> 
-    <a id="v295" href="https://pan.jl8.top/">图转链接</a> 
-   </div> 
-   <div id="v296" class="card"> 
-    <a id="v297" href="https://www.uugai.com/">LOGO设计</a> 
-   </div> 
-  </div> 
-  <div id="v298" class="gnlieb"> 
-   <div id="v299" class="card"> 
-    <a id="v300" href="http://fengjiufk.xyz/4399-account-system/">4399小白号</a> 
-   </div> 
-   <div id="v301" class="card"> 
-    <a id="v302" href="https://www.freereceivesms.com">无限手机号</a> 
-   </div> 
-  </div> 
-  <div id="v303" class="gnlieb"> 
-   <div id="v304" class="card"> 
-    <a id="v305" href="https://daga.cc/yin/">VIP视频解析</a> 
-   </div> 
-   <div id="v306" class="card"> 
-    <a id="v307" href="http://tool.mkblog.cn/">工具箱</a> 
-   </div> 
-  </div> 
-    <div id="v308" class="gnlieb"> 
-   <div id="v309" class="card"> 
-    <a id="v310" href="https://uutool.cn/">工具箱2</a> 
-   </div> 
-   <div id="v311" class="card"> 
-    <a id="v312" href="https://m.liantu.com/">二维码生成器</a> 
-   </div> 
-   </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://www.dute.org/about">工具箱3</a>
-		</div>
-		<div class="card">
-			<a href="https://ai-kit.cn/">工具箱4</a>
-		</div>
-  </div>
-   
-     <div class="gnlieb">
-		<div class="card">
-			<a href="https://www.sgdiy.cn/">工具箱5</a>
-		</div>
-		<div class="card">
-			<a href="https://www.tool12.com/">工具箱6</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="http://www.xsdggw.cn/">工具箱7</a>
-		</div>
-		<div class="card">
-			<a href="https://www.toolbon.com/">工具箱8</a>
-		</div>
-  </div>
-  
-     <div class="gnlieb">
-		<div class="card">
-			<a href="https://tools.miku.ac/">工具箱9</a>
-		</div>
-		<div class="card">
-			<a href="https://toolwa.com/">工具箱10</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="http://tool.mkblog.cn/">工具箱11</a>
-		</div>
-		<div class="card">
-			<a href="https://www.qiwangming.com/">工具箱12</a>
-		</div>
-  </div>
-  
-     <div class="gnlieb">
-		<div class="card">
-			<a href="https://www.iamwawa.cn/">工具箱13</a>
-		</div>
-		<div class="card">
-			<a href="https://tool.caoniang.com">工具箱总网站</a>
-		</div>
-  </div>
-  
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://coderschool.cn/tool/index.php/Index/radix">多进制转换</a>
-		</div>
-		<div class="card">
-			<a href="https://bj.96weixin.com/tools/symbol">特殊符号生成</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://www.gseen.com/online_tools/QRcode/qr">二维码生成</a>
-		</div>
-		<div class="card">
-			<a href="https://www.logoko.com.cn/">logo生成</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://api.toubiec.cn/wyapi.html">网易云音乐解析</a>
-		</div>
-		<div class="card">
-			<a href="https://www.oicq88.com/">QQ网名生成</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://www.toolzl.com/tools/getHttpData.html">网站取源</a>
-		</div>
-		<div class="card">
-			<a href="http://www.hacku.cn/i/DDoS">DDos攻击</a>
-		</div>
-  </div>
-  
-  </div> 
-  <div id="v313" class="gnlieb"> 
-   <div id="v314" class="card"> 
-    <a id="v315" href="http://www.hacku.cn/i/DDoS">DDos攻击</a> 
-   </div> 
-   <div id="v316" class="card"> 
-    <a id="v317" href="https://www.toolzl.com/">网页取源</a> 
-   </div> 
-  </div> 
-  <div id="v318" class="gnlieb"> 
-   <div id="v319" class="card"> 
-    <a id="v320" href="https://blackace.app/">链接转应用</a> 
-   </div> 
-   <div id="v321" class="card"> 
-    <a id="v322" href="http://suo.im/">链接缩短</a> 
-   </div> 
-   
-   </div><h2>小游戏<h2>
-     <div class="gnlieb">
-		<div class="card">
-			<a href="https://game.moe.ms/">植物大战僵尸</a>
-		</div>
-		<div class="card">
-			<a href="http://guozhivip.com/fun/wzq/">五子棋</a>
-		</div>
-  </div>
-    <div class="gnlieb">
-		<div class="card">
-			<a href="https://www.3699.cc/p/11273.htm">井字棋</a>
-		</div>
-		<div class="card">
-			<a href="http://m.19x19.com/engine/play/set">围棋</a>
-		</div>
-  </div>
-  
-     <div class="gnlieb">
-		<div class="card">
-			<a href="https://www.playok.com/zh/ludo/">飞行棋</a>
-		</div>
-		<div class="card">
-			<a href="https://poki.com/zh">小游戏大全</a>
-		</div>
-  </div>
-  
-   
-   
-  </div> <h2>其他内容<h2>
-<div id="v323" class="gnlieb"> 
-   <div id="v324" class="card"> 
-    <a id="v325" href="https://wwr.lanzoui.com/b00yactkna">王者荣耀改文件</a> 
-   </div> 
-   <div id="v326" class="card"> 
-    <a id="v327" href=https://wwr.lanzoui.com/b00yactkmj">和平改文件(新)</a> 
-   </div> 
-  </div> 
-  <div id="v328" class="gnlieb"> 
-   <div id="v329" class="card"> 
-    <a id="v330" href="https://wwr.lanzoui.com/b00yactiaf">香肠派对改文件</a> 
-   </div> 
-   <div id="v331" class="card"> 
-    <a id="v332" href="https://drive.uc.cn/s/952fa6c484de4?public=1">游戏破解</a> 
-   </div> 
-  </div> 
-  <div id="v333" class="gnlieb"> 
-   <div id="v334" class="card"> 
-    <a id="v335" href="https://www.kdocs.cn/l/cdDM9yOpMvWb">破解软件大全2</a> 
-   </div> 
-   <div id="v336" class="card"> 
-    <a id="v337" href="https://www.123684.com/s/Q9pFjv-nNc4H">小游戏科技</a> 
-   </div> 
-   </div> 
-  <div id="v378" class="gnlieb"> 
-   <div id="v379" class="card"> 
-    <a id="v380" href="https://www.123865.com/s/PkLtjv-ncgb">表白墙</a> 
-   </div> 
-   <div id="v381" class="card"> 
-    <a id="v382" href="https://wwp.lanzoup.com/ixFL12vb4syb">Q绑查询</a> 
-   </div> 
-  </div> 
-  <div id="v383" class="gnlieb"> 
-   <div id="v384" class="card"> 
-    <a id="v385" href="https://wwp.lanzoup.com/iGK2Q2vb72kj">户籍猎手</a> 
-   </div> 
-   <div id="v386" class="card"> 
-    <a id="v387" href="https://wwp.lanzoup.com/iSTBR2vb7g1e">网页攻击</a> 
-   </div> 
-  </div> 
-  <div id="v388" class="gnlieb"> 
-   <div id="v389" class="card"> 
-    <a id="v390" href="https://wwwx.qyshare.com/s/dgboez">黄鸟抓包</a> 
-   </div> 
-   <div id="v391" class="card"> 
-    <a id="v392" href="https://wwp.lanzoup.com/i11RK2vb80kd">去水印</a> 
-   </div> 
-  </div> 
-  <div id="v393" class="gnlieb"> 
-   <div id="v394" class="card"> 
-    <a id="v395" href="https://www.123pan.cn/s/WTCDVv-hG1WA.html">各大游戏改文件</a> 
-   </div> 
-   <div id="v396" class="card"> 
-    <a id="v397" href="https://wwwx.qyshare.com/s/bfjpow">王牌战争</a> 
-   </div> 
-  </div> 
-  <div id="v398" class="gnlieb"> 
-   <div id="v399" class="card"> 
-    <a id="v400" href="https://007cc.lanzouu.com/i8NBr302qbtc?sec=BDVRMQFpUzNTMQNgVDdTYwdkV2ZefQExAzIDMVE4U2FXblM0CClSNFEzVDFQM1FhAGMGNFA7UWFVLlI3XWJTawQ2UWQBblNiUzcDN1Q3U2EHO1czXjcBZgM9AzVRbFNrV2dTNwhlUjFRNFQ0UD1RNAA_aBmBQPFEyVWY_c">MotionNinja Pro破解</a> 
-   </div> 
-   <div id="v401" class="card"> 
-    <a id="v402" href="https://wwp.lanzoup.com/i3WO62vb84kh">毒舌加速器</a> 
-   </div> 
-  </div> 
-  <div id="v403" class="gnlieb"> 
-   <div id="v404" class="card"> 
-    <a id="v405" href="https://wwp.lanzoup.com/iGJLV2vbbsba">猎魔多合一</a> 
-   </div> 
-   <div id="v406" class="card"> 
-    <a id="v407" href="https://link3.cc/bychuxin">点我查看最新内容</a> 
- </div> 
-  </div> 
-  
-  
-  
-  
-  
-  
-  
-  
-  
   <script>
-                // 添加点击动画
-                btn.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    btn.style.transform = 'scale(1)';
-                }, 200);
+        const { jsPDF } = window.jspdf;
+        let selectedImages = [];
+        
+        // 获取DOM元素
+        const dropArea = document.getElementById('dropArea');
+        const imageInput = document.getElementById('imageInput');
+        const imageList = document.getElementById('imageList');
+        const fileCount = document.getElementById('fileCount');
+        const convertBtn = document.getElementById('convertBtn');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const status = document.getElementById('status');
+        
+        // 改进的数字提取和排序函数
+        function extractNumber(filename) {
+            // 匹配文件名中的数字部分
+            const match = filename.match(/(\d+)/);
+            return match ? parseInt(match[1], 10) : 0;
+        }
+        
+        // 改进的文件名排序函数
+        function sortFiles(files) {
+            return files.sort((a, b) => {
+                const numA = extractNumber(a.name);
+                const numB = extractNumber(b.name);
+                
+                // 如果两个文件名都包含数字，按数字排序
+                if (numA > 0 && numB > 0) {
+                    return numA - numB;
+                }
+                
+                // 否则按文件名自然排序
+                return a.name.localeCompare(b.name, undefined, { numeric: true });
             });
+        }
+        
+        // 更新文件列表显示
+        function updateFileList() {
+            if (selectedImages.length === 0) {
+                imageList.style.display = 'none';
+                fileCount.textContent = '';
+                return;
+            }
+            
+            imageList.style.display = 'block';
+            fileCount.textContent = `已选择 ${selectedImages.length} 个图片文件`;
+            
+            // 清空现有列表
+            imageList.innerHTML = '';
+            
+            // 添加图片项
+            selectedImages.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = 'image-item';
+                
+                const img = document.createElement('img');
+                img.className = 'image-preview';
+                img.src = URL.createObjectURL(file);
+                
+                const info = document.createElement('div');
+                info.className = 'image-info';
+                
+                const name = document.createElement('div');
+                name.className = 'image-name';
+                name.textContent = file.name;
+                
+                const size = document.createElement('div');
+                size.className = 'image-size';
+                size.textContent = formatFileSize(file.size);
+                
+                info.appendChild(name);
+                info.appendChild(size);
+                
+                const handle = document.createElement('div');
+                handle.className = 'drag-handle';
+                handle.innerHTML = '⋮⋮';
+                handle.setAttribute('draggable', 'true');
+                handle.dataset.index = index;
+                
+                // 拖拽排序功能
+                handle.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', index);
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                
+                handle.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                });
+                
+                handle.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                    const toIndex = parseInt(e.target.closest('.drag-handle').dataset.index);
+                    
+                    if (fromIndex !== toIndex) {
+                        // 移动项目
+                        const movedItem = selectedImages.splice(fromIndex, 1)[0];
+                        selectedImages.splice(toIndex, 0, movedItem);
+                        
+                        // 更新列表
+                        updateFileList();
+                    }
+                });
+                
+                item.appendChild(img);
+                item.appendChild(info);
+                item.appendChild(handle);
+                
+                imageList.appendChild(item);
+            });
+        }
+        
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 文件选择处理
+        imageInput.addEventListener('change', function(e) {
+            handleFiles(e.target.files);
         });
-    </script>
-</body>
+        
+        // 拖拽功能
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('dragover');
+        });
+        
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('dragover');
+        });
+        
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.items) {
+                // 使用 DataTransferItemList 接口来访问文件
+                const items = e.dataTransfer.items;
+                const files = [];
+                
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].kind === 'file') {
+                        const file = items[i].getAsFile();
+                        if (file.type.startsWith('image/')) {
+                            files.push(file);
+                        }
+                    }
+                }
+                
+                handleFiles(files);
+            } else {
+                // 使用 DataTransfer 接口来访问文件
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+        
+        // 处理选择的文件
+        function handleFiles(files) {
+            const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+            
+            if (imageFiles.length === 0) {
+                status.textContent = '未找到图片文件，请选择包含图片的文件夹';
+                status.className = 'status error';
+                return;
+            }
+            
+            // 按数字ID排序
+            selectedImages = sortFiles(imageFiles);
+            
+            // 更新UI
+            updateFileList();
+            convertBtn.disabled = false;
+            status.textContent = `已选择 ${selectedImages.length} 张图片，按文件名排序完成`;
+            status.className = 'status';
+        }
+        
+        // 清空选择
+        function clearSelection() {
+            selectedImages = [];
+            imageInput.value = '';
+            updateFileList();
+            convertBtn.disabled = true;
+            progressFill.style.width = '0%';
+            progressText.textContent = '准备就绪';
+            status.textContent = '请选择包含图片的文件夹';
+            status.className = 'status';
+        }
+        
+        // 开始转换
+        async function startConversion() {
+            if (selectedImages.length === 0) {
+                status.textContent = '请先选择图片文件！';
+                status.className = 'status error';
+                return;
+            }
+            
+            const pdf = new jsPDF();
+            convertBtn.disabled = true;
+            status.textContent = '开始转换...';
+            status.className = 'status';
+            
+            try {
+                for (let i = 0; i < selectedImages.length; i++) {
+                    const file = selectedImages[i];
+                    progressText.textContent = `处理中: ${file.name} (${i + 1}/${selectedImages.length})`;
+                    
+                    // 更新进度条
+                    const progress = ((i + 1) / selectedImages.length) * 100;
+                    progressFill.style.width = `${progress}%`;
+                    
+                    const img = new Image();
+                    const imgUrl = URL.createObjectURL(file);
+                    
+                    await new Promise((resolve, reject) => {
+                        img.onload = function() {
+                            try {
+                                if (i > 0) pdf.addPage();
+                                
+                                const imgWidth = pdf.internal.pageSize.getWidth();
+                                const imgHeight = (img.height * imgWidth) / img.width;
+                                
+                                pdf.addImage(img, 'JPEG', 0, 0, imgWidth, imgHeight);
+                                URL.revokeObjectURL(imgUrl);
+                                resolve();
+                            } catch (error) {
+                                reject(error);
+                            }
+                        };
+                        
+                        img.onerror = function() {
+                            URL.revokeObjectURL(imgUrl);
+                            reject(new Error(`无法加载图片: ${file.name}`));
+                        };
+                        
+                        img.src = imgUrl;
+                    });
+                }
+                
+                // 保存PDF
+                pdf.save('converted_book.pdf');
+                
+                // 更新状态
+                status.textContent = `转换完成！共处理 ${selectedImages.length} 张图片`;
+                status.className = 'status success';
+                progressText.textContent = '转换完成';
+                
+            } catch (error) {
+                console.error('转换过程中出错:', error);
+                status.textContent = `转换失败: ${error.message}`;
+                status.className = 'status error';
+                progressText.textContent = '转换失败';
+            } finally {
+                convertBtn.disabled = false;
+            }
+        }
+    </script> 
+ </body>
 </html>
