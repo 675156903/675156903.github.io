@@ -1,520 +1,716 @@
+<!DOCTYPE html>
 <html lang="zh-CN">
-<head> 
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>图片转PDF神器</title> 
-  <!-- 添加jsPDF库的CDN引用 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <style>
-        :root {
-            --primary-color: #4a6ee0;
-            --primary-dark: #3a5ac8;
-            --secondary-color: #f0f4ff;
-            --text-color: #333;
-            --light-gray: #f5f5f5;
-            --border-color: #ddd;
-            --success-color: #28a745;
-            --error-color: #dc3545;
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小学语文作业自动生成系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E63946',
+                        secondary: '#457B9D',
+                        accent: '#1D3557',
+                        light: '#F1FAEE',
+                        neutral: '#A8DADC'
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            }
+            .card-hover {
+                transition: all 0.2s ease;
+            }
+            .card-hover:hover {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            }
+            
+            /* 移动端优化 */
+            @media (max-width: 640px) {
+                .question-flex {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .question-flex > div {
+                    margin-top: 0.5rem;
+                }
+                .question-options {
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                }
+                .question-input {
+                    width: 100%;
+                }
+            }
+            
+            /* 打印样式 */
+            @media print {
+                header, main > div > div:first-child, #printBtn {
+                    display: none !important;
+                }
+                
+                body, .container, #homeworkContent {
+                    background: white !important;
+                    box-shadow: none !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+                
+                .bg-white {
+                    border: none !important;
+                    box-shadow: none !important;
+                }
+                
+                footer {
+                    position: fixed;
+                    bottom: 0;
+                    width: 100%;
+                    font-size: 12px;
+                }
+                
+                #questionsArea {
+                    font-size: 16px;
+                    line-height: 2;
+                }
+            }
         }
         
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
+        /* 全局基础样式 */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: #f9f9f9;
-            padding: 20px;
+            @apply bg-light text-accent min-h-screen flex flex-col;
+            -webkit-font-smoothing: antialiased;
         }
         
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+        /* 头部区域 - 简化手机端显示 */
+        header {
+            @apply bg-gradient-to-r from-primary to-secondary text-white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--primary-color);
+        /* 主要内容区 - 调整间距 */
+        main {
+            @apply flex-grow container mx-auto px-4 py-4 md:py-8;
         }
         
-        .upload-area {
-            border: 2px dashed var(--border-color);
-            border-radius: 8px;
-            padding: 40px 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            background-color: var(--secondary-color);
-            transition: all 0.3s;
-            cursor: pointer;
+        /* 卡片样式 - 简化效果 */
+        .card {
+            @apply bg-white rounded-lg shadow-sm p-4 md:p-6 card-hover;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
         
-        .upload-area:hover, .upload-area.dragover {
-            border-color: var(--primary-color);
-            background-color: #e8eeff;
+        /* 表单元素 - 调整手机端大小 */
+        input, select {
+            @apply w-full p-2 md:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary;
+            transition: all 0.2s ease;
         }
         
-        .upload-icon {
-            font-size: 48px;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-        
-        .file-input {
-            display: none;
-        }
-        
+        /* 按钮样式 - 调整手机端大小 */
         .btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background-color 0.3s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            @apply px-3 md:px-4 py-2 md:py-3 rounded-md font-medium transition-colors;
         }
-        
-        .btn:hover {
-            background-color: var(--primary-dark);
+        .btn-primary {
+            @apply bg-primary hover:bg-primary/90 text-white;
         }
-        
-        .btn:disabled {
-            background-color: #a0a0a0;
-            cursor: not-allowed;
-        }
-        
         .btn-secondary {
-            background-color: #6c757d;
+            @apply bg-secondary hover:bg-secondary/90 text-white;
+        }
+        .btn-upload {
+            @apply bg-gray-100 hover:bg-gray-200 text-gray-700;
         }
         
-        .btn-secondary:hover {
-            background-color: #5a6268;
+        /* 上传区域样式 */
+        .upload-area {
+            @apply border-2 border-dashed border-gray-400 rounded-md p-4 text-center cursor-pointer hover:border-primary transition-colors;
+        }
+        .upload-area.drag-over {
+            @apply border-primary bg-primary/5;
+        }
+        .upload-info {
+            @apply text-sm text-gray-500 mt-2;
         }
         
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
+        /* 题目相关样式 - 加深边框颜色使其更明显 */
+        .question-options div,
+        .question-input,
+        .question-flex .border-b,
+        .question-flex .border {
+            border-color: #6B7280 !important; /* 深灰色边框，更加明显 */
         }
-        
-        .progress-container {
-            margin: 30px 0;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background-color: var(--light-gray);
-            border-radius: 5px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background-color: var(--primary-color);
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .status {
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 20px;
-            background-color: var(--light-gray);
-            min-height: 60px;
-        }
-        
-        .status.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        
-        .status.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        .image-list {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            margin-top: 20px;
-            display: none;
-        }
-        
-        .image-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .image-item:last-child {
-            border-bottom: none;
-        }
-        
-        .image-preview {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-right: 15px;
-        }
-        
-        .image-info {
-            flex-grow: 1;
-        }
-        
-        .image-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .image-size {
-            font-size: 0.85em;
-            color: #666;
-        }
-        
-        .drag-handle {
-            cursor: move;
-            padding: 5px;
-            color: #888;
-        }
-        
-        .file-count {
-            margin-top: 10px;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-            
-            .controls {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
-        }
-    </style> 
- </head> 
- <body> 
-  <div class="container"> 
-   <h1>图片转PDF神器</h1> 
-   <div class="upload-area" id="dropArea"> 
-    <div class="upload-icon">
-     📁
-    </div> 
-    <h3>拖放图片文件到此处或点击选择文件夹</h3> 
-    <p>支持常见图片格式（JPG, PNG, GIF, BMP等）</p> 
-    <input type="file" id="imageInput" class="file-input" multiple accept="image/*"> 
-    <button class="btn" onclick="document.getElementById('imageInput').click()"> <span>选择图片</span> </button> 
-   </div> 
-   <div class="file-count" id="fileCount"></div> 
-   <div class="image-list" id="imageList"></div> 
-   <div class="controls"> 
-    <button class="btn" id="convertBtn" onclick="startConversion()" disabled> <span>开始转换</span> </button> 
-    <button class="btn btn-secondary" onclick="clearSelection()"> <span>清空选择</span> </button> 
-   </div> 
-   <div class="progress-container"> 
-    <div class="progress-bar"> 
-     <div class="progress-fill" id="progressFill"></div> 
-    </div> 
-    <div id="progressText">
-     准备就绪
-    </div> 
-   </div> 
-   <div class="status" id="status">
-    请选择图片文件或将图片拖放到上方区域
-   </div> 
-  </div> 
-  <script>
-        // 使用jsPDF库
-        const { jsPDF } = window.jspdf;
-        let selectedImages = [];
-        
-        // 获取DOM元素
-        const dropArea = document.getElementById('dropArea');
-        const imageInput = document.getElementById('imageInput');
-        const imageList = document.getElementById('imageList');
-        const fileCount = document.getElementById('fileCount');
-        const convertBtn = document.getElementById('convertBtn');
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
-        const status = document.getElementById('status');
-        
-        // 改进的数字提取和排序函数
-        function extractNumber(filename) {
-            // 匹配文件名中的数字部分
-            const match = filename.match(/(\d+)/);
-            return match ? parseInt(match[1], 10) : 0;
-        }
-        
-        // 改进的文件名排序函数
-        function sortFiles(files) {
-            return files.sort((a, b) => {
-                const numA = extractNumber(a.name);
-                const numB = extractNumber(b.name);
-                
-                // 如果两个文件名都包含数字，按数字排序
-                if (numA > 0 && numB > 0) {
-                    return numA - numB;
-                }
-                
-                // 否则按文件名自然排序
-                return a.name.localeCompare(b.name, undefined, { numeric: true });
-            });
-        }
-        
-        // 更新文件列表显示
-        function updateFileList() {
-            if (selectedImages.length === 0) {
-                imageList.style.display = 'none';
-                fileCount.textContent = '';
-                return;
-            }
-            
-            imageList.style.display = 'block';
-            fileCount.textContent = `已选择 ${selectedImages.length} 个图片文件`;
-            
-            // 清空现有列表
-            imageList.innerHTML = '';
-            
-            // 添加图片项
-            selectedImages.forEach((file, index) => {
-                const item = document.createElement('div');
-                item.className = 'image-item';
-                
-                const img = document.createElement('img');
-                img.className = 'image-preview';
-                img.src = URL.createObjectURL(file);
-                
-                const info = document.createElement('div');
-                info.className = 'image-info';
-                
-                const name = document.createElement('div');
-                name.className = 'image-name';
-                name.textContent = file.name;
-                
-                const size = document.createElement('div');
-                size.className = 'image-size';
-                size.textContent = formatFileSize(file.size);
-                
-                info.appendChild(name);
-                info.appendChild(size);
-                
-                const handle = document.createElement('div');
-                handle.className = 'drag-handle';
-                handle.innerHTML = '⋮⋮';
-                handle.setAttribute('draggable', 'true');
-                handle.dataset.index = index;
-                
-                // 拖拽排序功能
-                handle.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('text/plain', index);
-                    e.dataTransfer.effectAllowed = 'move';
-                });
-                
-                handle.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                });
-                
-                handle.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
-                    const toIndex = parseInt(e.target.closest('.drag-handle').dataset.index);
+    </style>
+</head>
+<body>
+    <!-- 头部区域 - 简化手机端标题 -->
+    <header>
+        <div class="container mx-auto px-4 py-4 md:py-6">
+            <div class="text-center">
+                <h1 class="text-xl md:text-3xl font-bold mb-1 md:mb-2">小学语文作业自动生成系统</h1>
+                <p class="text-white/90 text-sm md:text-base max-w-2xl mx-auto">轻松生成各种语文作业，支持打印和自定义文字库</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区 - 调整网格布局 -->
+    <main>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            <!-- 左侧设置面板 -->
+            <div class="lg:col-span-1">
+                <div class="card">
+                    <h2 class="text-lg md:text-xl font-semibold mb-3 md:mb-4 flex items-center">
+                        <i class="fa fa-cog text-primary mr-2"></i> 作业设置
+                    </h2>
                     
-                    if (fromIndex !== toIndex) {
-                        // 移动项目
-                        const movedItem = selectedImages.splice(fromIndex, 1)[0];
-                        selectedImages.splice(toIndex, 0, movedItem);
+                    <form id="homeworkSettings" class="space-y-3 md:space-y-4">
+                        <!-- 文字库上传区域 -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1 md:mb-2">
+                                <label class="block text-gray-700 font-medium">
+                                    <i class="fa fa-upload text-primary mr-1"></i> 自定义文字库上传
+                                </label>
+                                <a href="https://www.doubao.com/thread/w3626b79cce003525" target="_blank" class="text-xs text-primary hover:underline">
+                                    如何生成文字库?
+                                </a>
+                            </div>
+                            <div id="uploadArea" class="upload-area">
+                                <input type="file" id="libraryFile" accept=".json" class="hidden">
+                                <i class="fa fa-file-text-o text-2xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-600">点击或拖拽JSON文件到此处上传</p>
+                                <p class="upload-info" id="uploadStatus">系统自带生字库，也支持自定义汉字、拼音、词语和反义词库（最大1MB）</p>
+                            </div>
+                            <button type="button" id="clearUploadBtn" class="mt-2 text-sm text-gray-500 hover:text-primary">
+                                <i class="fa fa-trash-o mr-1"></i> 清除已上传的文字库
+                            </button>
+                        </div>
                         
-                        // 更新列表
-                        updateFileList();
-                    }
-                });
-                
-                item.appendChild(img);
-                item.appendChild(info);
-                item.appendChild(handle);
-                
-                imageList.appendChild(item);
-            });
-        }
-        
-        // 格式化文件大小
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
+                        <!-- 练习类型 - 调整手机端间距 -->
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1 md:mb-2">练习类型</label>
+                            <div class="space-y-1 md:space-y-2">
+                                <label class="flex items-center p-2 md:p-3 border border-gray-300 rounded-md cursor-pointer hover:border-primary">
+                                    <input type="checkbox" name="exerciseType" value="pinyin" checked class="mr-2 text-primary">
+                                    <span>拼音练习</span>
+                                </label>
+                                <label class="flex items-center p-2 md:p-3 border border-gray-300 rounded-md cursor-pointer hover:border-primary">
+                                    <input type="checkbox" name="exerciseType" value="character" checked class="mr-2 text-primary">
+                                    <span>汉字书写</span>
+                                </label>
+                                <label class="flex items-center p-2 md:p-3 border border-gray-300 rounded-md cursor-pointer hover:border-primary">
+                                    <input type="checkbox" name="exerciseType" value="word" class="mr-2 text-primary">
+                                    <span>组词练习</span>
+                                </label>
+                                <label class="flex items-center p-2 md:p-3 border border-gray-300 rounded-md cursor-pointer hover:border-primary">
+                                    <input type="checkbox" name="exerciseType" value="sentence" class="mr-2 text-primary">
+                                    <span>造句练习</span>
+                                </label>
+                                <label class="flex items-center p-2 md:p-3 border border-gray-300 rounded-md cursor-pointer hover:border-primary">
+                                    <input type="checkbox" name="exerciseType" value="antonym" class="mr-2 text-primary">
+                                    <span>反义词练习</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- 年级选择 -->
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1 md:mb-2">年级</label>
+                            <select name="grade" class="w-full">
+                                <option value="1" selected>一年级</option>
+                                <option value="2" >二年级</option>
+                                <option value="3">三年级</option>
+                                <option value="4">四年级</option>
+                                <option value="5">五年级</option>
+                                <option value="6">六年级</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 题目数量 -->
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1 md:mb-2">题目数量</label>
+                            <input type="number" name="count" value="20" min="5" max="50" class="w-full">
+                        </div>
+                        
+                        <!-- 生成按钮 -->
+                        <button type="button" id="generateBtn" class="btn btn-primary w-full">
+                            <i class="fa fa-refresh mr-2"></i> 生成作业题
+                        </button>
+                    </form>
+                </div>
+            </div>
             
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            <!-- 右侧作业展示区 -->
+            <div class="lg:col-span-2">
+                <div class="card h-full flex flex-col">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-3 md:mb-4">
+                        <h2 class="text-lg md:text-xl font-semibold mb-2 md:mb-0 flex items-center">
+                            <i class="fa fa-book text-primary mr-2"></i> 语文作业练习册
+                        </h2>
+                        <button id="printBtn" class="btn btn-secondary text-sm md:text-base">
+                            <i class="fa fa-print mr-2"></i> 打印作业
+                        </button>
+                    </div>
+                    
+                    <div id="homeworkContent" class="flex-grow">
+                        <!-- 作业标题 - 调整手机端大小 -->
+                        <div class="text-center mb-4 md:mb-6">
+                            <h3 class="text-xl md:text-2xl font-semibold mb-1 md:mb-2" id="homeworkTitle">小学语文练习作业</h3>
+                            <p class="text-gray-500 text-sm md:text-base" id="homeworkSubtitle">班级：__________ 姓名：__________ 日期：__________ 得分：__________</p>
+                        </div>
+                        
+                        <!-- 题目区域 - 调整间距和布局 -->
+                        <div id="questionsArea" class="space-y-3 md:space-y-4">
+                            <!-- 题目将通过JS动态生成 -->
+                            <div class="text-center text-gray-500 py-8">
+                                <i class="fa fa-info-circle text-2xl mb-2"></i>
+                                <p>请设置作业参数并点击"生成作业题"按钮</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 家长签字区 -->
+                        <div class="mt-6 md:mt-8 text-right text-sm md:text-base">
+                            <p>家长签字：__________</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 - 调整手机端布局 -->
+    <footer class="bg-accent text-white py-4 md:py-6 mt-6 md:mt-8 text-sm">
+        <div class="container mx-auto px-4">
+            <div class="text-center" id="copyright">
+                <div class="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-4">
+                    <p>云端资料即搜即用</p>
+                    <a href="http://www.3qpd.com/js_ku/ziliaogongxiang/" class="text-neutral hover:text-white flex items-center" target="_blank">
+                        <i class="fa fa-globe mr-1"></i> http://www.3qpd.com/js_ku/ziliaogongxiang/
+                    </a>
+                    <p class="text-gray-300">© 2025 小学语文作业自动生成系统</p>
+                </div>
+            </div>
             
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-        
-        // 文件选择处理
-        imageInput.addEventListener('change', function(e) {
-            handleFiles(e.target.files);
-        });
-        
-        // 拖拽功能
-        dropArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropArea.classList.add('dragover');
-        });
-        
-        dropArea.addEventListener('dragleave', () => {
-            dropArea.classList.remove('dragover');
-        });
-        
-        dropArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropArea.classList.remove('dragover');
-            
-            if (e.dataTransfer.items) {
-                // 使用 DataTransferItemList 接口来访问文件
-                const items = e.dataTransfer.items;
-                const files = [];
-                
-                for (let i = 0; i < items.length; i++) {
-                    if (items[i].kind === 'file') {
-                        const file = items[i].getAsFile();
-                        if (file.type.startsWith('image/')) {
-                            files.push(file);
+            <!-- 防篡改措施 -->
+            <script type="text/javascript">
+                (function() {
+                    var originalCopyright = document.getElementById('copyright').innerHTML;
+                    var copyrightElement = document.getElementById('copyright');
+                    
+                    setInterval(function() {
+                        if (copyrightElement.innerHTML !== originalCopyright) {
+                            copyrightElement.innerHTML = originalCopyright;
+                            console.warn('检测到尝试篡改版权信息的行为');
+                            copyrightElement.classList.add('bg-red-600');
+                            setTimeout(function() {
+                                copyrightElement.classList.remove('bg-red-600');
+                            }, 1000);
                         }
-                    }
-                }
-                
-                handleFiles(files);
-            } else {
-                // 使用 DataTransfer 接口来访问文件
-                handleFiles(e.dataTransfer.files);
-            }
-        });
-        
-        // 处理选择的文件
-        function handleFiles(files) {
-            const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
-            
-            if (imageFiles.length === 0) {
-                status.textContent = '未找到图片文件，请选择图片文件';
-                status.className = 'status error';
-                return;
-            }
-            
-            // 按数字ID排序
-            selectedImages = sortFiles(imageFiles);
-            
-            // 更新UI
-            updateFileList();
-            convertBtn.disabled = false;
-            status.textContent = `已选择 ${selectedImages.length} 张图片，按文件名排序完成`;
-            status.className = 'status';
-        }
-        
-        // 清空选择
-        function clearSelection() {
-            selectedImages = [];
-            imageInput.value = '';
-            updateFileList();
-            convertBtn.disabled = true;
-            progressFill.style.width = '0%';
-            progressText.textContent = '准备就绪';
-            status.textContent = '请选择图片文件或将图片拖放到上方区域';
-            status.className = 'status';
-        }
-        
-        // 开始转换
-        async function startConversion() {
-            if (selectedImages.length === 0) {
-                status.textContent = '请先选择图片文件！';
-                status.className = 'status error';
-                return;
-            }
-            
-            const pdf = new jsPDF();
-            convertBtn.disabled = true;
-            status.textContent = '开始转换...';
-            status.className = 'status';
-            
-            try {
-                for (let i = 0; i < selectedImages.length; i++) {
-                    const file = selectedImages[i];
-                    progressText.textContent = `处理中: ${file.name} (${i + 1}/${selectedImages.length})`;
+                    }, 500);
                     
-                    // 更新进度条
-                    const progress = ((i + 1) / selectedImages.length) * 100;
-                    progressFill.style.width = `${progress}%`;
-                    
-                    const img = new Image();
-                    const imgUrl = URL.createObjectURL(file);
-                    
-                    await new Promise((resolve, reject) => {
-                        img.onload = function() {
-                            try {
-                                if (i > 0) pdf.addPage();
-                                
-                                const imgWidth = pdf.internal.pageSize.getWidth() - 20;
-                                const imgHeight = (img.height * imgWidth) / img.width;
-                                
-                                // 添加图片到PDF，留10px的边距
-                                pdf.addImage(img, 'JPEG', 10, 10, imgWidth, imgHeight);
-                                URL.revokeObjectURL(imgUrl);
-                                resolve();
-                            } catch (error) {
-                                reject(error);
+                    new MutationObserver(function(mutations) {
+                        mutations.forEach(function(mutation) {
+                            if (!document.body.contains(copyrightElement)) {
+                                document.querySelector('footer').appendChild(copyrightElement);
+                                console.warn('检测到尝试删除版权信息的行为');
                             }
-                        };
-                        
-                        img.onerror = function() {
-                            URL.revokeObjectURL(imgUrl);
-                            reject(new Error(`无法加载图片: ${file.name}`));
-                        };
-                        
-                        img.src = imgUrl;
+                        });
+                    }).observe(document.body, {
+                        childList: true,
+                        subtree: true
                     });
-                }
-                
-                // 保存PDF
-                pdf.save('converted_images.pdf');
-                
-                // 更新状态
-                status.textContent = `转换完成！共处理 ${selectedImages.length} 张图片`;
-                status.className = 'status success';
-                progressText.textContent = '转换完成';
-                
-            } catch (error) {
-                console.error('转换过程中出错:', error);
-                status.textContent = `转换失败: ${error.message}`;
-                status.className = 'status error';
-                progressText.textContent = '转换失败';
-            } finally {
-                convertBtn.disabled = false;
+                })();
+            </script>
+        </div>
+    </footer>
+
+    <script>
+        // 硬编码的默认文字库 - 保留原数据
+        const defaultLibraries = {
+            // 汉字库 - 按年级分类
+            charactersByGrade: {
+                1: ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十',
+                    '天', '地', '人', '你', '我', '他', '日', '月', '水', '火',
+                    '山', '石', '田', '土', '上', '下', '左', '右', '大', '小'],
+                2: ['爸', '妈', '哥', '姐', '弟', '妹', '学', '校', '老', '师',
+                    '同', '学', '朋', '友', '前', '后', '多', '少', '来', '去',
+                    '白', '云', '风', '雨', '花', '草', '树', '木', '鸟', '虫'],
+                3: ['家', '国', '学', '习', '语', '文', '数', '学', '音', '乐',
+                    '体', '育', '美', '术', '劳', '动', '快', '乐', '开', '心',
+                    '阳', '光', '明', '亮', '黑', '夜', '春', '夏', '秋', '冬'],
+                4: ['知', '识', '道', '理', '聪', '明', '智', '慧', '思', '考',
+                    '阅', '读', '写', '作', '计', '划', '安', '排', '锻', '炼',
+                    '健', '康', '运', '动', '锻', '炼', '生', '活', '学', '习'],
+                5: ['研', '究', '探', '索', '发', '现', '创', '造', '理', '解',
+                    '体', '会', '感', '悟', '思', '想', '观', '点', '论', '证',
+                    '分', '析', '综', '合', '概', '括', '判', '断', '推', '理'],
+                6: ['博', '学', '审', '问', '慎', '思', '明', '辨', '笃', '行',
+                    '弘', '扬', '传', '承', '发', '展', '创', '新', '理', '性',
+                    '智', '慧', '洞', '察', '洞', '悉', '领', '悟', '透', '彻']
+            },
+            
+            // 拼音和汉字对应表
+            pinyinMap: {
+                'bà': '爸', 'mā': '妈', 'gē': '哥', 'jiě': '姐', 'dì': '弟',
+                'mèi': '妹', 'tóng': '同', 'xué': '学', 'lǎo': '老', 'shī': '师',
+                'tiān': '天', 'dì': '地', 'rén': '人', 'nǐ': '你', 'wǒ': '我',
+                'tā': '他', 'rì': '日', 'yuè': '月', 'shuǐ': '水', 'huǒ': '火',
+                'shān': '山', 'shí': '石', 'tián': '田', 'tǔ': '土', 'fēng': '风',
+                'yún': '云', 'huā': '花', 'niǎo': '鸟', 'chóng': '虫', 'yú': '鱼',
+                'dà': '大', 'xiǎo': '小', 'duō': '多', 'shǎo': '少', 'shàng': '上',
+                'xià': '下', 'zuǒ': '左', 'yòu': '右', 'qián': '前', 'hòu': '后'
+            },
+            
+            // 词语库
+            words: {
+                1: ['天空', '大地', '人民', '学生', '老师', '朋友', '上下', '左右', '大小', '多少'],
+                2: ['学校', '家庭', '快乐', '高兴', '阳光', '月亮', '山水', '花草', '树木', '小鸟'],
+                3: ['白云', '风雨', '前后', '高低', '白天', '黑夜', '春天', '夏天', '秋天', '冬天'],
+                4: ['读书', '写字', '学习', '思考', '运动', '健康', '安全', '快乐', '幸福', '生活'],
+                5: ['知识', '道理', '聪明', '智慧', '阅读', '写作', '计划', '安排', '锻炼', '成长'],
+                6: ['研究', '探索', '发现', '创造', '理解', '体会', '感悟', '思想', '观点', '论证']
+            },
+            
+            // 反义词库
+            antonyms: {
+                '大': '小', '多': '少', '上': '下', '左': '右', '前': '后',
+                '高': '低', '长': '短', '胖': '瘦', '快': '慢', '远': '近',
+                '黑': '白', '明': '暗', '早': '晚', '来': '去', '进': '出',
+                '开': '关', '哭': '笑', '好': '坏', '生': '死', '真': '假'
             }
+        };
+        
+        // 当前使用的文字库，默认为硬编码数据
+        let currentLibraries = { ...defaultLibraries };
+        let customLibraryLoaded = false;
+        
+        // DOM元素
+        const uploadArea = document.getElementById('uploadArea');
+        const libraryFile = document.getElementById('libraryFile');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const clearUploadBtn = document.getElementById('clearUploadBtn');
+        const generateBtn = document.getElementById('generateBtn');
+        const questionsArea = document.getElementById('questionsArea');
+        const printBtn = document.getElementById('printBtn');
+        
+        // 初始化上传区域事件
+        function initUploadArea() {
+            // 点击上传区域触发文件选择
+            uploadArea.addEventListener('click', () => {
+                libraryFile.click();
+            });
+            
+            // 文件选择变化事件
+            libraryFile.addEventListener('change', handleFileSelect);
+            
+            // 拖放事件
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('drag-over');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                
+                if (e.dataTransfer.files.length) {
+                    libraryFile.files = e.dataTransfer.files;
+                    handleFileSelect(e);
+                }
+            });
+            
+            // 清除上传按钮事件
+            clearUploadBtn.addEventListener('click', clearCustomLibrary);
         }
-    </script> 
- </body>
+        
+        // 处理文件选择
+        function handleFileSelect(e) {
+            const file = e.target.files ? e.target.files[0] : e.dataTransfer.files[0];
+            
+            if (!file) return;
+            
+            // 验证文件大小（1MB）
+            const maxSize = 1 * 1024 * 1024; // 1MB
+            if (file.size > maxSize) {
+                uploadStatus.textContent = '文件大小超过限制（最大1MB）';
+                uploadStatus.classList.add('text-red-500');
+                return;
+            }
+            
+            // 验证文件类型
+            if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+                uploadStatus.textContent = '请上传JSON格式的文件';
+                uploadStatus.classList.add('text-red-500');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const customLibrary = JSON.parse(e.target.result);
+                    
+                    // 验证JSON结构
+                    if (validateLibraryStructure(customLibrary)) {
+                        // 合并自定义库和默认库，自定义库优先级更高
+                        currentLibraries = {
+                            ...defaultLibraries,
+                            ...customLibrary
+                        };
+                        
+                        // 特殊处理按年级分类的库，进行合并而非覆盖
+                        ['charactersByGrade', 'words'].forEach(key => {
+                            if (customLibrary[key]) {
+                                currentLibraries[key] = {
+                                    ...defaultLibraries[key],
+                                    ...customLibrary[key]
+                                };
+                            }
+                        });
+                        
+                        customLibraryLoaded = true;
+                        uploadStatus.textContent = `已加载自定义文字库: ${file.name}`;
+                        uploadStatus.classList.remove('text-red-500');
+                        uploadStatus.classList.add('text-green-600');
+                    }
+                } catch (error) {
+                    uploadStatus.textContent = '文件解析错误，请检查JSON格式';
+                    uploadStatus.classList.add('text-red-500');
+                    console.error('文件解析错误:', error);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // 验证文字库结构
+        function validateLibraryStructure(library) {
+            // 不强制要求包含所有类型，但包含的类型必须符合基本结构
+            if (library.charactersByGrade && typeof library.charactersByGrade !== 'object') {
+                uploadStatus.textContent = 'charactersByGrade 格式错误';
+                uploadStatus.classList.add('text-red-500');
+                return false;
+            }
+            
+            if (library.pinyinMap && typeof library.pinyinMap !== 'object') {
+                uploadStatus.textContent = 'pinyinMap 格式错误';
+                uploadStatus.classList.add('text-red-500');
+                return false;
+            }
+            
+            if (library.words && typeof library.words !== 'object') {
+                uploadStatus.textContent = 'words 格式错误';
+                uploadStatus.classList.add('text-red-500');
+                return false;
+            }
+            
+            if (library.antonyms && typeof library.antonyms !== 'object') {
+                uploadStatus.textContent = 'antonyms 格式错误';
+                uploadStatus.classList.add('text-red-500');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // 清除自定义文字库
+        function clearCustomLibrary() {
+            currentLibraries = { ...defaultLibraries };
+            customLibraryLoaded = false;
+            libraryFile.value = '';
+            uploadStatus.textContent = '支持自定义汉字、拼音、词语和反义词库（最大1MB）';
+            uploadStatus.classList.remove('text-red-500', 'text-green-600');
+        }
+        
+        // 获取随机元素
+        function getRandomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+        
+        // 生成拼音练习题目
+        function generatePinyinQuestion(grade) {
+            const pinyinList = Object.keys(currentLibraries.pinyinMap);
+            const randomPinyin = getRandomItem(pinyinList);
+            const correctChar = currentLibraries.pinyinMap[randomPinyin];
+            
+            // 生成干扰项
+            const characters = currentLibraries.charactersByGrade[grade];
+            const distractors = [];
+            while (distractors.length < 3) {
+                const distractor = getRandomItem(characters);
+                if (distractor !== correctChar && !distractors.includes(distractor)) {
+                    distractors.push(distractor);
+                }
+            }
+            
+            // 合并正确答案和干扰项并打乱顺序
+            const options = [correctChar, ...distractors];
+            options.sort(() => Math.random() - 0.5);
+            
+            return `
+                <div class="question-flex flex items-center md:items-start">
+                    <span class="mr-3 font-medium">给拼音选择正确的汉字：${randomPinyin}</span>
+                    <div class="ml-0 md:ml-2 flex-grow">
+                        <div class="question-options flex gap-2 md:gap-4 mb-2">
+                            ${options.map(option => `<div class="w-8 h-8 border border-gray-400 flex items-center justify-center">${option}</div>`).join('')}
+                        </div>
+                        <div class="question-input w-full md:w-24 h-8 border-b border-gray-400"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 生成汉字书写练习题目
+        function generateCharacterQuestion(grade) {
+            const character = getRandomItem(currentLibraries.charactersByGrade[grade]);
+            return `
+                <div class="question-flex flex items-center md:items-start">
+                    <span class="mr-3 font-medium">抄写汉字并注音：${character}</span>
+                    <div class="ml-0 md:ml-2 flex-grow">
+                        <div class="flex gap-2 mb-2">
+                            <div class="w-8 h-8 md:w-10 md:h-10 border border-gray-400"></div>
+                            <div class="w-8 h-8 md:w-10 md:h-10 border border-gray-400"></div>
+                            <div class="w-8 h-8 md:w-10 md:h-10 border border-gray-400"></div>
+                        </div>
+                        <div class="w-full md:w-20 h-8 border-b border-gray-400"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 生成组词练习题目
+        function generateWordQuestion(grade) {
+            const character = getRandomItem(currentLibraries.charactersByGrade[grade]);
+            return `
+                <div class="question-flex flex items-center">
+                    <span class="mr-3 font-medium">给汉字组词：${character}</span>
+                    <div class="ml-0 md:ml-2 flex-grow">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="h-8 border-b border-gray-400"></div>
+                            <div class="h-8 border-b border-gray-400"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 生成造句练习题目
+        function generateSentenceQuestion(grade) {
+            const word = getRandomItem(currentLibraries.words[grade]);
+            return `
+                <div class="question-flex flex flex-col md:flex-row">
+                    <span class="mr-3 font-medium mb-2 md:mb-0">用词语造句：${word}</span>
+                    <div class="ml-0 md:ml-2 flex-grow">
+                        <div class="h-8 border-b border-gray-400 mb-2"></div>
+                        <div class="h-8 border-b border-gray-400"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 生成反义词练习题目
+        function generateAntonymQuestion() {
+            const words = Object.keys(currentLibraries.antonyms);
+            const word = getRandomItem(words);
+            return `
+                <div class="question-flex flex items-center">
+                    <span class="mr-3 font-medium">写出反义词：${word}</span>
+                    <div class="ml-0 md:ml-2 flex-grow">
+                        <div class="w-full md:w-24 h-8 border-b border-gray-400"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 生成作业题目
+        function generateHomework() {
+            const form = document.getElementById('homeworkSettings');
+            const formData = new FormData(form);
+            const exerciseTypes = Array.from(formData.getAll('exerciseType'));
+            const grade = formData.get('grade');
+            const count = parseInt(formData.get('count'));
+            
+            // 验证至少选择一种练习类型
+            if (exerciseTypes.length === 0) {
+                alert('请至少选择一种练习类型');
+                return;
+            }
+            
+            let questionsHTML = '';
+            
+            // 平均分配各类题型的数量
+            const questionsPerType = Math.ceil(count / exerciseTypes.length);
+            let totalQuestions = 0;
+            
+            // 为每种选中的题型生成题目
+            exerciseTypes.forEach(type => {
+                let questionsToAdd = Math.min(questionsPerType, count - totalQuestions);
+                
+                for (let i = 0; i < questionsToAdd; i++) {
+                    totalQuestions++;
+                    let questionHTML = '';
+                    
+                    switch (type) {
+                        case 'pinyin':
+                            questionHTML = generatePinyinQuestion(grade);
+                            break;
+                        case 'character':
+                            questionHTML = generateCharacterQuestion(grade);
+                            break;
+                        case 'word':
+                            questionHTML = generateWordQuestion(grade);
+                            break;
+                        case 'sentence':
+                            questionHTML = generateSentenceQuestion(grade);
+                            break;
+                        case 'antonym':
+                            questionHTML = generateAntonymQuestion();
+                            break;
+                    }
+                    
+                    questionsHTML += `
+                        <div class="question-item py-2 border-b border-gray-200">
+                            <span class="font-medium mr-2">${totalQuestions}.</span>
+                            ${questionHTML}
+                        </div>
+                    `;
+                }
+            });
+            
+            questionsArea.innerHTML = questionsHTML;
+        }
+        
+        // 初始化事件监听
+        function initEventListeners() {
+            // 生成作业按钮
+            generateBtn.addEventListener('click', generateHomework);
+            
+            // 打印按钮
+            printBtn.addEventListener('click', () => {
+                window.print();
+            });
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initUploadArea();
+            initEventListeners();
+        });
+    </script>
+</body>
 </html>
