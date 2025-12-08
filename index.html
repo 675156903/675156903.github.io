@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鸡蛋糕制作与配送动画</title>
+    <title>鸡蛋糕做好了，请申秋艳签收哦！</title>
     <style>
         * {
             margin: 0;
@@ -532,7 +532,7 @@
                 },
                 { 
                     title: "等待签收", 
-                    text: "📦 蛋糕已送达！秋艳，请点击签收按钮～", 
+                    text: "📦 蛋糕已送达！申秋艳，请点击签收按钮～", 
                     duration: 9999999
                 }
             ];
@@ -637,7 +637,7 @@
                 if (stepIndex === steps.length - 1 && !isReceiving) {
                     setTimeout(() => {
                         receiveButton.classList.add('show');
-                        buttonText.textContent = "秋艳，点击签收";
+                        buttonText.textContent = "申秋艳，点击签收";
                         buttonIcon.textContent = "📦";
                         receiveButton.classList.remove('receiving', 'received');
                         isAutoPlaying = false; // 停止自动播放
