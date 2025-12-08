@@ -2,13 +2,14 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>鸡蛋糕制作与配送动画</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -17,11 +18,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
             overflow: hidden;
+            padding: 10px;
         }
         
-        /* 背景装饰元素 */
+        /* 背景装饰元素 - 移动端优化 */
         .floating-element {
             position: fixed;
             border-radius: 50%;
@@ -30,51 +32,76 @@
         }
         
         .bg-element-1 {
-            width: 300px;
-            height: 300px;
+            width: 150px;
+            height: 150px;
             background: radial-gradient(circle, #ff9900, transparent 70%);
-            top: 10%;
+            top: 5%;
             left: 5%;
             animation: float 20s infinite ease-in-out;
         }
         
         .bg-element-2 {
-            width: 200px;
-            height: 200px;
+            width: 120px;
+            height: 120px;
             background: radial-gradient(circle, #ff3366, transparent 70%);
-            bottom: 15%;
-            right: 8%;
+            bottom: 10%;
+            right: 5%;
             animation: float 18s infinite ease-in-out reverse;
         }
         
         .bg-element-3 {
-            width: 150px;
-            height: 150px;
+            width: 100px;
+            height: 100px;
             background: radial-gradient(circle, #33ccff, transparent 70%);
-            top: 60%;
+            top: 70%;
             left: 85%;
             animation: float 15s infinite ease-in-out;
         }
         
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
         }
         
-        /* 主容器 */
+        /* 主容器 - 响应式设计 */
         .animation-container {
-            width: 1000px;
-            height: 700px;
+            width: 100%;
+            max-width: 500px;
+            height: 85vh;
+            min-height: 600px;
+            max-height: 800px;
             background: radial-gradient(ellipse at center, rgba(40, 20, 10, 0.9) 0%, rgba(20, 10, 5, 0.95) 100%);
-            border-radius: 25px;
+            border-radius: 20px;
             position: relative;
             overflow: hidden;
-            border: 3px solid rgba(210, 105, 30, 0.5);
+            border: 2px solid rgba(210, 105, 30, 0.5);
             box-shadow: 
-                0 0 50px rgba(210, 105, 30, 0.3),
-                0 20px 40px rgba(0, 0, 0, 0.5),
-                inset 0 0 30px rgba(255, 215, 0, 0.1);
+                0 0 30px rgba(210, 105, 30, 0.3),
+                0 10px 20px rgba(0, 0, 0, 0.5),
+                inset 0 0 20px rgba(255, 215, 0, 0.1);
             z-index: 1;
+        }
+        
+        /* 移动端横屏适配 */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .animation-container {
+                height: 95vh;
+                min-height: 300px;
+                max-height: 400px;
+            }
+            
+            .instruction-box {
+                font-size: 16px !important;
+                padding: 12px 20px !important;
+                bottom: 15px !important;
+            }
+            
+            .status-indicator {
+                font-size: 12px !important;
+                padding: 6px 12px !important;
+                top: 10px !important;
+                right: 10px !important;
+            }
         }
         
         /* 动画区域 */
@@ -87,23 +114,23 @@
                 radial-gradient(circle at 80% 70%, rgba(255, 105, 30, 0.05) 0%, transparent 50%);
         }
         
-        /* 状态指示器 */
+        /* 状态指示器 - 移动端优化 */
         .status-indicator {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 15px;
+            right: 15px;
             background: linear-gradient(135deg, #d2691e, #ff8c00);
             color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
             font-weight: bold;
             z-index: 1000;
             display: flex;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 5px 15px rgba(210, 105, 30, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            gap: 6px;
+            box-shadow: 0 3px 10px rgba(210, 105, 30, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             animation: pulse 2s infinite;
         }
         
@@ -121,30 +148,32 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* 说明框 */
+        /* 说明框 - 移动端优化 */
         .instruction-box {
             position: absolute;
-            bottom: 30px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             width: 90%;
+            max-width: 450px;
             background: linear-gradient(135deg, rgba(40, 20, 10, 0.9), rgba(60, 30, 15, 0.9));
             color: #ffd700;
-            padding: 25px 40px;
-            border-radius: 20px;
+            padding: 18px 25px;
+            border-radius: 15px;
             text-align: center;
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
-            border: 3px solid rgba(255, 215, 0, 0.3);
+            border: 2px solid rgba(255, 215, 0, 0.3);
             box-shadow: 
-                0 0 30px rgba(255, 215, 0, 0.2),
-                0 10px 20px rgba(0, 0, 0, 0.4);
+                0 0 20px rgba(255, 215, 0, 0.2),
+                0 5px 10px rgba(0, 0, 0, 0.4);
             z-index: 1000;
-            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.5);
+            text-shadow: 0 1px 5px rgba(255, 215, 0, 0.5);
             backdrop-filter: blur(5px);
+            line-height: 1.4;
         }
         
-        /* 动画元素通用样式 */
+        /* 动画元素通用样式 - 移动端优化 */
         .animated-element {
             position: absolute;
             transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -156,7 +185,7 @@
         
         @keyframes bounce {
             from { transform: translateY(0); }
-            to { transform: translateY(-10px); }
+            to { transform: translateY(-8px); }
         }
         
         .rotate {
@@ -173,8 +202,8 @@
         }
         
         @keyframes wiggle {
-            from { transform: rotate(-5deg); }
-            to { transform: rotate(5deg); }
+            from { transform: rotate(-3deg); }
+            to { transform: rotate(3deg); }
         }
         
         .float-up {
@@ -183,7 +212,7 @@
         
         @keyframes floatUp {
             0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-20px) scale(1.05); }
+            50% { transform: translateY(-15px) scale(1.05); }
         }
         
         /* 粒子效果 */
@@ -193,9 +222,50 @@
             pointer-events: none;
             opacity: 0.8;
         }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .instruction-box {
+                font-size: 16px;
+                padding: 15px 20px;
+                bottom: 15px;
+            }
+            
+            .status-indicator {
+                font-size: 12px;
+                padding: 6px 12px;
+                top: 10px;
+                right: 10px;
+            }
+            
+            .animation-container {
+                border-radius: 15px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .instruction-box {
+                font-size: 14px;
+                padding: 12px 16px;
+            }
+            
+            .animation-container {
+                height: 80vh;
+                min-height: 500px;
+            }
+        }
+        
+        /* 防止文本选中 */
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
     </style>
 </head>
-<body>
+<body class="no-select">
     <!-- 背景装饰元素 -->
     <div class="floating-element bg-element-1"></div>
     <div class="floating-element bg-element-2"></div>
@@ -204,7 +274,7 @@
     <!-- 主容器 -->
     <div class="animation-container">
         <div class="status-indicator">
-            <i>🌀</i> 自动播放中...
+            <i>🌀</i> 自动播放
         </div>
         <div class="animation-area" id="animationArea">
             <!-- 动画将在这里展示 -->
@@ -219,51 +289,59 @@
             const animationArea = document.getElementById('animationArea');
             const instruction = document.getElementById('instruction');
             
+            // 获取容器尺寸
+            const getContainerSize = () => {
+                return {
+                    width: animationArea.offsetWidth,
+                    height: animationArea.offsetHeight
+                };
+            };
+            
             // 生动的步骤数据
             const steps = [
                 { 
-                    text: "🥚 准备美味食材：新鲜鸡蛋、香浓面粉、甜蜜砂糖！", 
-                    duration: 3500,
+                    text: "🥚 准备美味食材", 
+                    duration: 3000,
                     emoji: "🥚"
                 },
                 { 
-                    text: "🥣 搅拌魔法面糊～让所有材料快乐地跳舞！", 
-                    duration: 4000,
+                    text: "🥣 搅拌魔法面糊", 
+                    duration: 3500,
                     emoji: "🥣"
                 },
                 { 
-                    text: "🍶 倒入可爱模具，准备进入烤箱的温暖怀抱！", 
-                    duration: 3500,
+                    text: "🍶 倒入可爱模具", 
+                    duration: 3000,
                     emoji: "🍶"
                 },
                 { 
-                    text: "🔥 烤箱开始工作～蛋糕正在慢慢膨胀变大！", 
-                    duration: 5000,
+                    text: "🔥 烤箱开始工作", 
+                    duration: 4000,
                     emoji: "🔥"
                 },
                 { 
-                    text: "✨ 金黄色的蛋糕出炉啦！撒上五彩糖粒装饰～", 
-                    duration: 4500,
+                    text: "✨ 蛋糕出炉装饰", 
+                    duration: 3500,
                     emoji: "✨"
                 },
                 { 
-                    text: "🎁 精心包装，系上漂亮的蝴蝶结～准备出发！", 
-                    duration: 4000,
+                    text: "🎁 精心包装", 
+                    duration: 3000,
                     emoji: "🎁"
                 },
                 { 
-                    text: "✈️ 飞机起飞！蛋糕正在空中快速飞行中...", 
-                    duration: 5500,
+                    text: "✈️ 飞机运送中", 
+                    duration: 4500,
                     emoji: "✈️"
                 },
                 { 
-                    text: "🚚 快递员叔叔正在努力配送，马上就到啦！", 
-                    duration: 4500,
+                    text: "🚚 快递员配送", 
+                    duration: 3500,
                     emoji: "🚚"
                 },
                 { 
-                    text: "🎉 成功送达！客户收到蛋糕，露出幸福的笑容！", 
-                    duration: 5000,
+                    text: "🎉 成功送达！", 
+                    duration: 4000,
                     emoji: "🎉"
                 }
             ];
@@ -271,49 +349,49 @@
             let currentStep = 0;
             
             // 创建粒子效果
-            function createParticles(x, y, count = 20, color = '#ffd700') {
+            function createParticles(x, y, count = 15, color = '#ffd700') {
                 for (let i = 0; i < count; i++) {
                     const particle = document.createElement('div');
                     particle.className = 'particle';
-                    particle.style.width = Math.random() * 10 + 5 + 'px';
+                    particle.style.width = Math.random() * 8 + 4 + 'px';
                     particle.style.height = particle.style.width;
                     particle.style.backgroundColor = color;
                     particle.style.left = x + 'px';
                     particle.style.top = y + 'px';
-                    particle.style.boxShadow = `0 0 10px ${color}`;
+                    particle.style.boxShadow = `0 0 5px ${color}`;
                     animationArea.appendChild(particle);
                     
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = Math.random() * 100 + 50;
-                    const distance = Math.random() * 100 + 50;
+                    const speed = Math.random() * 50 + 30;
+                    const distance = Math.random() * 50 + 30;
                     
-                    particle.style.transition = `all ${Math.random() + 0.5}s ease-out`;
+                    particle.style.transition = `all ${Math.random() + 0.3}s ease-out`;
                     particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
                     particle.style.opacity = '0';
                     
-                    setTimeout(() => particle.remove(), 1000);
+                    setTimeout(() => particle.remove(), 800);
                 }
             }
             
             // 创建星星特效
             function createStars() {
-                for (let i = 0; i < 30; i++) {
+                for (let i = 0; i < 20; i++) {
                     const star = document.createElement('div');
                     star.style.position = 'absolute';
-                    star.style.width = Math.random() * 4 + 2 + 'px';
+                    star.style.width = Math.random() * 3 + 1 + 'px';
                     star.style.height = star.style.width;
                     star.style.backgroundColor = '#ffffff';
                     star.style.borderRadius = '50%';
                     star.style.left = Math.random() * 100 + '%';
                     star.style.top = Math.random() * 100 + '%';
                     star.style.opacity = Math.random() * 0.5 + 0.3;
-                    star.style.boxShadow = '0 0 10px #fff';
-                    star.style.animation = `twinkle ${Math.random() * 3 + 2}s infinite alternate`;
+                    star.style.boxShadow = '0 0 5px #fff';
+                    star.style.animation = `twinkle ${Math.random() * 2 + 1}s infinite alternate`;
                     animationArea.appendChild(star);
                 }
             }
             
-            // 添加闪烁动画
+            // 添加动画样式
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes twinkle {
@@ -323,21 +401,21 @@
                 
                 @keyframes pop {
                     0% { transform: scale(0); opacity: 0; }
-                    70% { transform: scale(1.2); opacity: 1; }
+                    70% { transform: scale(1.1); opacity: 1; }
                     100% { transform: scale(1); opacity: 1; }
                 }
                 
                 @keyframes fly {
                     0% { transform: translateX(-100px) rotate(-20deg); }
-                    100% { transform: translateX(1100px) rotate(20deg); }
+                    100% { transform: translateX(100vw) rotate(20deg); }
                 }
                 
                 @keyframes walk {
                     0% { transform: translateX(0) translateY(0); }
-                    25% { transform: translateX(10px) translateY(-5px); }
-                    50% { transform: translateX(20px) translateY(0); }
-                    75% { transform: translateX(30px) translateY(-5px); }
-                    100% { transform: translateX(40px) translateY(0); }
+                    25% { transform: translateX(5px) translateY(-3px); }
+                    50% { transform: translateX(10px) translateY(0); }
+                    75% { transform: translateX(15px) translateY(-3px); }
+                    100% { transform: translateX(20px) translateY(0); }
                 }
             `;
             document.head.appendChild(style);
@@ -345,10 +423,7 @@
             // 显示当前步骤
             function showStep(stepIndex) {
                 instruction.textContent = steps[stepIndex].text;
-                instruction.style.animation = 'pop 0.5s ease-out';
-                
-                // 添加表情动画
-                instruction.innerHTML = steps[stepIndex].text;
+                instruction.style.animation = 'pop 0.4s ease-out';
                 
                 // 清空动画区域
                 animationArea.innerHTML = '';
@@ -356,53 +431,57 @@
                 // 添加星星背景
                 if (stepIndex === 0) createStars();
                 
-                // 创建粒子效果
-                createParticles(500, 100, 30, '#ff9900');
+                const size = getContainerSize();
+                const centerX = size.width / 2;
+                const centerY = size.height / 2;
                 
-                // 根据步骤显示不同的生动动画
+                // 创建粒子效果
+                createParticles(centerX, centerY * 0.3, 20, '#ff9900');
+                
+                // 根据步骤显示不同的动画
                 switch(stepIndex) {
                     case 0:
-                        showPreparation();
+                        showPreparation(size, centerX, centerY);
                         break;
                     case 1:
-                        showMixing();
+                        showMixing(size, centerX, centerY);
                         break;
                     case 2:
-                        showPouring();
+                        showPouring(size, centerX, centerY);
                         break;
                     case 3:
-                        showBaking();
+                        showBaking(size, centerX, centerY);
                         break;
                     case 4:
-                        showDecorating();
+                        showDecorating(size, centerX, centerY);
                         break;
                     case 5:
-                        showPackaging();
+                        showPackaging(size, centerX, centerY);
                         break;
                     case 6:
-                        showAirplane();
+                        showAirplane(size, centerX, centerY);
                         break;
                     case 7:
-                        showDelivery();
+                        showDelivery(size, centerX, centerY);
                         break;
                     case 8:
-                        showReceiving();
+                        showReceiving(size, centerX, centerY);
                         break;
                 }
                 
                 // 移除动画效果
                 setTimeout(() => {
                     instruction.style.animation = '';
-                }, 500);
+                }, 400);
             }
             
-            // 步骤0: 准备材料 - 生动的跳跃效果
-            function showPreparation() {
+            // 步骤0: 准备材料
+            function showPreparation(size, centerX, centerY) {
                 const ingredients = [
-                    { emoji: '🥚', color: '#fff', x: 200, size: 80 },
-                    { emoji: '🌾', color: '#f5deb3', x: 350, size: 70 },
-                    { emoji: '🍬', color: '#ffcccb', x: 500, size: 60 },
-                    { emoji: '🥛', color: '#f0fff0', x: 650, size: 75 }
+                    { emoji: '🥚', x: centerX - 100, size: 50 },
+                    { emoji: '🌾', x: centerX - 30, size: 45 },
+                    { emoji: '🍬', x: centerX + 40, size: 40 },
+                    { emoji: '🥛', x: centerX + 110, size: 50 }
                 ];
                 
                 ingredients.forEach((ing, index) => {
@@ -410,510 +489,217 @@
                     element.className = 'animated-element bounce';
                     element.style.fontSize = ing.size + 'px';
                     element.style.left = ing.x + 'px';
-                    element.style.top = '250px';
+                    element.style.top = (centerY - 50) + 'px';
                     element.style.opacity = '0';
-                    element.style.animationDelay = index * 0.3 + 's';
+                    element.style.animationDelay = index * 0.2 + 's';
                     element.textContent = ing.emoji;
-                    element.style.filter = 'drop-shadow(0 5px 15px rgba(0,0,0,0.3))';
+                    element.style.filter = 'drop-shadow(0 3px 8px rgba(0,0,0,0.3))';
                     animationArea.appendChild(element);
                     
-                    // 弹跳入场
                     setTimeout(() => {
-                        element.style.transition = 'all 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+                        element.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
                         element.style.opacity = '1';
                         element.style.transform = 'translateY(0)';
                         
-                        // 连续弹跳
                         setTimeout(() => {
                             element.style.animation = 'bounce 0.5s ease infinite alternate';
-                        }, 600);
-                    }, index * 200);
+                        }, 500);
+                    }, index * 150);
                 });
             }
             
-            // 步骤1: 搅拌面糊 - 旋转搅拌效果
-            function showMixing() {
+            // 步骤1: 搅拌面糊
+            function showMixing(size, centerX, centerY) {
                 // 创建碗
                 const bowl = document.createElement('div');
                 bowl.style.position = 'absolute';
-                bowl.style.width = '250px';
-                bowl.style.height = '120px';
+                bowl.style.width = Math.min(200, size.width * 0.4) + 'px';
+                bowl.style.height = Math.min(100, size.height * 0.15) + 'px';
                 bowl.style.background = 'radial-gradient(circle, #888, #666)';
-                bowl.style.borderRadius = '0 0 150px 150px';
-                bowl.style.left = '375px';
-                bowl.style.top = '300px';
-                bowl.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
+                bowl.style.borderRadius = '0 0 100px 100px';
+                bowl.style.left = (centerX - parseInt(bowl.style.width)/2) + 'px';
+                bowl.style.top = (centerY - 30) + 'px';
+                bowl.style.boxShadow = '0 5px 10px rgba(0,0,0,0.3)';
                 bowl.style.transform = 'scale(0)';
                 animationArea.appendChild(bowl);
                 
                 // 创建搅拌器
                 const mixer = document.createElement('div');
                 mixer.className = 'animated-element rotate';
-                mixer.style.width = '20px';
-                mixer.style.height = '150px';
+                mixer.style.width = '15px';
+                mixer.style.height = Math.min(120, size.height * 0.2) + 'px';
                 mixer.style.background = 'linear-gradient(to bottom, #666, #999)';
-                mixer.style.left = '500px';
-                mixer.style.top = '200px';
-                mixer.style.borderRadius = '10px';
-                mixer.style.transformOrigin = 'center 180px';
+                mixer.style.left = centerX + 'px';
+                mixer.style.top = (centerY - 100) + 'px';
+                mixer.style.borderRadius = '8px';
+                mixer.style.transformOrigin = 'center 150px';
                 animationArea.appendChild(mixer);
-                
-                // 创建面糊
-                const batter = document.createElement('div');
-                batter.style.position = 'absolute';
-                batter.style.width = '200px';
-                batter.style.height = '80px';
-                batter.style.background = 'linear-gradient(to bottom, #f8e0b0, #e6b873)';
-                batter.style.borderRadius = '100px';
-                batter.style.left = '400px';
-                batter.style.top = '340px';
-                batter.style.opacity = '0';
-                batter.style.boxShadow = '0 5px 15px rgba(230, 184, 115, 0.5)';
-                animationArea.appendChild(batter);
                 
                 // 动画序列
                 setTimeout(() => {
-                    bowl.style.transition = 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    bowl.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
                     bowl.style.transform = 'scale(1)';
                     
                     setTimeout(() => {
-                        mixer.style.animation = 'rotate 0.5s linear infinite';
-                        
-                        setTimeout(() => {
-                            batter.style.transition = 'all 1s ease';
-                            batter.style.opacity = '1';
-                            
-                            // 添加搅拌气泡
-                            for (let i = 0; i < 15; i++) {
-                                setTimeout(() => {
-                                    const bubble = document.createElement('div');
-                                    bubble.style.position = 'absolute';
-                                    bubble.style.width = Math.random() * 15 + 5 + 'px';
-                                    bubble.style.height = bubble.style.width;
-                                    bubble.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-                                    bubble.style.borderRadius = '50%';
-                                    bubble.style.left = (400 + Math.random() * 200) + 'px';
-                                    bubble.style.top = '340px';
-                                    bubble.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
-                                    animationArea.appendChild(bubble);
-                                    
-                                    bubble.style.transition = 'all 1.5s ease-out';
-                                    bubble.style.top = (200 + Math.random() * 100) + 'px';
-                                    bubble.style.left = (parseInt(bubble.style.left) + Math.random() * 100 - 50) + 'px';
-                                    bubble.style.opacity = '0';
-                                    
-                                    setTimeout(() => bubble.remove(), 1500);
-                                }, i * 200);
-                            }
-                        }, 500);
+                        mixer.style.animation = 'rotate 0.4s linear infinite';
                     }, 300);
                 }, 200);
             }
             
-            // 步骤2: 倒入模具 - 流动效果
-            function showPouring() {
-                // 创建流动的液体
-                const liquid = document.createElement('div');
-                liquid.className = 'animated-element';
-                liquid.style.width = '30px';
-                liquid.style.height = '200px';
-                liquid.style.background = 'linear-gradient(to bottom, #f8e0b0, transparent)';
-                liquid.style.left = '485px';
-                liquid.style.top = '200px';
-                liquid.style.borderRadius = '15px';
-                liquid.style.opacity = '0';
-                animationArea.appendChild(liquid);
-                
-                // 创建模具
+            // 步骤2: 倒入模具
+            function showPouring(size, centerX, centerY) {
                 const mold = document.createElement('div');
                 mold.className = 'animated-element float-up';
-                mold.style.width = '180px';
-                mold.style.height = '100px';
+                mold.style.width = Math.min(150, size.width * 0.3) + 'px';
+                mold.style.height = Math.min(80, size.height * 0.12) + 'px';
                 mold.style.background = 'linear-gradient(135deg, #aaa, #888)';
-                mold.style.left = '410px';
-                mold.style.top = '350px';
-                mold.style.borderRadius = '20px 20px 10px 10px';
+                mold.style.left = (centerX - parseInt(mold.style.width)/2) + 'px';
+                mold.style.top = (centerY) + 'px';
+                mold.style.borderRadius = '15px 15px 8px 8px';
                 mold.style.transform = 'scale(0)';
-                mold.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
                 animationArea.appendChild(mold);
                 
-                // 动画序列
                 setTimeout(() => {
-                    liquid.style.transition = 'all 0.5s ease';
-                    liquid.style.opacity = '1';
-                    liquid.style.height = '200px';
-                    
-                    setTimeout(() => {
-                        mold.style.transition = 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                        mold.style.transform = 'scale(1)';
-                        
-                        // 液体流入模具
-                        setTimeout(() => {
-                            const filling = document.createElement('div');
-                            filling.style.position = 'absolute';
-                            filling.style.width = '160px';
-                            filling.style.height = '0';
-                            filling.style.background = 'linear-gradient(to top, #f8e0b0, #e6b873)';
-                            filling.style.left = '420px';
-                            filling.style.top = '430px';
-                            filling.style.borderRadius = '10px 10px 0 0';
-                            animationArea.appendChild(filling);
-                            
-                            filling.style.transition = 'height 1.5s ease-in-out';
-                            filling.style.height = '60px';
-                            
-                            // 液体消失
-                            setTimeout(() => {
-                                liquid.style.transition = 'opacity 0.5s ease';
-                                liquid.style.opacity = '0';
-                            }, 1000);
-                        }, 300);
-                    }, 500);
+                    mold.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    mold.style.transform = 'scale(1)';
                 }, 200);
             }
             
-            // 步骤3: 烘烤蛋糕 - 烤箱加热效果
-            function showBaking() {
-                // 创建烤箱
+            // 步骤3: 烘烤蛋糕
+            function showBaking(size, centerX, centerY) {
                 const oven = document.createElement('div');
                 oven.className = 'animated-element';
-                oven.style.width = '300px';
-                oven.style.height = '200px';
+                oven.style.width = Math.min(250, size.width * 0.5) + 'px';
+                oven.style.height = Math.min(150, size.height * 0.25) + 'px';
                 oven.style.background = 'linear-gradient(135deg, #8b4513, #a0522d)';
-                oven.style.left = '350px';
-                oven.style.top = '250px';
-                oven.style.borderRadius = '15px';
-                oven.style.border = '10px solid #654321';
+                oven.style.left = (centerX - parseInt(oven.style.width)/2) + 'px';
+                oven.style.top = (centerY - 50) + 'px';
+                oven.style.borderRadius = '12px';
+                oven.style.border = '8px solid #654321';
                 oven.style.transform = 'scale(0)';
-                oven.style.overflow = 'hidden';
                 animationArea.appendChild(oven);
                 
-                // 创建烤箱窗口
-                const window = document.createElement('div');
-                window.style.width = '150px';
-                window.style.height = '80px';
-                window.style.background = 'rgba(0, 0, 0, 0.8)';
-                window.style.position = 'absolute';
-                window.style.left = '75px';
-                window.style.top = '20px';
-                window.style.borderRadius = '10px';
-                oven.appendChild(window);
-                
-                // 创建蛋糕
-                const cake = document.createElement('div');
-                cake.className = 'animated-element';
-                cake.style.width = '120px';
-                cake.style.height = '60px';
-                cake.style.background = 'linear-gradient(to top, #e6b873, #d4a65a)';
-                cake.style.position = 'absolute';
-                cake.style.left = '90px';
-                cake.style.top = '100px';
-                cake.style.borderRadius = '10px';
-                cake.style.opacity = '0';
-                oven.appendChild(cake);
-                
-                // 动画序列
                 setTimeout(() => {
-                    oven.style.transition = 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    oven.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
                     oven.style.transform = 'scale(1)';
-                    
-                    setTimeout(() => {
-                        cake.style.transition = 'all 1s ease';
-                        cake.style.opacity = '1';
-                        
-                        // 加热效果
-                        for (let i = 0; i < 20; i++) {
-                            setTimeout(() => {
-                                const heat = document.createElement('div');
-                                heat.style.position = 'absolute';
-                                heat.style.width = '10px';
-                                heat.style.height = '10px';
-                                heat.style.background = 'radial-gradient(circle, #ff4500, transparent)';
-                                heat.style.borderRadius = '50%';
-                                heat.style.left = (Math.random() * 280 + 10) + 'px';
-                                heat.style.top = (Math.random() * 180 + 10) + 'px';
-                                heat.style.boxShadow = '0 0 20px #ff4500';
-                                oven.appendChild(heat);
-                                
-                                heat.style.animation = 'twinkle 0.5s ease-out';
-                                setTimeout(() => heat.remove(), 500);
-                            }, i * 200);
-                        }
-                        
-                        // 蛋糕膨胀
-                        setTimeout(() => {
-                            cake.style.transition = 'all 2s ease-in-out';
-                            cake.style.height = '100px';
-                            cake.style.top = '60px';
-                        }, 1000);
-                    }, 300);
                 }, 200);
             }
             
-            // 步骤4: 装饰蛋糕 - 撒糖粒效果
-            function showDecorating() {
-                // 创建蛋糕
+            // 步骤4: 装饰蛋糕
+            function showDecorating(size, centerX, centerY) {
                 const cake = document.createElement('div');
                 cake.className = 'animated-element float-up';
-                cake.style.width = '200px';
-                cake.style.height = '120px';
+                cake.style.width = Math.min(160, size.width * 0.35) + 'px';
+                cake.style.height = Math.min(100, size.height * 0.15) + 'px';
                 cake.style.background = 'radial-gradient(ellipse at center, #d4a65a, #b89446)';
-                cake.style.left = '400px';
-                cake.style.top = '290px';
-                cake.style.borderRadius = '20px 20px 0 0';
-                cake.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
-                cake.style.transform = 'scale(1)';
+                cake.style.left = (centerX - parseInt(cake.style.width)/2) + 'px';
+                cake.style.top = (centerY - 30) + 'px';
+                cake.style.borderRadius = '15px 15px 0 0';
+                cake.style.boxShadow = '0 5px 10px rgba(0,0,0,0.3)';
                 animationArea.appendChild(cake);
                 
-                // 创建顶部奶油
-                const cream = document.createElement('div');
-                cream.style.position = 'absolute';
-                cream.style.width = '100%';
-                cream.style.height = '30px';
-                cream.style.background = 'linear-gradient(to bottom, #fffaf0, #f0e6d6)';
-                cream.style.top = '0';
-                cream.style.borderRadius = '20px 20px 0 0';
-                cake.appendChild(cream);
-                
-                // 撒糖粒效果
                 setTimeout(() => {
-                    const colors = ['#ff3366', '#33ccff', '#ffcc00', '#99ff33', '#ff66cc'];
-                    
-                    for (let i = 0; i < 30; i++) {
+                    const colors = ['#ff3366', '#33ccff', '#ffcc00', '#99ff33'];
+                    for (let i = 0; i < 20; i++) {
                         setTimeout(() => {
                             const sprinkle = document.createElement('div');
                             sprinkle.style.position = 'absolute';
-                            sprinkle.style.width = '12px';
-                            sprinkle.style.height = '12px';
+                            sprinkle.style.width = '8px';
+                            sprinkle.style.height = '8px';
                             sprinkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                             sprinkle.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-                            sprinkle.style.left = (Math.random() * 180 + 410) + 'px';
-                            sprinkle.style.top = '250px';
-                            sprinkle.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
-                            sprinkle.style.transform = 'scale(0) rotate(0deg)';
+                            sprinkle.style.left = (centerX - 80 + Math.random() * 160) + 'px';
+                            sprinkle.style.top = (centerY - 30) + 'px';
+                            sprinkle.style.transform = 'scale(0)';
                             animationArea.appendChild(sprinkle);
                             
-                            sprinkle.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                            sprinkle.style.top = (290 + Math.random() * 100) + 'px';
-                            sprinkle.style.left = (410 + Math.random() * 180) + 'px';
-                            sprinkle.style.transform = `scale(1) rotate(${Math.random() * 360}deg)`;
-                            
-                            // 弹跳效果
-                            setTimeout(() => {
-                                sprinkle.style.transition = 'transform 0.3s ease';
-                                sprinkle.style.transform = `scale(1.2) rotate(${Math.random() * 360}deg)`;
-                                
-                                setTimeout(() => {
-                                    sprinkle.style.transform = `scale(1) rotate(${Math.random() * 360}deg)`;
-                                }, 300);
-                            }, 500);
+                            sprinkle.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                            sprinkle.style.top = (centerY - 30 + Math.random() * 80) + 'px';
+                            sprinkle.style.transform = 'scale(1)';
                         }, i * 100);
                     }
                 }, 500);
             }
             
-            // 步骤5: 包装蛋糕 - 包装效果
-            function showPackaging() {
-                // 蛋糕变成包装盒
-                const cake = document.createElement('div');
-                cake.className = 'animated-element bounce';
-                cake.style.width = '200px';
-                cake.style.height = '150px';
-                cake.style.background = 'linear-gradient(135deg, #d2691e, #8b4513)';
-                cake.style.left = '400px';
-                cake.style.top = '275px';
-                cake.style.borderRadius = '15px';
-                cake.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
-                cake.style.transform = 'scale(1)';
-                animationArea.appendChild(cake);
+            // 步骤5: 包装蛋糕
+            function showPackaging(size, centerX, centerY) {
+                const box = document.createElement('div');
+                box.className = 'animated-element bounce';
+                box.style.width = Math.min(160, size.width * 0.35) + 'px';
+                box.style.height = Math.min(120, size.height * 0.18) + 'px';
+                box.style.background = 'linear-gradient(135deg, #d2691e, #8b4513)';
+                box.style.left = (centerX - parseInt(box.style.width)/2) + 'px';
+                box.style.top = (centerY - 30) + 'px';
+                box.style.borderRadius = '12px';
+                box.style.boxShadow = '0 5px 10px rgba(0,0,0,0.3)';
+                animationArea.appendChild(box);
                 
-                // 包装带
                 const ribbon = document.createElement('div');
                 ribbon.style.position = 'absolute';
-                ribbon.style.width = '240px';
-                ribbon.style.height = '30px';
+                ribbon.style.width = (parseInt(box.style.width) + 40) + 'px';
+                ribbon.style.height = '20px';
                 ribbon.style.background = 'linear-gradient(135deg, #ff3366, #ff0066)';
-                ribbon.style.left = '380px';
-                ribbon.style.top = '325px';
-                ribbon.style.borderRadius = '15px';
+                ribbon.style.left = (centerX - parseInt(ribbon.style.width)/2) + 'px';
+                ribbon.style.top = centerY + 'px';
+                ribbon.style.borderRadius = '10px';
                 ribbon.style.transform = 'scaleX(0)';
                 animationArea.appendChild(ribbon);
                 
-                // 蝴蝶结
-                const bow = document.createElement('div');
-                bow.className = 'wiggle';
-                bow.style.position = 'absolute';
-                bow.style.width = '40px';
-                bow.style.height = '40px';
-                bow.style.background = 'linear-gradient(135deg, #ff3366, #ff0066)';
-                bow.style.left = '480px';
-                bow.style.top = '310px';
-                bow.style.borderRadius = '10px';
-                bow.style.transform = 'rotate(45deg) scale(0)';
-                animationArea.appendChild(bow);
-                
-                // 动画序列
                 setTimeout(() => {
-                    // 包装带出现
-                    ribbon.style.transition = 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    ribbon.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
                     ribbon.style.transform = 'scaleX(1)';
-                    
-                    // 蝴蝶结出现
-                    setTimeout(() => {
-                        bow.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                        bow.style.transform = 'rotate(45deg) scale(1)';
-                        bow.style.animation = 'wiggle 0.5s ease-in-out infinite alternate';
-                    }, 300);
-                    
-                    // 包装盒弹跳
-                    cake.style.animation = 'bounce 0.5s ease infinite alternate';
                 }, 200);
             }
             
-            // 步骤6: 飞机运送 - 飞行动画
-            function showAirplane() {
-                // 创建飞机
+            // 步骤6: 飞机运送
+            function showAirplane(size, centerX, centerY) {
                 const airplane = document.createElement('div');
                 airplane.className = 'animated-element';
                 airplane.innerHTML = '✈️';
-                airplane.style.fontSize = '100px';
-                airplane.style.left = '-150px';
-                airplane.style.top = '300px';
-                airplane.style.filter = 'drop-shadow(0 5px 15px rgba(0,0,0,0.5))';
+                airplane.style.fontSize = Math.min(80, size.width * 0.15) + 'px';
+                airplane.style.left = '-100px';
+                airplane.style.top = (centerY - 50) + 'px';
                 animationArea.appendChild(airplane);
                 
-                // 创建云朵
-                for (let i = 0; i < 5; i++) {
-                    const cloud = document.createElement('div');
-                    cloud.style.position = 'absolute';
-                    cloud.style.fontSize = '60px';
-                    cloud.style.left = (200 + i * 150) + 'px';
-                    cloud.style.top = (200 + Math.random() * 200) + 'px';
-                    cloud.style.opacity = '0.7';
-                    cloud.textContent = '☁️';
-                    cloud.style.animation = `floatUp ${3 + Math.random() * 2}s ease-in-out infinite`;
-                    animationArea.appendChild(cloud);
-                }
-                
-                // 飞行动画
                 setTimeout(() => {
-                    airplane.style.transition = 'left 4s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                    airplane.style.left = '1100px';
-                    airplane.style.transform = 'rotate(20deg)';
-                    
-                    // 添加尾迹
-                    for (let i = 0; i < 20; i++) {
-                        setTimeout(() => {
-                            const trail = document.createElement('div');
-                            trail.style.position = 'absolute';
-                            trail.style.width = '20px';
-                            trail.style.height = '20px';
-                            trail.style.background = 'rgba(255, 255, 255, 0.5)';
-                            trail.style.borderRadius = '50%';
-                            trail.style.left = (parseInt(airplane.style.left) - 50) + 'px';
-                            trail.style.top = airplane.style.top;
-                            trail.style.opacity = '0';
-                            animationArea.appendChild(trail);
-                            
-                            trail.style.transition = 'all 1s ease-out';
-                            trail.style.opacity = '0.8';
-                            trail.style.transform = 'scale(1.5)';
-                            
-                            setTimeout(() => {
-                                trail.style.opacity = '0';
-                                setTimeout(() => trail.remove(), 1000);
-                            }, 500);
-                        }, i * 200);
-                    }
+                    airplane.style.transition = 'left 3s linear';
+                    airplane.style.left = (size.width + 100) + 'px';
                 }, 500);
             }
             
-            // 步骤7: 送货员配送 - 行走动画
-            function showDelivery() {
-                // 创建送货员
+            // 步骤7: 送货员配送
+            function showDelivery(size, centerX, centerY) {
                 const deliveryMan = document.createElement('div');
                 deliveryMan.className = 'animated-element';
                 deliveryMan.innerHTML = '🚚';
-                deliveryMan.style.fontSize = '80px';
-                deliveryMan.style.left = '-100px';
-                deliveryMan.style.top = '320px';
-                deliveryMan.style.filter = 'drop-shadow(0 5px 15px rgba(0,0,0,0.3))';
+                deliveryMan.style.fontSize = Math.min(60, size.width * 0.12) + 'px';
+                deliveryMan.style.left = '-80px';
+                deliveryMan.style.top = (centerY) + 'px';
                 animationArea.appendChild(deliveryMan);
                 
-                // 创建道路
-                const road = document.createElement('div');
-                road.style.position = 'absolute';
-                road.style.width = '1000px';
-                road.style.height = '5px';
-                road.style.background = 'linear-gradient(to right, #666, #888, #666)';
-                road.style.left = '0';
-                road.style.top = '380px';
-                animationArea.appendChild(road);
-                
-                // 行走动画
                 setTimeout(() => {
-                    deliveryMan.style.transition = 'left 3s ease-in-out';
-                    deliveryMan.style.left = '450px';
-                    deliveryMan.style.animation = 'walk 0.5s ease-in-out infinite';
-                    
-                    // 添加灰尘效果
-                    for (let i = 0; i < 10; i++) {
-                        setTimeout(() => {
-                            const dust = document.createElement('div');
-                            dust.style.position = 'absolute';
-                            dust.style.width = '10px';
-                            dust.style.height = '10px';
-                            dust.style.background = '#888';
-                            dust.style.borderRadius = '50%';
-                            dust.style.left = (parseInt(deliveryMan.style.left) - 20) + 'px';
-                            dust.style.top = '375px';
-                            dust.style.opacity = '0';
-                            animationArea.appendChild(dust);
-                            
-                            dust.style.transition = 'all 1s ease-out';
-                            dust.style.opacity = '0.6';
-                            dust.style.transform = 'translateY(-20px) scale(1.5)';
-                            
-                            setTimeout(() => {
-                                dust.style.opacity = '0';
-                                setTimeout(() => dust.remove(), 1000);
-                            }, 500);
-                        }, i * 300);
-                    }
+                    deliveryMan.style.transition = 'left 2s ease-in-out';
+                    deliveryMan.style.left = (centerX - 30) + 'px';
                 }, 500);
             }
             
-            // 步骤8: 客户签收 - 庆祝效果
-            function showReceiving() {
-                // 创建开心的客户
+            // 步骤8: 客户签收
+            function showReceiving(size, centerX, centerY) {
                 const customer = document.createElement('div');
                 customer.className = 'animated-element bounce';
                 customer.innerHTML = '😄';
-                customer.style.fontSize = '120px';
-                customer.style.left = '440px';
-                customer.style.top = '280px';
-                customer.style.filter = 'drop-shadow(0 5px 20px rgba(255,215,0,0.5))';
+                customer.style.fontSize = Math.min(100, size.width * 0.2) + 'px';
+                customer.style.left = (centerX - 50) + 'px';
+                customer.style.top = (centerY - 50) + 'px';
                 animationArea.appendChild(customer);
                 
-                // 创建蛋糕
-                const cake = document.createElement('div');
-                cake.className = 'animated-element float-up';
-                cake.innerHTML = '🎂';
-                cake.style.fontSize = '80px';
-                cake.style.left = '440px';
-                cake.style.top = '400px';
-                cake.style.filter = 'drop-shadow(0 5px 15px rgba(0,0,0,0.3))';
-                animationArea.appendChild(cake);
-                
-                // 庆祝特效
                 setTimeout(() => {
-                    // 彩色纸屑
-                    for (let i = 0; i < 50; i++) {
+                    for (let i = 0; i < 30; i++) {
                         setTimeout(() => {
                             const confetti = document.createElement('div');
                             confetti.style.position = 'absolute';
-                            confetti.style.width = '10px';
-                            confetti.style.height = '10px';
+                            confetti.style.width = '6px';
+                            confetti.style.height = '6px';
                             confetti.style.backgroundColor = 
                                 i % 5 === 0 ? '#ff3366' : 
                                 i % 5 === 1 ? '#33ccff' : 
@@ -921,46 +707,20 @@
                                 i % 5 === 3 ? '#99ff33' : 
                                 '#ff66cc';
                             confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-                            confetti.style.left = '500px';
-                            confetti.style.top = '300px';
-                            confetti.style.transform = 'rotate(0deg)';
+                            confetti.style.left = centerX + 'px';
+                            confetti.style.top = (centerY - 20) + 'px';
                             animationArea.appendChild(confetti);
                             
                             const angle = Math.random() * Math.PI * 2;
-                            const distance = Math.random() * 200 + 100;
+                            const distance = Math.random() * 100 + 50;
                             
-                            confetti.style.transition = 'all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                            confetti.style.left = (500 + Math.cos(angle) * distance) + 'px';
-                            confetti.style.top = (300 + Math.sin(angle) * distance) + 'px';
-                            confetti.style.transform = `rotate(${Math.random() * 720}deg)`;
+                            confetti.style.transition = 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                            confetti.style.left = (centerX + Math.cos(angle) * distance) + 'px';
+                            confetti.style.top = (centerY - 20 + Math.sin(angle) * distance) + 'px';
                             confetti.style.opacity = '0';
                             
-                            setTimeout(() => confetti.remove(), 1500);
-                        }, i * 30);
-                    }
-                    
-                    // 爱心特效
-                    for (let i = 0; i < 15; i++) {
-                        setTimeout(() => {
-                            const heart = document.createElement('div');
-                            heart.style.position = 'absolute';
-                            heart.style.fontSize = '30px';
-                            heart.style.left = (440 + Math.random() * 100 - 50) + 'px';
-                            heart.style.top = '250px';
-                            heart.style.opacity = '0';
-                            heart.textContent = '❤️';
-                            heart.style.filter = 'drop-shadow(0 0 10px rgba(255,0,0,0.5))';
-                            animationArea.appendChild(heart);
-                            
-                            heart.style.transition = 'all 2s ease-out';
-                            heart.style.top = '100px';
-                            heart.style.opacity = '1';
-                            
-                            setTimeout(() => {
-                                heart.style.opacity = '0';
-                                setTimeout(() => heart.remove(), 2000);
-                            }, 1500);
-                        }, i * 200);
+                            setTimeout(() => confetti.remove(), 1000);
+                        }, i * 50);
                     }
                 }, 500);
             }
@@ -981,10 +741,17 @@
                 }
             }
             
-            // 3秒后开始自动播放
+            // 开始自动播放
             setTimeout(() => {
                 autoPlay();
             }, 1000);
+            
+            // 窗口大小变化时重新计算
+            window.addEventListener('resize', () => {
+                if (currentStep < steps.length) {
+                    showStep(currentStep);
+                }
+            });
         });
     </script>
 </body>
