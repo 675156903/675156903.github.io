@@ -3,1673 +3,988 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>鸡蛋糕制作与配送动画 - 自动播放</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>鸡蛋糕制作与配送动画</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
         }
         
         body {
-            background-color: #fff9f0;
-            color: #5a3e2b;
-            line-height: 1.6;
-            padding: 20px;
+            background: linear-gradient(135deg, #1a0f0a 0%, #3c2415 100%);
             min-height: 100vh;
-            overflow-x: hidden;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: #ffefd6;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        h1 {
-            color: #d2691e;
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .subtitle {
-            color: #8b4513;
-            font-size: 1.2rem;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .auto-play-notice {
-            display: inline-block;
-            background-color: #d2691e;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            animation: pulse-notice 2s infinite;
-        }
-        
-        @keyframes pulse-notice {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        
-        .animation-container {
-            flex: 1;
-            min-width: 300px;
-            background-color: #fff;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .cake-stage {
-            width: 100%;
-            height: 400px;
-            position: relative;
-            background-color: #fffaf0;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px dashed #f0e6d6;
-        }
-        
-        .ingredients {
-            flex: 1;
-            min-width: 300px;
-            background-color: #fff;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-        }
-        
-        .ingredients h2, .steps h2 {
-            color: #d2691e;
-            border-bottom: 2px solid #ffd7b5;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .ingredients-list {
-            list-style-type: none;
-        }
-        
-        .ingredients-list li {
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            font-size: 1.1rem;
-        }
-        
-        .ingredients-list li i {
-            color: #d2691e;
-            margin-right: 15px;
-            width: 24px;
-            text-align: center;
-        }
-        
-        .steps {
-            background-color: #fff;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            margin-bottom: 30px;
-        }
-        
-        .steps-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .step {
-            background-color: #fff9f0;
-            border-radius: 10px;
-            padding: 20px;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border-left: 4px solid #d2691e;
-        }
-        
-        .step:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .step-number {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            background-color: #d2691e;
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 30px;
-            margin-right: 10px;
-            font-weight: bold;
-        }
-        
-        .step.active {
-            background-color: #ffefd6;
-            animation: active-step 2s infinite alternate;
-        }
-        
-        @keyframes active-step {
-            0% { box-shadow: 0 0 0 rgba(210, 105, 30, 0.3); }
-            100% { box-shadow: 0 0 15px rgba(210, 105, 30, 0.6); }
-        }
-        
-        .controls {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
-            margin-top: 25px;
-            flex-wrap: wrap;
+            font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+            overflow: hidden;
         }
         
-        button {
-            background-color: #d2691e;
+        /* 背景装饰元素 */
+        .floating-element {
+            position: fixed;
+            border-radius: 50%;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .bg-element-1 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #ff9900, transparent 70%);
+            top: 10%;
+            left: 5%;
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        .bg-element-2 {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #ff3366, transparent 70%);
+            bottom: 15%;
+            right: 8%;
+            animation: float 18s infinite ease-in-out reverse;
+        }
+        
+        .bg-element-3 {
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, #33ccff, transparent 70%);
+            top: 60%;
+            left: 85%;
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        /* 主容器 */
+        .animation-container {
+            width: 1000px;
+            height: 700px;
+            background: radial-gradient(ellipse at center, rgba(40, 20, 10, 0.9) 0%, rgba(20, 10, 5, 0.95) 100%);
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid rgba(210, 105, 30, 0.5);
+            box-shadow: 
+                0 0 50px rgba(210, 105, 30, 0.3),
+                0 20px 40px rgba(0, 0, 0, 0.5),
+                inset 0 0 30px rgba(255, 215, 0, 0.1);
+            z-index: 1;
+        }
+        
+        /* 动画区域 */
+        .animation-area {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 105, 30, 0.05) 0%, transparent 50%);
+        }
+        
+        /* 状态指示器 */
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #d2691e, #ff8c00);
             color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 1000;
             display: flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 5px 15px rgba(210, 105, 30, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            animation: pulse 2s infinite;
         }
         
-        button:hover {
-            background-color: #b3591a;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        .status-indicator i {
+            animation: spin 1.5s linear infinite;
         }
         
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
-        .progress-container {
-            flex-grow: 1;
-            max-width: 500px;
-        }
-        
-        .progress-bar {
-            height: 10px;
-            background-color: #f0e6d6;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        
-        .progress {
-            height: 100%;
-            background-color: #d2691e;
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-        
-        .progress-text {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            color: #8b4513;
-        }
-        
-        /* 蛋糕制作动画元素 */
-        .bowl {
-            position: absolute;
-            width: 180px;
-            height: 100px;
-            background-color: #f0f0f0;
-            border-radius: 0 0 90px 90px;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 8px solid #e0e0e0;
-        }
-        
-        .egg {
-            position: absolute;
-            width: 40px;
-            height: 55px;
-            background-color: #fff;
-            border-radius: 50%;
-            top: 50px;
-            box-shadow: inset 0 0 0 2px #f0f0f0;
-        }
-        
-        .flour {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #f5f5dc;
-            border-radius: 50%;
-        }
-        
-        .milk {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background-color: #fffaf0;
-            border-radius: 50%;
-            border: 2px dashed #f0e6d6;
-        }
-        
-        .mixer {
-            position: absolute;
-            width: 40px;
-            height: 60px;
-            background-color: #c0c0c0;
-            border-radius: 10px;
-            top: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .mixer:after {
-            content: "";
-            position: absolute;
-            width: 60px;
-            height: 20px;
-            background-color: #a0a0a0;
-            border-radius: 5px;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .batter {
-            position: absolute;
-            width: 160px;
-            height: 60px;
-            background-color: #f8e0b0;
-            border-radius: 10px;
-            bottom: 110px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .cake-mold {
-            position: absolute;
-            width: 150px;
-            height: 80px;
-            background-color: #d0d0d0;
-            border-radius: 10px;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .cake {
-            position: absolute;
-            width: 140px;
-            height: 60px;
-            background-color: #e6b873;
-            border-radius: 10px 10px 0 0;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .cake-baked {
-            position: absolute;
-            width: 150px;
-            height: 80px;
-            background-color: #d4a65a;
-            border-radius: 10px;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 5px 0 #b89446;
-        }
-        
-        .cake-baked:after {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 20px;
-            background-color: #f0c966;
-            border-radius: 10px 10px 0 0;
-            top: 0;
-        }
-        
-        .oven {
-            position: absolute;
-            width: 200px;
-            height: 150px;
-            background-color: #a0522d;
-            border-radius: 10px;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid #8b4513;
-        }
-        
-        .oven-window {
-            position: absolute;
-            width: 100px;
-            height: 60px;
-            background-color: #333;
-            border-radius: 5px;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .heat {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: #ff4500;
-            border-radius: 50%;
-            opacity: 0;
-        }
-        
-        /* 飞机运送和签收动画元素 */
-        .airplane {
-            position: absolute;
-            width: 100px;
-            height: 40px;
-            top: 50%;
-            left: -120px;
-            transform: translateY(-50%);
-        }
-        
-        .airplane-body {
-            position: absolute;
-            width: 100px;
-            height: 25px;
-            background-color: #4682b4;
-            border-radius: 10px 20px 20px 10px;
-        }
-        
-        .airplane-wing {
-            position: absolute;
-            width: 40px;
-            height: 15px;
-            background-color: #5f9ea0;
-            border-radius: 5px;
-            top: -10px;
-            left: 20px;
-        }
-        
-        .airplane-tail {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #5f9ea0;
-            border-radius: 5px;
-            top: 5px;
-            right: 0;
-        }
-        
-        .airplane-propeller {
-            position: absolute;
-            width: 30px;
-            height: 5px;
-            background-color: #2f4f4f;
-            border-radius: 3px;
-            left: 0;
-            top: 10px;
-        }
-        
-        .cloud {
-            position: absolute;
-            background-color: white;
-            border-radius: 50%;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-        }
-        
-        .package {
-            position: absolute;
-            width: 60px;
-            height: 40px;
-            background-color: #d2691e;
-            border-radius: 8px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            box-shadow: 0 5px 0 #8b4513;
-        }
-        
-        .package:after {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 10px;
-            background-color: #b3591a;
-            top: 0;
-            border-radius: 8px 8px 0 0;
-        }
-        
-        .delivery-person {
-            position: absolute;
-            width: 40px;
-            height: 60px;
-            bottom: 50px;
-            right: -60px;
-        }
-        
-        .person-body {
-            position: absolute;
-            width: 40px;
-            height: 30px;
-            background-color: #4682b4;
-            border-radius: 8px 8px 0 0;
-            bottom: 0;
-        }
-        
-        .person-head {
-            position: absolute;
-            width: 25px;
-            height: 25px;
-            background-color: #f5deb3;
-            border-radius: 50%;
-            bottom: 30px;
-            left: 7.5px;
-        }
-        
-        .person-legs {
-            position: absolute;
-            width: 40px;
-            height: 20px;
-            bottom: 0;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .leg {
-            width: 10px;
-            height: 20px;
-            background-color: #2f4f4f;
-            border-radius: 5px 5px 0 0;
-        }
-        
-        .delivery-box {
-            position: absolute;
-            width: 50px;
-            height: 35px;
-            background-color: #d2691e;
-            border-radius: 5px;
-            bottom: 70px;
-            right: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 10px;
-            box-shadow: 0 4px 0 #8b4513;
-        }
-        
-        .delivery-box:after {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 8px;
-            background-color: #b3591a;
-            top: 0;
-            border-radius: 5px 5px 0 0;
-        }
-        
-        .house {
-            position: absolute;
-            width: 100px;
-            height: 80px;
-            bottom: 50px;
-            right: 20px;
-        }
-        
-        .house-body {
-            position: absolute;
-            width: 100px;
-            height: 60px;
-            background-color: #8b4513;
-            bottom: 0;
-            border-radius: 5px 5px 0 0;
-        }
-        
-        .house-roof {
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-left: 50px solid transparent;
-            border-right: 50px solid transparent;
-            border-bottom: 30px solid #a0522d;
-            top: 0;
-        }
-        
-        .house-door {
-            position: absolute;
-            width: 20px;
-            height: 30px;
-            background-color: #654321;
-            bottom: 0;
-            left: 40px;
-            border-radius: 5px 5px 0 0;
-        }
-        
-        .house-window {
-            position: absolute;
-            width: 15px;
-            height: 15px;
-            background-color: #87ceeb;
-            border-radius: 50%;
-            top: 20px;
-            left: 20px;
-        }
-        
-        .receiver {
-            position: absolute;
-            width: 30px;
-            height: 50px;
-            bottom: 50px;
-            right: 35px;
-            opacity: 0;
-        }
-        
-        .receiver-body {
-            position: absolute;
-            width: 30px;
-            height: 20px;
-            background-color: #32cd32;
-            border-radius: 5px;
-            bottom: 0;
-        }
-        
-        .receiver-head {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #f5deb3;
-            border-radius: 50%;
-            bottom: 20px;
-            left: 5px;
-        }
-        
-        .smiley {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: #ffd700;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            color: #ff6347;
-        }
-        
-        /* 动画类 */
-        .animate-egg-crack {
-            animation: eggCrack 1.5s forwards;
-        }
-        
-        @keyframes eggCrack {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            30% { transform: translate(0, 100px) rotate(10deg); }
-            60% { transform: translate(0, 150px) rotate(-10deg); opacity: 1; }
-            100% { transform: translate(0, 200px) rotate(15deg); opacity: 0; }
-        }
-        
-        .animate-mixer {
-            animation: mixerMove 2s infinite;
-        }
-        
-        @keyframes mixerMove {
-            0%, 100% { transform: translateX(-50%) rotate(0deg); }
-            25% { transform: translateX(-50%) rotate(15deg); }
-            50% { transform: translateX(-50%) rotate(0deg); }
-            75% { transform: translateX(-50%) rotate(-15deg); }
-        }
-        
-        .animate-heat {
-            animation: heatMove 1.5s infinite;
-        }
-        
-        @keyframes heatMove {
-            0% { transform: translateY(0) scale(1); opacity: 0.8; }
-            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
-        }
-        
-        .animate-rise {
-            animation: cakeRise 2s forwards;
-        }
-        
-        @keyframes cakeRise {
-            0% { height: 60px; bottom: 100px; }
-            100% { height: 80px; bottom: 90px; }
-        }
-        
-        .animate-airplane-fly {
-            animation: airplaneFly 4s forwards;
-        }
-        
-        @keyframes airplaneFly {
-            0% { left: -120px; transform: translateY(-50%) rotate(0deg); }
-            20% { left: 50%; transform: translateY(-50%) rotate(-5deg); }
-            40% { left: 50%; transform: translateY(-50%) rotate(5deg); }
-            60% { left: 50%; transform: translateY(-50%) rotate(0deg); }
-            100% { left: 120%; transform: translateY(-50%) rotate(0deg); }
-        }
-        
-        .animate-propeller {
-            animation: propellerSpin 0.5s infinite linear;
-        }
-        
-        @keyframes propellerSpin {
+        @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
         
-        .animate-cloud {
-            animation: cloudMove 20s infinite linear;
-        }
-        
-        @keyframes cloudMove {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(100px); }
-        }
-        
-        .animate-person-walk {
-            animation: personWalk 3s forwards;
-        }
-        
-        @keyframes personWalk {
-            0% { right: -60px; }
-            100% { right: 100px; }
-        }
-        
-        .animate-person-leave {
-            animation: personLeave 3s forwards;
-        }
-        
-        @keyframes personLeave {
-            0% { right: 100px; opacity: 1; }
-            100% { right: -60px; opacity: 1; }
-        }
-        
-        .animate-box-deliver {
-            animation: boxDeliver 1.5s forwards;
-        }
-        
-        @keyframes boxDeliver {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-100px, -50px) scale(1.2); }
-            100% { transform: translate(-120px, 0) scale(1); }
-        }
-        
-        .animate-receiver-appear {
-            animation: receiverAppear 1s forwards;
-        }
-        
-        @keyframes receiverAppear {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-smiley {
-            animation: smileyFloat 2s infinite alternate ease-in-out;
-        }
-        
-        @keyframes smileyFloat {
-            0% { transform: translateY(0) rotate(0deg); }
-            100% { transform: translateY(-20px) rotate(10deg); }
-        }
-        
-        .pulse {
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.05); }
-            100% { transform: translateX(-50%) scale(1); }
-        }
-        
-        .instruction {
-            text-align: center;
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #8b4513;
-            margin-top: 20px;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-            background-color: #fff9f0;
-            border-radius: 10px;
-            border: 2px dashed #f0e6d6;
-        }
-        
-        .auto-play-indicator {
+        /* 说明框 */
+        .instruction-box {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: #d2691e;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            animation: pulse 2s infinite;
-        }
-        
-        footer {
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            background: linear-gradient(135deg, rgba(40, 20, 10, 0.9), rgba(60, 30, 15, 0.9));
+            color: #ffd700;
+            padding: 25px 40px;
+            border-radius: 20px;
             text-align: center;
-            padding: 20px;
-            color: #8b4513;
-            font-size: 0.9rem;
-            border-top: 1px solid #f0e6d6;
-            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            border: 3px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.2),
+                0 10px 20px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.5);
+            backdrop-filter: blur(5px);
         }
         
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.2rem;
-            }
-            
-            .cake-stage {
-                height: 350px;
-            }
-            
-            .steps-list {
-                grid-template-columns: 1fr;
-            }
-            
-            .controls {
-                flex-direction: column;
-            }
-            
-            .progress-container {
-                width: 100%;
-            }
-            
-            .auto-play-indicator {
-                top: 10px;
-                right: 10px;
-                font-size: 0.7rem;
-            }
+        /* 动画元素通用样式 */
+        .animated-element {
+            position: absolute;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .bounce {
+            animation: bounce 0.5s ease infinite alternate;
+        }
+        
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+        
+        .rotate {
+            animation: rotate 2s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .wiggle {
+            animation: wiggle 0.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes wiggle {
+            from { transform: rotate(-5deg); }
+            to { transform: rotate(5deg); }
+        }
+        
+        .float-up {
+            animation: floatUp 3s ease-in-out infinite;
+        }
+        
+        @keyframes floatUp {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+        
+        /* 粒子效果 */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-birthday-cake"></i> 鸡蛋糕制作与配送动画</h1>
-            <p class="subtitle">观看鸡蛋糕从制作、包装、配送到签收的完整过程，享受烘焙与配送的乐趣！</p>
-            <div class="auto-play-notice" id="auto-play-notice">
-                <i class="fas fa-play-circle"></i> 动画将在3秒后自动播放
-            </div>
-        </header>
-        
-        <div class="content">
-            <div class="animation-container">
-                <h2><i class="fas fa-play-circle"></i> 制作与配送过程动画</h2>
-                <div class="auto-play-indicator" id="auto-play-indicator" style="display: none;">
-                    <i class="fas fa-spinner fa-spin"></i> 自动播放中
-                </div>
-                <div class="cake-stage" id="cake-stage">
-                    <!-- 动画元素将通过JavaScript动态添加 -->
-                </div>
-                <div class="instruction" id="instruction">页面加载中，动画即将开始自动播放...</div>
-                
-                <div class="controls">
-                    <button id="prev-btn" disabled>
-                        <i class="fas fa-backward"></i> 上一步
-                    </button>
-                    <button id="start-pause-btn">
-                        <i class="fas fa-pause"></i> 暂停
-                    </button>
-                    <button id="next-btn" disabled>
-                        下一步 <i class="fas fa-forward"></i>
-                    </button>
-                    <button id="reset-btn">
-                        <i class="fas fa-redo"></i> 重新开始
-                    </button>
-                </div>
-                
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress" id="progress"></div>
-                    </div>
-                    <div class="progress-text">
-                        <span>步骤: <span id="current-step">0</span>/10</span>
-                        <span id="step-title">准备材料</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="ingredients">
-                <h2><i class="fas fa-shopping-basket"></i> 所需材料</h2>
-                <ul class="ingredients-list">
-                    <li><i class="fas fa-egg"></i> 鸡蛋 3个</li>
-                    <li><i class="fas fa-wheat-alt"></i> 低筋面粉 100克</li>
-                    <li><i class="fas fa-cube"></i> 细砂糖 80克</li>
-                    <li><i class="fas fa-wine-bottle"></i> 植物油 40毫升</li>
-                    <li><i class="fas fa-wine-bottle"></i> 牛奶 60毫升</li>
-                    <li><i class="fas fa-vial"></i> 泡打粉 5克</li>
-                    <li><i class="fas fa-lemon"></i> 柠檬汁 几滴</li>
-                </ul>
-                
-                <h2 style="margin-top: 30px;"><i class="fas fa-utensils"></i> 所需工具</h2>
-                <ul class="ingredients-list">
-                    <li><i class="fas fa-blender"></i> 搅拌碗和打蛋器</li>
-                    <li><i class="fas fa-balance-scale"></i> 电子秤</li>
-                    <li><i class="fas fa-thermometer-half"></i> 烤箱</li>
-                    <li><i class="fas fa-utensil-spoon"></i> 蛋糕模具</li>
-                    <li><i class="fas fa-filter"></i> 面粉筛</li>
-                </ul>
-                
-                <h2 style="margin-top: 30px;"><i class="fas fa-shipping-fast"></i> 配送环节</h2>
-                <ul class="ingredients-list">
-                    <li><i class="fas fa-box"></i> 蛋糕包装盒</li>
-                    <li><i class="fas fa-plane"></i> 配送飞机</li>
-                    <li><i class="fas fa-truck"></i> 送货员</li>
-                    <li><i class="fas fa-home"></i> 收货地址</li>
-                    <li><i class="fas fa-user-check"></i> 收件人</li>
-                </ul>
-            </div>
+    <!-- 背景装饰元素 -->
+    <div class="floating-element bg-element-1"></div>
+    <div class="floating-element bg-element-2"></div>
+    <div class="floating-element bg-element-3"></div>
+    
+    <!-- 主容器 -->
+    <div class="animation-container">
+        <div class="status-indicator">
+            <i>🌀</i> 自动播放中...
         </div>
-        
-        <div class="steps">
-            <h2><i class="fas fa-list-ol"></i> 制作与配送步骤</h2>
-            <div class="steps-list" id="steps-list">
-                <!-- 步骤将通过JavaScript动态添加 -->
-            </div>
+        <div class="animation-area" id="animationArea">
+            <!-- 动画将在这里展示 -->
         </div>
-        
-        <footer>
-            <p>鸡蛋糕制作与配送动画演示 | 完整展示烘焙到送达的完整流程 | 动画自动播放，也可手动控制</p>
-        </footer>
+        <div class="instruction-box" id="instruction">
+            鸡蛋糕制作与配送动画即将开始...
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 获取DOM元素
-            const cakeStage = document.getElementById('cake-stage');
+            const animationArea = document.getElementById('animationArea');
             const instruction = document.getElementById('instruction');
-            const prevBtn = document.getElementById('prev-btn');
-            const startPauseBtn = document.getElementById('start-pause-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const progress = document.getElementById('progress');
-            const currentStepEl = document.getElementById('current-step');
-            const stepTitleEl = document.getElementById('step-title');
-            const stepsList = document.getElementById('steps-list');
-            const autoPlayIndicator = document.getElementById('auto-play-indicator');
-            const autoPlayNotice = document.getElementById('auto-play-notice');
             
-            // 步骤数据
+            // 生动的步骤数据
             const steps = [
                 { 
-                    title: "准备材料", 
-                    instruction: "准备好所有需要的材料和工具",
-                    duration: 2000
+                    text: "🥚 准备美味食材：新鲜鸡蛋、香浓面粉、甜蜜砂糖！", 
+                    duration: 3500,
+                    emoji: "🥚"
                 },
                 { 
-                    title: "打散鸡蛋", 
-                    instruction: "将3个鸡蛋打入碗中，加入细砂糖，用打蛋器搅拌均匀",
-                    duration: 3000
+                    text: "🥣 搅拌魔法面糊～让所有材料快乐地跳舞！", 
+                    duration: 4000,
+                    emoji: "🥣"
                 },
                 { 
-                    title: "加入牛奶和油", 
-                    instruction: "加入牛奶和植物油，继续搅拌均匀",
-                    duration: 2500
+                    text: "🍶 倒入可爱模具，准备进入烤箱的温暖怀抱！", 
+                    duration: 3500,
+                    emoji: "🍶"
                 },
                 { 
-                    title: "筛入面粉", 
-                    instruction: "将低筋面粉和泡打粉混合筛入蛋液中",
-                    duration: 3000
+                    text: "🔥 烤箱开始工作～蛋糕正在慢慢膨胀变大！", 
+                    duration: 5000,
+                    emoji: "🔥"
                 },
                 { 
-                    title: "搅拌面糊", 
-                    instruction: "用刮刀轻轻翻拌均匀，直到没有干粉",
-                    duration: 3500
+                    text: "✨ 金黄色的蛋糕出炉啦！撒上五彩糖粒装饰～", 
+                    duration: 4500,
+                    emoji: "✨"
                 },
                 { 
-                    title: "倒入模具", 
-                    instruction: "将面糊倒入蛋糕模具中，轻轻震动去除大气泡",
-                    duration: 2500
+                    text: "🎁 精心包装，系上漂亮的蝴蝶结～准备出发！", 
+                    duration: 4000,
+                    emoji: "🎁"
                 },
                 { 
-                    title: "烘烤蛋糕", 
-                    instruction: "放入预热好的烤箱，以170°C烘烤25-30分钟",
-                    duration: 4000
+                    text: "✈️ 飞机起飞！蛋糕正在空中快速飞行中...", 
+                    duration: 5500,
+                    emoji: "✈️"
                 },
                 { 
-                    title: "包装蛋糕", 
-                    instruction: "蛋糕冷却后，用精美包装盒包装好准备配送",
-                    duration: 3000
+                    text: "🚚 快递员叔叔正在努力配送，马上就到啦！", 
+                    duration: 4500,
+                    emoji: "🚚"
                 },
                 { 
-                    title: "飞机运送", 
-                    instruction: "包装好的蛋糕通过飞机快速运送到目的地",
-                    duration: 4000
-                },
-                { 
-                    title: "签收蛋糕", 
-                    instruction: "送货员将蛋糕送达，收件人开心签收",
-                    duration: 3500
+                    text: "🎉 成功送达！客户收到蛋糕，露出幸福的笑容！", 
+                    duration: 5000,
+                    emoji: "🎉"
                 }
             ];
             
-            // 当前步骤索引
             let currentStep = 0;
-            // 动画是否正在进行
-            let isAnimating = false;
-            // 是否自动播放
-            let isAutoPlay = true;
-            // 是否暂停
-            let isPaused = false;
-            // 动画计时器
-            let animationTimer = null;
             
-            // 初始化步骤列表
-            function initSteps() {
-                stepsList.innerHTML = '';
-                steps.forEach((step, index) => {
-                    const stepEl = document.createElement('div');
-                    stepEl.className = 'step';
-                    stepEl.innerHTML = `
-                        <span class="step-number">${index + 1}</span>
-                        <strong>${step.title}</strong>
-                        <p style="margin-top: 8px;">${step.instruction}</p>
-                    `;
-                    stepsList.appendChild(stepEl);
-                });
-                
-                // 更新步骤列表高亮
-                updateStepsHighlight();
-            }
-            
-            // 更新步骤列表高亮
-            function updateStepsHighlight() {
-                const stepElements = document.querySelectorAll('.step');
-                stepElements.forEach((el, index) => {
-                    if (index === currentStep) {
-                        el.classList.add('active');
-                    } else {
-                        el.classList.remove('active');
-                    }
-                });
-            }
-            
-            // 更新进度条和步骤信息
-            function updateProgress() {
-                const progressPercent = ((currentStep + 1) / steps.length) * 100;
-                progress.style.width = `${progressPercent}%`;
-                currentStepEl.textContent = currentStep + 1;
-                stepTitleEl.textContent = steps[currentStep].title;
-                
-                // 更新按钮状态
-                prevBtn.disabled = currentStep === 0 || isAnimating;
-                nextBtn.disabled = currentStep === steps.length - 1 || isAnimating;
-                
-                // 更新步骤列表高亮
-                updateStepsHighlight();
-            }
-            
-            // 清除蛋糕舞台
-            function clearCakeStage() {
-                cakeStage.innerHTML = '';
-            }
-            
-            // 创建背景云朵
-            function createClouds() {
-                // 创建几朵云
-                for (let i = 0; i < 5; i++) {
-                    const cloud = document.createElement('div');
-                    cloud.className = 'cloud animate-cloud';
-                    cloud.style.width = `${40 + Math.random() * 40}px`;
-                    cloud.style.height = `${20 + Math.random() * 20}px`;
-                    cloud.style.top = `${20 + Math.random() * 100}px`;
-                    cloud.style.left = `${Math.random() * 100}%`;
-                    cloud.style.opacity = `${0.6 + Math.random() * 0.4}`;
-                    cloud.style.animationDelay = `${Math.random() * 5}s`;
-                    cloud.style.animationDuration = `${15 + Math.random() * 20}s`;
-                    cakeStage.appendChild(cloud);
+            // 创建粒子效果
+            function createParticles(x, y, count = 20, color = '#ffd700') {
+                for (let i = 0; i < count; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.width = Math.random() * 10 + 5 + 'px';
+                    particle.style.height = particle.style.width;
+                    particle.style.backgroundColor = color;
+                    particle.style.left = x + 'px';
+                    particle.style.top = y + 'px';
+                    particle.style.boxShadow = `0 0 10px ${color}`;
+                    animationArea.appendChild(particle);
                     
-                    // 为云朵添加一些变化
-                    const cloud2 = document.createElement('div');
-                    cloud2.className = 'cloud';
-                    cloud2.style.width = `${20 + Math.random() * 20}px`;
-                    cloud2.style.height = `${10 + Math.random() * 10}px`;
-                    cloud2.style.top = `${cloud.offsetTop + 10}px`;
-                    cloud2.style.left = `${cloud.offsetLeft + 20}px`;
-                    cloud2.style.opacity = `${0.4 + Math.random() * 0.3}`;
-                    cloud2.style.animationDelay = `${Math.random() * 5}s`;
-                    cloud2.style.animationDuration = `${15 + Math.random() * 20}s`;
-                    cakeStage.appendChild(cloud2);
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 100 + 50;
+                    const distance = Math.random() * 100 + 50;
+                    
+                    particle.style.transition = `all ${Math.random() + 0.5}s ease-out`;
+                    particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
+                    particle.style.opacity = '0';
+                    
+                    setTimeout(() => particle.remove(), 1000);
                 }
             }
             
-            // 显示当前步骤的动画
-            function showStepAnimation(stepIndex) {
-                clearCakeStage();
-                instruction.textContent = steps[stepIndex].instruction;
+            // 创建星星特效
+            function createStars() {
+                for (let i = 0; i < 30; i++) {
+                    const star = document.createElement('div');
+                    star.style.position = 'absolute';
+                    star.style.width = Math.random() * 4 + 2 + 'px';
+                    star.style.height = star.style.width;
+                    star.style.backgroundColor = '#ffffff';
+                    star.style.borderRadius = '50%';
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = Math.random() * 100 + '%';
+                    star.style.opacity = Math.random() * 0.5 + 0.3;
+                    star.style.boxShadow = '0 0 10px #fff';
+                    star.style.animation = `twinkle ${Math.random() * 3 + 2}s infinite alternate`;
+                    animationArea.appendChild(star);
+                }
+            }
+            
+            // 添加闪烁动画
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes twinkle {
+                    0% { opacity: 0.2; transform: scale(0.8); }
+                    100% { opacity: 1; transform: scale(1.2); }
+                }
                 
+                @keyframes pop {
+                    0% { transform: scale(0); opacity: 0; }
+                    70% { transform: scale(1.2); opacity: 1; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+                
+                @keyframes fly {
+                    0% { transform: translateX(-100px) rotate(-20deg); }
+                    100% { transform: translateX(1100px) rotate(20deg); }
+                }
+                
+                @keyframes walk {
+                    0% { transform: translateX(0) translateY(0); }
+                    25% { transform: translateX(10px) translateY(-5px); }
+                    50% { transform: translateX(20px) translateY(0); }
+                    75% { transform: translateX(30px) translateY(-5px); }
+                    100% { transform: translateX(40px) translateY(0); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // 显示当前步骤
+            function showStep(stepIndex) {
+                instruction.textContent = steps[stepIndex].text;
+                instruction.style.animation = 'pop 0.5s ease-out';
+                
+                // 添加表情动画
+                instruction.innerHTML = steps[stepIndex].text;
+                
+                // 清空动画区域
+                animationArea.innerHTML = '';
+                
+                // 添加星星背景
+                if (stepIndex === 0) createStars();
+                
+                // 创建粒子效果
+                createParticles(500, 100, 30, '#ff9900');
+                
+                // 根据步骤显示不同的生动动画
                 switch(stepIndex) {
-                    case 0: // 准备材料
+                    case 0:
                         showPreparation();
                         break;
-                    case 1: // 打散鸡蛋
-                        showEggCracking();
-                        break;
-                    case 2: // 加入牛奶和油
-                        showAddingLiquid();
-                        break;
-                    case 3: // 筛入面粉
-                        showAddingFlour();
-                        break;
-                    case 4: // 搅拌面糊
+                    case 1:
                         showMixing();
                         break;
-                    case 5: // 倒入模具
+                    case 2:
                         showPouring();
                         break;
-                    case 6: // 烘烤蛋糕
+                    case 3:
                         showBaking();
                         break;
-                    case 7: // 包装蛋糕
+                    case 4:
+                        showDecorating();
+                        break;
+                    case 5:
                         showPackaging();
                         break;
-                    case 8: // 飞机运送
-                        showAirplaneDelivery();
+                    case 6:
+                        showAirplane();
                         break;
-                    case 9: // 签收蛋糕
-                        showDeliveryAndReceipt();
+                    case 7:
+                        showDelivery();
+                        break;
+                    case 8:
+                        showReceiving();
                         break;
                 }
-            }
-            
-            // 步骤0: 准备材料
-            function showPreparation() {
-                // 创建碗
-                const bowl = document.createElement('div');
-                bowl.className = 'bowl';
-                cakeStage.appendChild(bowl);
                 
-                // 创建鸡蛋
-                for (let i = 0; i < 3; i++) {
-                    const egg = document.createElement('div');
-                    egg.className = 'egg';
-                    egg.style.left = `${30 + i * 60}px`;
-                    egg.style.top = `${30 + i * 10}px`;
-                    cakeStage.appendChild(egg);
-                }
-                
-                // 创建面粉
-                const flour = document.createElement('div');
-                flour.className = 'flour';
-                flour.style.left = '200px';
-                flour.style.top = '50px';
-                cakeStage.appendChild(flour);
-                
-                // 创建牛奶
-                const milk = document.createElement('div');
-                milk.className = 'milk';
-                milk.style.left = '250px';
-                milk.style.top = '50px';
-                cakeStage.appendChild(milk);
-            }
-            
-            // 步骤1: 打散鸡蛋
-            function showEggCracking() {
-                // 创建碗
-                const bowl = document.createElement('div');
-                bowl.className = 'bowl';
-                cakeStage.appendChild(bowl);
-                
-                // 创建鸡蛋掉落动画
-                for (let i = 0; i < 3; i++) {
-                    const egg = document.createElement('div');
-                    egg.className = 'egg animate-egg-crack';
-                    egg.style.left = `${30 + i * 60}px`;
-                    egg.style.top = '50px';
-                    egg.style.animationDelay = `${i * 0.5}s`;
-                    cakeStage.appendChild(egg);
-                }
-                
-                // 3秒后显示打散的鸡蛋
+                // 移除动画效果
                 setTimeout(() => {
-                    const batter = document.createElement('div');
-                    batter.className = 'batter';
-                    batter.style.opacity = '0';
-                    cakeStage.appendChild(batter);
-                    
-                    // 淡入效果
-                    setTimeout(() => {
-                        batter.style.transition = 'opacity 1s';
-                        batter.style.opacity = '1';
-                    }, 100);
-                }, 2000);
+                    instruction.style.animation = '';
+                }, 500);
             }
             
-            // 步骤2: 加入牛奶和油
-            function showAddingLiquid() {
-                // 创建碗
-                const bowl = document.createElement('div');
-                bowl.className = 'bowl';
-                cakeStage.appendChild(bowl);
+            // 步骤0: 准备材料 - 生动的跳跃效果
+            function showPreparation() {
+                const ingredients = [
+                    { emoji: '🥚', color: '#fff', x: 200, size: 80 },
+                    { emoji: '🌾', color: '#f5deb3', x: 350, size: 70 },
+                    { emoji: '🍬', color: '#ffcccb', x: 500, size: 60 },
+                    { emoji: '🥛', color: '#f0fff0', x: 650, size: 75 }
+                ];
                 
-                // 创建面糊
-                const batter = document.createElement('div');
-                batter.className = 'batter';
-                cakeStage.appendChild(batter);
-                
-                // 创建牛奶滴落
-                for (let i = 0; i < 5; i++) {
-                    const milkDrop = document.createElement('div');
-                    milkDrop.className = 'milk';
-                    milkDrop.style.width = '15px';
-                    milkDrop.style.height = '15px';
-                    milkDrop.style.left = `${100 + i * 15}px`;
-                    milkDrop.style.top = `${-20 - i * 10}px`;
-                    milkDrop.style.opacity = '0';
-                    cakeStage.appendChild(milkDrop);
+                ingredients.forEach((ing, index) => {
+                    const element = document.createElement('div');
+                    element.className = 'animated-element bounce';
+                    element.style.fontSize = ing.size + 'px';
+                    element.style.left = ing.x + 'px';
+                    element.style.top = '250px';
+                    element.style.opacity = '0';
+                    element.style.animationDelay = index * 0.3 + 's';
+                    element.textContent = ing.emoji;
+                    element.style.filter = 'drop-shadow(0 5px 15px rgba(0,0,0,0.3))';
+                    animationArea.appendChild(element);
                     
-                    // 牛奶滴落动画
+                    // 弹跳入场
                     setTimeout(() => {
-                        milkDrop.style.transition = 'top 1s, opacity 1s';
-                        milkDrop.style.top = '200px';
-                        milkDrop.style.opacity = '1';
-                    }, i * 300);
-                }
+                        element.style.transition = 'all 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                        
+                        // 连续弹跳
+                        setTimeout(() => {
+                            element.style.animation = 'bounce 0.5s ease infinite alternate';
+                        }, 600);
+                    }, index * 200);
+                });
             }
             
-            // 步骤3: 筛入面粉
-            function showAddingFlour() {
-                // 创建碗
-                const bowl = document.createElement('div');
-                bowl.className = 'bowl';
-                cakeStage.appendChild(bowl);
-                
-                // 创建面糊
-                const batter = document.createElement('div');
-                batter.className = 'batter';
-                cakeStage.appendChild(batter);
-                
-                // 创建面粉下落
-                for (let i = 0; i < 20; i++) {
-                    const flour = document.createElement('div');
-                    flour.className = 'flour';
-                    flour.style.width = `${5 + Math.random() * 10}px`;
-                    flour.style.height = `${5 + Math.random() * 10}px`;
-                    flour.style.left = `${100 + Math.random() * 100}px`;
-                    flour.style.top = `${-10 - Math.random() * 50}px`;
-                    flour.style.opacity = '0';
-                    cakeStage.appendChild(flour);
-                    
-                    // 面粉下落动画
-                    setTimeout(() => {
-                        flour.style.transition = 'top 2s, opacity 2s';
-                        flour.style.top = '200px';
-                        flour.style.opacity = '0.8';
-                    }, i * 100);
-                }
-            }
-            
-            // 步骤4: 搅拌面糊
+            // 步骤1: 搅拌面糊 - 旋转搅拌效果
             function showMixing() {
                 // 创建碗
                 const bowl = document.createElement('div');
-                bowl.className = 'bowl';
-                cakeStage.appendChild(bowl);
-                
-                // 创建面糊
-                const batter = document.createElement('div');
-                batter.className = 'batter';
-                cakeStage.appendChild(batter);
+                bowl.style.position = 'absolute';
+                bowl.style.width = '250px';
+                bowl.style.height = '120px';
+                bowl.style.background = 'radial-gradient(circle, #888, #666)';
+                bowl.style.borderRadius = '0 0 150px 150px';
+                bowl.style.left = '375px';
+                bowl.style.top = '300px';
+                bowl.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
+                bowl.style.transform = 'scale(0)';
+                animationArea.appendChild(bowl);
                 
                 // 创建搅拌器
                 const mixer = document.createElement('div');
-                mixer.className = 'mixer animate-mixer';
-                cakeStage.appendChild(mixer);
+                mixer.className = 'animated-element rotate';
+                mixer.style.width = '20px';
+                mixer.style.height = '150px';
+                mixer.style.background = 'linear-gradient(to bottom, #666, #999)';
+                mixer.style.left = '500px';
+                mixer.style.top = '200px';
+                mixer.style.borderRadius = '10px';
+                mixer.style.transformOrigin = 'center 180px';
+                animationArea.appendChild(mixer);
                 
-                // 创建气泡效果
-                for (let i = 0; i < 10; i++) {
-                    setTimeout(() => {
-                        const bubble = document.createElement('div');
-                        bubble.style.position = 'absolute';
-                        bubble.style.width = '8px';
-                        bubble.style.height = '8px';
-                        bubble.style.backgroundColor = '#fff';
-                        bubble.style.borderRadius = '50%';
-                        bubble.style.opacity = '0.7';
-                        bubble.style.left = `${120 + Math.random() * 40}px`;
-                        bubble.style.top = '220px';
-                        cakeStage.appendChild(bubble);
-                        
-                        // 气泡上升动画
-                        setTimeout(() => {
-                            bubble.style.transition = 'top 1.5s, opacity 1.5s';
-                            bubble.style.top = '150px';
-                            bubble.style.opacity = '0';
-                            
-                            // 移除气泡
-                            setTimeout(() => {
-                                if (bubble.parentNode) {
-                                    cakeStage.removeChild(bubble);
-                                }
-                            }, 1500);
-                        }, 10);
-                    }, i * 300);
-                }
-            }
-            
-            // 步骤5: 倒入模具
-            function showPouring() {
-                // 创建蛋糕模具
-                const cakeMold = document.createElement('div');
-                cakeMold.className = 'cake-mold';
-                cakeStage.appendChild(cakeMold);
-                
-                // 创建面糊倒入效果
+                // 创建面糊
                 const batter = document.createElement('div');
-                batter.className = 'batter';
-                batter.style.width = '20px';
-                batter.style.height = '10px';
-                batter.style.bottom = '170px';
-                batter.style.left = '100px';
-                batter.style.borderRadius = '5px';
-                cakeStage.appendChild(batter);
+                batter.style.position = 'absolute';
+                batter.style.width = '200px';
+                batter.style.height = '80px';
+                batter.style.background = 'linear-gradient(to bottom, #f8e0b0, #e6b873)';
+                batter.style.borderRadius = '100px';
+                batter.style.left = '400px';
+                batter.style.top = '340px';
+                batter.style.opacity = '0';
+                batter.style.boxShadow = '0 5px 15px rgba(230, 184, 115, 0.5)';
+                animationArea.appendChild(batter);
                 
-                // 面糊倒入动画
+                // 动画序列
                 setTimeout(() => {
-                    batter.style.transition = 'left 1.5s, bottom 1.5s, width 1.5s, height 1.5s';
-                    batter.style.left = '50%';
-                    batter.style.bottom = '100px';
-                    batter.style.width = '140px';
-                    batter.style.height = '60px';
+                    bowl.style.transition = 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    bowl.style.transform = 'scale(1)';
                     
-                    // 1.5秒后显示蛋糕
                     setTimeout(() => {
-                        batter.style.display = 'none';
-                        const cake = document.createElement('div');
-                        cake.className = 'cake';
-                        cakeStage.appendChild(cake);
-                    }, 1500);
-                }, 500);
+                        mixer.style.animation = 'rotate 0.5s linear infinite';
+                        
+                        setTimeout(() => {
+                            batter.style.transition = 'all 1s ease';
+                            batter.style.opacity = '1';
+                            
+                            // 添加搅拌气泡
+                            for (let i = 0; i < 15; i++) {
+                                setTimeout(() => {
+                                    const bubble = document.createElement('div');
+                                    bubble.style.position = 'absolute';
+                                    bubble.style.width = Math.random() * 15 + 5 + 'px';
+                                    bubble.style.height = bubble.style.width;
+                                    bubble.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                                    bubble.style.borderRadius = '50%';
+                                    bubble.style.left = (400 + Math.random() * 200) + 'px';
+                                    bubble.style.top = '340px';
+                                    bubble.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
+                                    animationArea.appendChild(bubble);
+                                    
+                                    bubble.style.transition = 'all 1.5s ease-out';
+                                    bubble.style.top = (200 + Math.random() * 100) + 'px';
+                                    bubble.style.left = (parseInt(bubble.style.left) + Math.random() * 100 - 50) + 'px';
+                                    bubble.style.opacity = '0';
+                                    
+                                    setTimeout(() => bubble.remove(), 1500);
+                                }, i * 200);
+                            }
+                        }, 500);
+                    }, 300);
+                }, 200);
             }
             
-            // 步骤6: 烘烤蛋糕
+            // 步骤2: 倒入模具 - 流动效果
+            function showPouring() {
+                // 创建流动的液体
+                const liquid = document.createElement('div');
+                liquid.className = 'animated-element';
+                liquid.style.width = '30px';
+                liquid.style.height = '200px';
+                liquid.style.background = 'linear-gradient(to bottom, #f8e0b0, transparent)';
+                liquid.style.left = '485px';
+                liquid.style.top = '200px';
+                liquid.style.borderRadius = '15px';
+                liquid.style.opacity = '0';
+                animationArea.appendChild(liquid);
+                
+                // 创建模具
+                const mold = document.createElement('div');
+                mold.className = 'animated-element float-up';
+                mold.style.width = '180px';
+                mold.style.height = '100px';
+                mold.style.background = 'linear-gradient(135deg, #aaa, #888)';
+                mold.style.left = '410px';
+                mold.style.top = '350px';
+                mold.style.borderRadius = '20px 20px 10px 10px';
+                mold.style.transform = 'scale(0)';
+                mold.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
+                animationArea.appendChild(mold);
+                
+                // 动画序列
+                setTimeout(() => {
+                    liquid.style.transition = 'all 0.5s ease';
+                    liquid.style.opacity = '1';
+                    liquid.style.height = '200px';
+                    
+                    setTimeout(() => {
+                        mold.style.transition = 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                        mold.style.transform = 'scale(1)';
+                        
+                        // 液体流入模具
+                        setTimeout(() => {
+                            const filling = document.createElement('div');
+                            filling.style.position = 'absolute';
+                            filling.style.width = '160px';
+                            filling.style.height = '0';
+                            filling.style.background = 'linear-gradient(to top, #f8e0b0, #e6b873)';
+                            filling.style.left = '420px';
+                            filling.style.top = '430px';
+                            filling.style.borderRadius = '10px 10px 0 0';
+                            animationArea.appendChild(filling);
+                            
+                            filling.style.transition = 'height 1.5s ease-in-out';
+                            filling.style.height = '60px';
+                            
+                            // 液体消失
+                            setTimeout(() => {
+                                liquid.style.transition = 'opacity 0.5s ease';
+                                liquid.style.opacity = '0';
+                            }, 1000);
+                        }, 300);
+                    }, 500);
+                }, 200);
+            }
+            
+            // 步骤3: 烘烤蛋糕 - 烤箱加热效果
             function showBaking() {
                 // 创建烤箱
                 const oven = document.createElement('div');
-                oven.className = 'oven';
-                cakeStage.appendChild(oven);
+                oven.className = 'animated-element';
+                oven.style.width = '300px';
+                oven.style.height = '200px';
+                oven.style.background = 'linear-gradient(135deg, #8b4513, #a0522d)';
+                oven.style.left = '350px';
+                oven.style.top = '250px';
+                oven.style.borderRadius = '15px';
+                oven.style.border = '10px solid #654321';
+                oven.style.transform = 'scale(0)';
+                oven.style.overflow = 'hidden';
+                animationArea.appendChild(oven);
                 
                 // 创建烤箱窗口
-                const ovenWindow = document.createElement('div');
-                ovenWindow.className = 'oven-window';
-                oven.appendChild(ovenWindow);
+                const window = document.createElement('div');
+                window.style.width = '150px';
+                window.style.height = '80px';
+                window.style.background = 'rgba(0, 0, 0, 0.8)';
+                window.style.position = 'absolute';
+                window.style.left = '75px';
+                window.style.top = '20px';
+                window.style.borderRadius = '10px';
+                oven.appendChild(window);
                 
                 // 创建蛋糕
                 const cake = document.createElement('div');
-                cake.className = 'cake';
-                cake.style.bottom = '120px';
-                cakeStage.appendChild(cake);
+                cake.className = 'animated-element';
+                cake.style.width = '120px';
+                cake.style.height = '60px';
+                cake.style.background = 'linear-gradient(to top, #e6b873, #d4a65a)';
+                cake.style.position = 'absolute';
+                cake.style.left = '90px';
+                cake.style.top = '100px';
+                cake.style.borderRadius = '10px';
+                cake.style.opacity = '0';
+                oven.appendChild(cake);
                 
-                // 创建热量效果
-                for (let i = 0; i < 15; i++) {
-                    const heat = document.createElement('div');
-                    heat.className = 'heat animate-heat';
-                    heat.style.left = `${50 + Math.random() * 100}px`;
-                    heat.style.top = `${100 + Math.random() * 30}px`;
-                    heat.style.animationDelay = `${i * 0.2}s`;
-                    cakeStage.appendChild(heat);
-                }
-                
-                // 蛋糕膨胀动画
+                // 动画序列
                 setTimeout(() => {
-                    cake.classList.add('animate-rise');
-                }, 1000);
-            }
-            
-            // 步骤7: 包装蛋糕
-            function showPackaging() {
-                // 创建完成的蛋糕
-                const cakeBaked = document.createElement('div');
-                cakeBaked.className = 'cake-baked pulse';
-                cakeStage.appendChild(cakeBaked);
-                
-                // 创建装饰
-                for (let i = 0; i < 5; i++) {
-                    const sprinkle = document.createElement('div');
-                    sprinkle.style.position = 'absolute';
-                    sprinkle.style.width = '10px';
-                    sprinkle.style.height = '10px';
-                    sprinkle.style.backgroundColor = i % 2 === 0 ? '#ff6b9d' : '#4dabf7';
-                    sprinkle.style.borderRadius = '50%';
-                    sprinkle.style.left = `${100 + i * 20}px`;
-                    sprinkle.style.top = '120px';
-                    sprinkle.style.opacity = '0';
-                    cakeStage.appendChild(sprinkle);
+                    oven.style.transition = 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    oven.style.transform = 'scale(1)';
                     
-                    // 装饰出现动画
                     setTimeout(() => {
-                        sprinkle.style.transition = 'opacity 0.5s';
-                        sprinkle.style.opacity = '1';
-                    }, i * 300);
-                }
-                
-                // 2秒后蛋糕变成包装盒
-                setTimeout(() => {
-                    cakeBaked.style.display = 'none';
-                    
-                    // 创建包装盒
-                    const package = document.createElement('div');
-                    package.className = 'package';
-                    package.innerHTML = '<i class="fas fa-birthday-cake"></i>';
-                    cakeStage.appendChild(package);
-                }, 2000);
-            }
-            
-            // 步骤8: 飞机运送
-            function showAirplaneDelivery() {
-                // 创建云朵背景
-                createClouds();
-                
-                // 创建飞机
-                const airplane = document.createElement('div');
-                airplane.className = 'airplane';
-                airplane.innerHTML = `
-                    <div class="airplane-body"></div>
-                    <div class="airplane-wing"></div>
-                    <div class="airplane-tail"></div>
-                    <div class="airplane-propeller"></div>
-                `;
-                cakeStage.appendChild(airplane);
-                
-                // 创建包装盒
-                const package = document.createElement('div');
-                package.className = 'package';
-                package.innerHTML = '<i class="fas fa-birthday-cake"></i>';
-                package.style.top = '50%';
-                package.style.left = '50%';
-                cakeStage.appendChild(package);
-                
-                // 飞机飞行动画
-                setTimeout(() => {
-                    airplane.classList.add('animate-airplane-fly');
-                    const propeller = airplane.querySelector('.airplane-propeller');
-                    propeller.classList.add('animate-propeller');
-                    
-                    // 飞机飞到中间时，包装盒飞到飞机上
-                    setTimeout(() => {
-                        package.classList.add('animate-box-deliver');
+                        cake.style.transition = 'all 1s ease';
+                        cake.style.opacity = '1';
                         
-                        // 包装盒飞到飞机上后，与飞机一起飞走
+                        // 加热效果
+                        for (let i = 0; i < 20; i++) {
+                            setTimeout(() => {
+                                const heat = document.createElement('div');
+                                heat.style.position = 'absolute';
+                                heat.style.width = '10px';
+                                heat.style.height = '10px';
+                                heat.style.background = 'radial-gradient(circle, #ff4500, transparent)';
+                                heat.style.borderRadius = '50%';
+                                heat.style.left = (Math.random() * 280 + 10) + 'px';
+                                heat.style.top = (Math.random() * 180 + 10) + 'px';
+                                heat.style.boxShadow = '0 0 20px #ff4500';
+                                oven.appendChild(heat);
+                                
+                                heat.style.animation = 'twinkle 0.5s ease-out';
+                                setTimeout(() => heat.remove(), 500);
+                            }, i * 200);
+                        }
+                        
+                        // 蛋糕膨胀
                         setTimeout(() => {
-                            package.style.left = 'calc(50% + 50px)';
-                            package.style.top = 'calc(50% - 20px)';
-                        }, 1500);
-                    }, 1000);
+                            cake.style.transition = 'all 2s ease-in-out';
+                            cake.style.height = '100px';
+                            cake.style.top = '60px';
+                        }, 1000);
+                    }, 300);
+                }, 200);
+            }
+            
+            // 步骤4: 装饰蛋糕 - 撒糖粒效果
+            function showDecorating() {
+                // 创建蛋糕
+                const cake = document.createElement('div');
+                cake.className = 'animated-element float-up';
+                cake.style.width = '200px';
+                cake.style.height = '120px';
+                cake.style.background = 'radial-gradient(ellipse at center, #d4a65a, #b89446)';
+                cake.style.left = '400px';
+                cake.style.top = '290px';
+                cake.style.borderRadius = '20px 20px 0 0';
+                cake.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
+                cake.style.transform = 'scale(1)';
+                animationArea.appendChild(cake);
+                
+                // 创建顶部奶油
+                const cream = document.createElement('div');
+                cream.style.position = 'absolute';
+                cream.style.width = '100%';
+                cream.style.height = '30px';
+                cream.style.background = 'linear-gradient(to bottom, #fffaf0, #f0e6d6)';
+                cream.style.top = '0';
+                cream.style.borderRadius = '20px 20px 0 0';
+                cake.appendChild(cream);
+                
+                // 撒糖粒效果
+                setTimeout(() => {
+                    const colors = ['#ff3366', '#33ccff', '#ffcc00', '#99ff33', '#ff66cc'];
+                    
+                    for (let i = 0; i < 30; i++) {
+                        setTimeout(() => {
+                            const sprinkle = document.createElement('div');
+                            sprinkle.style.position = 'absolute';
+                            sprinkle.style.width = '12px';
+                            sprinkle.style.height = '12px';
+                            sprinkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                            sprinkle.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                            sprinkle.style.left = (Math.random() * 180 + 410) + 'px';
+                            sprinkle.style.top = '250px';
+                            sprinkle.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+                            sprinkle.style.transform = 'scale(0) rotate(0deg)';
+                            animationArea.appendChild(sprinkle);
+                            
+                            sprinkle.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                            sprinkle.style.top = (290 + Math.random() * 100) + 'px';
+                            sprinkle.style.left = (410 + Math.random() * 180) + 'px';
+                            sprinkle.style.transform = `scale(1) rotate(${Math.random() * 360}deg)`;
+                            
+                            // 弹跳效果
+                            setTimeout(() => {
+                                sprinkle.style.transition = 'transform 0.3s ease';
+                                sprinkle.style.transform = `scale(1.2) rotate(${Math.random() * 360}deg)`;
+                                
+                                setTimeout(() => {
+                                    sprinkle.style.transform = `scale(1) rotate(${Math.random() * 360}deg)`;
+                                }, 300);
+                            }, 500);
+                        }, i * 100);
+                    }
                 }, 500);
             }
             
-            // 步骤9: 签收蛋糕
-            function showDeliveryAndReceipt() {
-                // 创建房屋
-                const house = document.createElement('div');
-                house.className = 'house';
-                house.innerHTML = `
-                    <div class="house-roof"></div>
-                    <div class="house-body"></div>
-                    <div class="house-door"></div>
-                    <div class="house-window"></div>
-                `;
-                cakeStage.appendChild(house);
+            // 步骤5: 包装蛋糕 - 包装效果
+            function showPackaging() {
+                // 蛋糕变成包装盒
+                const cake = document.createElement('div');
+                cake.className = 'animated-element bounce';
+                cake.style.width = '200px';
+                cake.style.height = '150px';
+                cake.style.background = 'linear-gradient(135deg, #d2691e, #8b4513)';
+                cake.style.left = '400px';
+                cake.style.top = '275px';
+                cake.style.borderRadius = '15px';
+                cake.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
+                cake.style.transform = 'scale(1)';
+                animationArea.appendChild(cake);
                 
-                // 创建送货员
-                const deliveryPerson = document.createElement('div');
-                deliveryPerson.className = 'delivery-person';
-                deliveryPerson.innerHTML = `
-                    <div class="person-head"></div>
-                    <div class="person-body"></div>
-                    <div class="person-legs">
-                        <div class="leg"></div>
-                        <div class="leg"></div>
-                    </div>
-                `;
-                cakeStage.appendChild(deliveryPerson);
+                // 包装带
+                const ribbon = document.createElement('div');
+                ribbon.style.position = 'absolute';
+                ribbon.style.width = '240px';
+                ribbon.style.height = '30px';
+                ribbon.style.background = 'linear-gradient(135deg, #ff3366, #ff0066)';
+                ribbon.style.left = '380px';
+                ribbon.style.top = '325px';
+                ribbon.style.borderRadius = '15px';
+                ribbon.style.transform = 'scaleX(0)';
+                animationArea.appendChild(ribbon);
                 
-                // 创建包装盒
-                const deliveryBox = document.createElement('div');
-                deliveryBox.className = 'delivery-box';
-                deliveryBox.innerHTML = '<i class="fas fa-gift"></i>';
-                cakeStage.appendChild(deliveryBox);
+                // 蝴蝶结
+                const bow = document.createElement('div');
+                bow.className = 'wiggle';
+                bow.style.position = 'absolute';
+                bow.style.width = '40px';
+                bow.style.height = '40px';
+                bow.style.background = 'linear-gradient(135deg, #ff3366, #ff0066)';
+                bow.style.left = '480px';
+                bow.style.top = '310px';
+                bow.style.borderRadius = '10px';
+                bow.style.transform = 'rotate(45deg) scale(0)';
+                animationArea.appendChild(bow);
                 
-                // 送货员走路动画
+                // 动画序列
                 setTimeout(() => {
-                    deliveryPerson.classList.add('animate-person-walk');
+                    // 包装带出现
+                    ribbon.style.transition = 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    ribbon.style.transform = 'scaleX(1)';
                     
-                    // 送货员走到房屋前
+                    // 蝴蝶结出现
                     setTimeout(() => {
-                        // 显示收件人
-                        const receiver = document.createElement('div');
-                        receiver.className = 'receiver';
-                        receiver.innerHTML = `
-                            <div class="receiver-head"></div>
-                            <div class="receiver-body"></div>
-                        `;
-                        cakeStage.appendChild(receiver);
-                        
-                        // 收件人出现
+                        bow.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                        bow.style.transform = 'rotate(45deg) scale(1)';
+                        bow.style.animation = 'wiggle 0.5s ease-in-out infinite alternate';
+                    }, 300);
+                    
+                    // 包装盒弹跳
+                    cake.style.animation = 'bounce 0.5s ease infinite alternate';
+                }, 200);
+            }
+            
+            // 步骤6: 飞机运送 - 飞行动画
+            function showAirplane() {
+                // 创建飞机
+                const airplane = document.createElement('div');
+                airplane.className = 'animated-element';
+                airplane.innerHTML = '✈️';
+                airplane.style.fontSize = '100px';
+                airplane.style.left = '-150px';
+                airplane.style.top = '300px';
+                airplane.style.filter = 'drop-shadow(0 5px 15px rgba(0,0,0,0.5))';
+                animationArea.appendChild(airplane);
+                
+                // 创建云朵
+                for (let i = 0; i < 5; i++) {
+                    const cloud = document.createElement('div');
+                    cloud.style.position = 'absolute';
+                    cloud.style.fontSize = '60px';
+                    cloud.style.left = (200 + i * 150) + 'px';
+                    cloud.style.top = (200 + Math.random() * 200) + 'px';
+                    cloud.style.opacity = '0.7';
+                    cloud.textContent = '☁️';
+                    cloud.style.animation = `floatUp ${3 + Math.random() * 2}s ease-in-out infinite`;
+                    animationArea.appendChild(cloud);
+                }
+                
+                // 飞行动画
+                setTimeout(() => {
+                    airplane.style.transition = 'left 4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    airplane.style.left = '1100px';
+                    airplane.style.transform = 'rotate(20deg)';
+                    
+                    // 添加尾迹
+                    for (let i = 0; i < 20; i++) {
                         setTimeout(() => {
-                            receiver.classList.add('animate-receiver-appear');
+                            const trail = document.createElement('div');
+                            trail.style.position = 'absolute';
+                            trail.style.width = '20px';
+                            trail.style.height = '20px';
+                            trail.style.background = 'rgba(255, 255, 255, 0.5)';
+                            trail.style.borderRadius = '50%';
+                            trail.style.left = (parseInt(airplane.style.left) - 50) + 'px';
+                            trail.style.top = airplane.style.top;
+                            trail.style.opacity = '0';
+                            animationArea.appendChild(trail);
                             
-                            // 送货员放下包装盒
+                            trail.style.transition = 'all 1s ease-out';
+                            trail.style.opacity = '0.8';
+                            trail.style.transform = 'scale(1.5)';
+                            
                             setTimeout(() => {
-                                deliveryBox.classList.add('animate-box-deliver');
-                                
-                                // 创建笑脸
-                                setTimeout(() => {
-                                    const smiley = document.createElement('div');
-                                    smiley.className = 'smiley animate-smiley';
-                                    smiley.innerHTML = '😊';
-                                    smiley.style.left = 'calc(50% - 15px)';
-                                    smiley.style.top = '100px';
-                                    cakeStage.appendChild(smiley);
-                                    
-                                    // 送货员离开
-                                    setTimeout(() => {
-                                        deliveryPerson.classList.remove('animate-person-walk');
-                                        deliveryPerson.classList.add('animate-person-leave');
-                                    }, 1000);
-                                }, 1000);
-                            }, 1000);
-                        }, 1000);
-                    }, 3000);
-                }, 1000);
-            }
-            
-            // 开始动画
-            function startAnimation() {
-                if (isAnimating || isPaused) return;
-                
-                isAnimating = true;
-                updateProgress();
-                startPauseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
-                
-                // 显示当前步骤动画
-                showStepAnimation(currentStep);
-                
-                // 设置计时器进入下一步
-                clearTimeout(animationTimer);
-                animationTimer = setTimeout(() => {
-                    isAnimating = false;
-                    
-                    // 如果是自动播放且不是最后一步，自动进入下一步
-                    if (isAutoPlay && currentStep < steps.length - 1 && !isPaused) {
-                        nextStep();
-                    } else if (currentStep === steps.length - 1) {
-                        // 如果是最后一步，更新按钮文本
-                        startPauseBtn.innerHTML = '<i class="fas fa-check"></i> 完成';
-                    } else {
-                        startPauseBtn.innerHTML = '<i class="fas fa-play"></i> 继续';
+                                trail.style.opacity = '0';
+                                setTimeout(() => trail.remove(), 1000);
+                            }, 500);
+                        }, i * 200);
                     }
-                }, steps[currentStep].duration);
+                }, 500);
             }
             
-            // 下一步
-            function nextStep() {
-                if (currentStep < steps.length - 1 && !isAnimating) {
-                    currentStep++;
-                    updateProgress();
-                    startAnimation();
-                    
-                    // 如果是最后一步，更新按钮文本
-                    if (currentStep === steps.length - 1) {
-                        startPauseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
-                    }
-                }
-            }
-            
-            // 上一步
-            function prevStep() {
-                if (currentStep > 0 && !isAnimating) {
-                    currentStep--;
-                    updateProgress();
-                    startAnimation();
-                }
-            }
-            
-            // 暂停/继续动画
-            function togglePause() {
-                if (isAnimating && !isPaused) {
-                    // 暂停动画
-                    isPaused = true;
-                    startPauseBtn.innerHTML = '<i class="fas fa-play"></i> 继续';
-                    clearTimeout(animationTimer);
-                    
-                    // 显示暂停指示
-                    instruction.textContent = "动画已暂停，点击继续按钮恢复播放";
-                    
-                    // 显示暂停指示
-                    autoPlayIndicator.innerHTML = '<i class="fas fa-pause"></i> 已暂停';
-                } else if (isPaused) {
-                    // 继续动画
-                    isPaused = false;
-                    startPauseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
-                    
-                    // 恢复自动播放指示
-                    if (isAutoPlay) {
-                        autoPlayIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 自动播放中';
-                    }
-                    
-                    // 继续播放当前步骤动画
-                    startAnimation();
-                } else {
-                    // 如果动画不在进行中，开始动画
-                    startAnimation();
-                }
-            }
-            
-            // 重置
-            function resetAnimation() {
-                currentStep = 0;
-                isAnimating = false;
-                isPaused = false;
-                isAutoPlay = true;
-                clearTimeout(animationTimer);
-                updateProgress();
-                showStepAnimation(currentStep);
-                startPauseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
-                startPauseBtn.disabled = false;
-                autoPlayIndicator.style.display = 'block';
-                autoPlayIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 自动播放中';
-                autoPlayNotice.innerHTML = '<i class="fas fa-play-circle"></i> 动画将自动播放';
+            // 步骤7: 送货员配送 - 行走动画
+            function showDelivery() {
+                // 创建送货员
+                const deliveryMan = document.createElement('div');
+                deliveryMan.className = 'animated-element';
+                deliveryMan.innerHTML = '🚚';
+                deliveryMan.style.fontSize = '80px';
+                deliveryMan.style.left = '-100px';
+                deliveryMan.style.top = '320px';
+                deliveryMan.style.filter = 'drop-shadow(0 5px 15px rgba(0,0,0,0.3))';
+                animationArea.appendChild(deliveryMan);
                 
-                // 重置后自动开始播放
+                // 创建道路
+                const road = document.createElement('div');
+                road.style.position = 'absolute';
+                road.style.width = '1000px';
+                road.style.height = '5px';
+                road.style.background = 'linear-gradient(to right, #666, #888, #666)';
+                road.style.left = '0';
+                road.style.top = '380px';
+                animationArea.appendChild(road);
+                
+                // 行走动画
                 setTimeout(() => {
-                    instruction.textContent = "动画已重置，正在重新开始播放...";
-                    startAnimation();
-                }, 1000);
+                    deliveryMan.style.transition = 'left 3s ease-in-out';
+                    deliveryMan.style.left = '450px';
+                    deliveryMan.style.animation = 'walk 0.5s ease-in-out infinite';
+                    
+                    // 添加灰尘效果
+                    for (let i = 0; i < 10; i++) {
+                        setTimeout(() => {
+                            const dust = document.createElement('div');
+                            dust.style.position = 'absolute';
+                            dust.style.width = '10px';
+                            dust.style.height = '10px';
+                            dust.style.background = '#888';
+                            dust.style.borderRadius = '50%';
+                            dust.style.left = (parseInt(deliveryMan.style.left) - 20) + 'px';
+                            dust.style.top = '375px';
+                            dust.style.opacity = '0';
+                            animationArea.appendChild(dust);
+                            
+                            dust.style.transition = 'all 1s ease-out';
+                            dust.style.opacity = '0.6';
+                            dust.style.transform = 'translateY(-20px) scale(1.5)';
+                            
+                            setTimeout(() => {
+                                dust.style.opacity = '0';
+                                setTimeout(() => dust.remove(), 1000);
+                            }, 500);
+                        }, i * 300);
+                    }
+                }, 500);
             }
             
-            // 启动自动播放
-            function startAutoPlay() {
-                isAutoPlay = true;
-                autoPlayIndicator.style.display = 'block';
-                autoPlayNotice.innerHTML = '<i class="fas fa-play-circle"></i> 动画正在自动播放中...';
+            // 步骤8: 客户签收 - 庆祝效果
+            function showReceiving() {
+                // 创建开心的客户
+                const customer = document.createElement('div');
+                customer.className = 'animated-element bounce';
+                customer.innerHTML = '😄';
+                customer.style.fontSize = '120px';
+                customer.style.left = '440px';
+                customer.style.top = '280px';
+                customer.style.filter = 'drop-shadow(0 5px 20px rgba(255,215,0,0.5))';
+                animationArea.appendChild(customer);
                 
-                // 3秒后开始播放
+                // 创建蛋糕
+                const cake = document.createElement('div');
+                cake.className = 'animated-element float-up';
+                cake.innerHTML = '🎂';
+                cake.style.fontSize = '80px';
+                cake.style.left = '440px';
+                cake.style.top = '400px';
+                cake.style.filter = 'drop-shadow(0 5px 15px rgba(0,0,0,0.3))';
+                animationArea.appendChild(cake);
+                
+                // 庆祝特效
                 setTimeout(() => {
-                    instruction.textContent = "动画开始自动播放，您也可以使用控制按钮手动操作";
-                    startAnimation();
-                }, 3000);
+                    // 彩色纸屑
+                    for (let i = 0; i < 50; i++) {
+                        setTimeout(() => {
+                            const confetti = document.createElement('div');
+                            confetti.style.position = 'absolute';
+                            confetti.style.width = '10px';
+                            confetti.style.height = '10px';
+                            confetti.style.backgroundColor = 
+                                i % 5 === 0 ? '#ff3366' : 
+                                i % 5 === 1 ? '#33ccff' : 
+                                i % 5 === 2 ? '#ffcc00' : 
+                                i % 5 === 3 ? '#99ff33' : 
+                                '#ff66cc';
+                            confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                            confetti.style.left = '500px';
+                            confetti.style.top = '300px';
+                            confetti.style.transform = 'rotate(0deg)';
+                            animationArea.appendChild(confetti);
+                            
+                            const angle = Math.random() * Math.PI * 2;
+                            const distance = Math.random() * 200 + 100;
+                            
+                            confetti.style.transition = 'all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                            confetti.style.left = (500 + Math.cos(angle) * distance) + 'px';
+                            confetti.style.top = (300 + Math.sin(angle) * distance) + 'px';
+                            confetti.style.transform = `rotate(${Math.random() * 720}deg)`;
+                            confetti.style.opacity = '0';
+                            
+                            setTimeout(() => confetti.remove(), 1500);
+                        }, i * 30);
+                    }
+                    
+                    // 爱心特效
+                    for (let i = 0; i < 15; i++) {
+                        setTimeout(() => {
+                            const heart = document.createElement('div');
+                            heart.style.position = 'absolute';
+                            heart.style.fontSize = '30px';
+                            heart.style.left = (440 + Math.random() * 100 - 50) + 'px';
+                            heart.style.top = '250px';
+                            heart.style.opacity = '0';
+                            heart.textContent = '❤️';
+                            heart.style.filter = 'drop-shadow(0 0 10px rgba(255,0,0,0.5))';
+                            animationArea.appendChild(heart);
+                            
+                            heart.style.transition = 'all 2s ease-out';
+                            heart.style.top = '100px';
+                            heart.style.opacity = '1';
+                            
+                            setTimeout(() => {
+                                heart.style.opacity = '0';
+                                setTimeout(() => heart.remove(), 2000);
+                            }, 1500);
+                        }, i * 200);
+                    }
+                }, 500);
             }
             
-            // 事件监听
-            startPauseBtn.addEventListener('click', togglePause);
-            nextBtn.addEventListener('click', function() {
-                // 手动点击时，暂停自动播放
-                isAutoPlay = false;
-                isPaused = false;
-                autoPlayIndicator.style.display = 'none';
-                autoPlayNotice.innerHTML = '<i class="fas fa-hand-pointer"></i> 手动控制模式';
-                nextStep();
-            });
-            prevBtn.addEventListener('click', function() {
-                // 手动点击时，暂停自动播放
-                isAutoPlay = false;
-                isPaused = false;
-                autoPlayIndicator.style.display = 'none';
-                autoPlayNotice.innerHTML = '<i class="fas fa-hand-pointer"></i> 手动控制模式';
-                prevStep();
-            });
-            resetBtn.addEventListener('click', resetAnimation);
+            // 自动播放函数
+            function autoPlay() {
+                if (currentStep < steps.length) {
+                    showStep(currentStep);
+                    
+                    setTimeout(() => {
+                        currentStep++;
+                        if (currentStep >= steps.length) {
+                            // 循环播放
+                            currentStep = 0;
+                        }
+                        autoPlay();
+                    }, steps[currentStep]?.duration || 3000);
+                }
+            }
             
-            // 初始化
-            initSteps();
-            updateProgress();
-            showStepAnimation(currentStep);
-            
-            // 启动自动播放
-            startAutoPlay();
+            // 3秒后开始自动播放
+            setTimeout(() => {
+                autoPlay();
+            }, 1000);
         });
     </script>
 </body>
