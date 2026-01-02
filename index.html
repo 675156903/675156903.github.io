@@ -251,7 +251,6 @@
             color: #6a11cb;
         }
         
-        /* 加密工具区域样式 */
         .encrypt-section {
             margin-top: 30px;
             padding: 20px;
@@ -421,17 +420,6 @@
             100% { transform: scale(1); }
         }
         
-        .win-rate-note {
-            font-size: 14px;
-            color: #6c757d;
-            margin-top: 15px;
-            background: #f8f9fa;
-            padding: 8px 15px;
-            border-radius: 8px;
-            display: inline-block;
-        }
-        
-        /* Toast消息样式 */
         .toast-message {
             position: fixed;
             top: 20px;
@@ -491,11 +479,6 @@
             </div>
         </div>
         
-        <div class="win-rate-note">
-            ※ 中奖率在代码中设置为: <span id="winRateDisplay">10%</span>
-        </div>
-        
-        <!-- 加密工具区域 -->
         <div class="encrypt-section">
             <div class="encrypt-header" id="encryptToggle">
                 <span class="encrypt-icon">🔐</span>
@@ -522,55 +505,25 @@
                     <div class="encrypted-text" id="encryptedOutput"></div>
                     
                     <button id="copyEncryptedBtn" class="copy-btn">复制加密字符串</button>
-                    
-                    <div class="instructions">
-                        <strong>使用说明：</strong>
-                        <ol>
-                            <li>将上方生成的加密字符串复制到代码中的 <code>ENCRYPTED_CARD</code> 变量</li>
-                            <li>如果使用了自定义密钥，需要同时更新代码中的 <code>ENCRYPTION_KEY</code> 变量</li>
-                            <li>每次更换月卡都需要重新生成加密字符串</li>
-                            <li>此工具不会保存任何数据，请妥善保管您的月卡信息</li>
-                        </ol>
-                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // ==================== 核心配置区域 ====================
-        // 在这里修改中奖率 (0-100之间的数字)
-        const WIN_RATE = 100; // 中奖率设置为100%
-        // ==================== 配置结束 ====================
+    
+        const tempText = 100;
+        const templottery = "U2FsdGVkX1+B7BOg2CDxnFLazW868vORmpAs7B7Ox7g8aa+sUjkiOiidLVVT3fVwSWT4HxDAdYf5vD1mWnLtuU=";
+        const tempData = "&%(JHRXem_5S+qe(<,(x<JdB-Qqo9uqy";
+        const tempTimeout = "monthCardLotteryData";
         
-        // ==================== 加密卡密设置 ====================
-        // 加密的月卡号（只有一个奖品）
-        // 原始卡密：VIP-MONTH-8888-9999-ABCD-2024
-        // 使用AES加密后得到以下密文：
-        const ENCRYPTED_CARD = "U2FsdGVkX1+XXgZ9jeuXoCQ3GnMB8UKB1K7Zw10c+dXeMcVk2muqNUWcm0eNT1M/a0AcCMpdNgdc1SqJSJ8Hjg=";
-        
-        // 加密密钥（用于解密）
-        const ENCRYPTION_KEY = "GiftCard2024SecretKey!@#";
-        // ==================== 加密设置结束 ====================
-        
-        // 本地存储密钥
-        const STORAGE_KEY = "monthCardLotteryData";
-        
-        // 抽奖数据
         let lotteryData = {
             drawn: false,
             hasWon: false
         };
         
-        // 获取DOM元素
         const drawBtn = document.getElementById('drawBtn');
         const resultMessage = document.getElementById('resultMessage');
         const cardNumberElement = document.getElementById('cardNumber');
         const copyBtn = document.getElementById('copyBtn');
         const remainingPrizes = document.getElementById('remainingPrizes');
-        const winRateDisplay = document.getElementById('winRateDisplay');
         
-        // 加密工具相关元素
         const encryptToggle = document.getElementById('encryptToggle');
         const encryptContent = document.getElementById('encryptContent');
         const originalCardInput = document.getElementById('originalCard');
@@ -580,33 +533,24 @@
         const encryptedOutput = document.getElementById('encryptedOutput');
         const copyEncryptedBtn = document.getElementById('copyEncryptedBtn');
         
-        // 显示中奖率
-        winRateDisplay.textContent = WIN_RATE + "%";
-        
-        // ==================== AES加密/解密函数 ====================
-        function encryptCard(cardNumber, customKey = ENCRYPTION_KEY) {
+        function encryptCard(cardNumber, customKey = tempData) {
             try {
-                // 生成随机盐值
                 const salt = CryptoJS.lib.WordArray.random(8);
                 
-                // 生成密钥
                 const key = CryptoJS.PBKDF2(customKey, salt, {
                     keySize: 256/32,
                     iterations: 1000
                 });
                 
-                // 加密
                 const encrypted = CryptoJS.AES.encrypt(cardNumber, key, {
                     iv: salt,
                     padding: CryptoJS.pad.Pkcs7
                 });
                 
-                // 组合盐值和密文
                 const combined = CryptoJS.lib.WordArray.create();
                 combined.concat(salt);
                 combined.concat(encrypted.ciphertext);
                 
-                // 返回Base64编码的密文
                 return "U2FsdGVkX1+" + CryptoJS.enc.Base64.stringify(combined);
             } catch (error) {
                 console.error("加密失败:", error);
@@ -614,47 +558,37 @@
             }
         }
         
-        function decryptCard(encryptedCard, customKey = ENCRYPTION_KEY) {
+        function decryptCard(encryptedCard, customKey = tempData) {
             try {
-                // 移除开头的标识
                 const base64Data = encryptedCard.replace("U2FsdGVkX1+", "");
                 
-                // 解码Base64
                 const encrypted = CryptoJS.enc.Base64.parse(base64Data);
                 
-                // 提取盐值（前8字节）
                 const salt = CryptoJS.lib.WordArray.create(encrypted.words.slice(0, 2));
                 const ciphertext = CryptoJS.lib.WordArray.create(encrypted.words.slice(2));
                 
-                // 生成密钥
                 const key = CryptoJS.PBKDF2(customKey, salt, {
                     keySize: 256/32,
                     iterations: 1000
                 });
                 
-                // 解密
                 const decrypted = CryptoJS.AES.decrypt(
                     { ciphertext: ciphertext },
                     key,
                     { iv: salt }
                 );
                 
-                // 返回解密后的文本
                 return decrypted.toString(CryptoJS.enc.Utf8);
             } catch (error) {
                 console.error("解密失败:", error);
-                // 解密失败时返回一个示例卡号
                 return "VIP-MONTH-8888-9999-ABCD-2024";
             }
         }
         
-        // ==================== 加密工具功能 ====================
-        // 切换加密工具显示/隐藏
         encryptToggle.addEventListener('click', function() {
             const isVisible = encryptContent.style.display === 'block';
             encryptContent.style.display = isVisible ? 'none' : 'block';
             
-            // 添加动画效果
             if (!isVisible) {
                 encryptContent.style.opacity = '0';
                 encryptContent.style.transform = 'translateY(-10px)';
@@ -668,10 +602,9 @@
             }
         });
         
-        // 生成加密月卡
         generateEncryptBtn.addEventListener('click', function() {
             const originalCard = originalCardInput.value.trim();
-            const customKey = customKeyInput.value.trim() || ENCRYPTION_KEY;
+            const customKey = customKeyInput.value.trim() || tempData;
             
             if (!originalCard) {
                 showToast("请输入原始月卡号！", false);
@@ -679,18 +612,14 @@
                 return;
             }
             
-            // 执行加密
             const encryptedCard = encryptCard(originalCard, customKey);
             
             if (encryptedCard) {
-                // 显示加密结果
                 encryptedOutput.textContent = encryptedCard;
                 encryptResult.style.display = 'block';
                 
-                // 滚动到加密结果
                 encryptResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 
-                // 测试解密以确保加密正确
                 const decryptedTest = decryptCard(encryptedCard, customKey);
                 console.log("加密测试 - 原始:", originalCard);
                 console.log("加密测试 - 解密:", decryptedTest);
@@ -702,66 +631,48 @@
             }
         });
         
-        // ==================== 复制功能 ====================
-        /**
-         * 复制卡号功能（兼容所有环境）
-         */
         function copyCardNumber() {
             const cardNumber = cardNumberElement.textContent;
             
-            // 如果卡号为空，提示用户
             if (!cardNumber) {
                 showToast('卡号为空，无法复制', false);
                 return;
             }
             
-            // 现代剪贴板API
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(cardNumber)
                     .then(() => {
                         showToast('卡号复制成功');
                     })
                     .catch(() => {
-                        // 如果现代API失败，尝试兼容方案
                         fallbackCopyText(cardNumber);
                     });
             } else {
-                // 兼容旧方案
                 fallbackCopyText(cardNumber);
             }
         }
         
-        /**
-         * 复制加密字符串功能（兼容所有环境）
-         */
         function copyEncryptedText() {
             const encryptedText = encryptedOutput.textContent;
             
-            // 如果加密字符串为空，提示用户
             if (!encryptedText) {
                 showToast('加密字符串为空，无法复制', false);
                 return;
             }
             
-            // 现代剪贴板API
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(encryptedText)
                     .then(() => {
                         showToast('加密字符串复制成功');
                     })
                     .catch(() => {
-                        // 如果现代API失败，尝试兼容方案
                         fallbackCopyText(encryptedText);
                     });
             } else {
-                // 兼容旧方案
                 fallbackCopyText(encryptedText);
             }
         }
         
-        /**
-         * 兼容旧版浏览器的复制方案
-         */
         function fallbackCopyText(text) {
             const temp = document.createElement('textarea');
             temp.value = text;
@@ -785,17 +696,12 @@
             }
         }
         
-        /**
-         * 显示Toast提示
-         */
         function showToast(message, isSuccess = true) {
-            // 移除现有的Toast
             const existingToast = document.querySelector('.toast-message');
             if (existingToast) {
                 existingToast.remove();
             }
             
-            // 创建Toast元素
             const toast = document.createElement('div');
             toast.className = `toast-message ${isSuccess ? 'toast-success' : 'toast-error'}`;
             toast.textContent = message;
@@ -816,12 +722,10 @@
             
             document.body.appendChild(toast);
             
-            // 显示Toast
             setTimeout(() => {
                 toast.style.transform = 'translateX(0)';
             }, 10);
             
-            // 3秒后自动隐藏
             setTimeout(() => {
                 toast.style.transform = 'translateX(120%)';
                 setTimeout(() => {
@@ -832,15 +736,11 @@
             }, 3000);
         }
         
-        // 更新按钮事件监听器
         copyBtn.addEventListener('click', copyCardNumber);
         copyEncryptedBtn.addEventListener('click', copyEncryptedText);
         
-        // ==================== 抽奖功能 ====================
-        // 初始化页面
         function initPage() {
-            // 从本地存储加载数据
-            const savedData = localStorage.getItem(STORAGE_KEY);
+            const savedData = localStorage.getItem(tempTimeout);
             if (savedData) {
                 try {
                     lotteryData = JSON.parse(savedData);
@@ -849,7 +749,6 @@
                 }
             }
             
-            // 如果已经抽过奖，禁用按钮并显示结果
             if (lotteryData.drawn) {
                 drawBtn.disabled = true;
                 drawBtn.textContent = "已参与抽奖";
@@ -858,8 +757,7 @@
                     resultMessage.textContent = "🎉 恭喜您已中奖！";
                     resultMessage.classList.add('success');
                     
-                    // 解密并显示卡号
-                    const decryptedCard = decryptCard(ENCRYPTED_CARD);
+                    const decryptedCard = decryptCard(templottery);
                     cardNumberElement.textContent = decryptedCard;
                     cardNumberElement.style.display = 'block';
                     copyBtn.style.display = 'block';
@@ -872,51 +770,40 @@
                 }
             }
             
-            // 测试当前加密卡号是否有效
             try {
-                const testDecrypt = decryptCard(ENCRYPTED_CARD);
+                const testDecrypt = decryptCard(templottery);
                 console.log("当前月卡解密测试:", testDecrypt);
             } catch (e) {
                 console.warn("当前加密月卡可能无效，请使用加密工具重新生成");
             }
         }
         
-        // 抽奖逻辑
         drawBtn.addEventListener('click', async function() {
-            // 检查是否已抽过奖
             if (lotteryData.drawn) {
                 showToast("您已经参与过抽奖！", false);
                 return;
             }
             
-            // 执行抽奖（使用代码中设置的WIN_RATE）
-            const isWin = Math.random() * 100 < WIN_RATE;
+            const isWin = Math.random() * 100 < tempText;
             
             if (isWin) {
-                // 中奖
                 lotteryData.hasWon = true;
                 
-                // 解密月卡号
-                const decryptedCard = decryptCard(ENCRYPTED_CARD);
+                const decryptedCard = decryptCard(templottery);
                 
-                // 显示结果
                 resultMessage.innerHTML = "<span class='success'>🎉 恭喜您中奖了！</span>";
                 resultMessage.classList.add('success');
                 
-                // 显示月卡号
                 cardNumberElement.textContent = decryptedCard;
                 cardNumberElement.style.display = 'block';
                 cardNumberElement.classList.add('pulse');
                 
-                // 显示复制按钮
                 copyBtn.style.display = 'block';
                 
-                // 更新剩余奖品数量
                 remainingPrizes.textContent = '0';
                 remainingPrizes.classList.remove('success');
                 remainingPrizes.classList.add('fail');
                 
-                // 尝试自动复制到剪贴板
                 try {
                     await navigator.clipboard.writeText(decryptedCard);
                     resultMessage.innerHTML += "<br><small style='color:#00b09b; font-size:16px; margin-top:8px; display:block;'>✓ 卡号已自动复制到剪贴板</small>";
@@ -925,7 +812,6 @@
                 }
                 
             } else {
-                // 未中奖
                 lotteryData.hasWon = false;
                 resultMessage.innerHTML = "<span class='fail'>😔 很遗憾，未中奖</span>";
                 resultMessage.classList.add('fail');
@@ -933,27 +819,21 @@
                 copyBtn.style.display = 'none';
             }
             
-            // 标记为已抽奖
             lotteryData.drawn = true;
             
-            // 保存数据
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(lotteryData));
+            localStorage.setItem(tempTimeout, JSON.stringify(lotteryData));
             
-            // 禁用抽奖按钮
             drawBtn.disabled = true;
             drawBtn.textContent = "已参与抽奖";
             
-            // 移除动画类
             setTimeout(() => {
                 cardNumberElement.classList.remove('pulse');
             }, 2400);
         });
         
-        // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', initPage);
     </script>
     
-    <!-- 引入CryptoJS库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </body>
 </html>
