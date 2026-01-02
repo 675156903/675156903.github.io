@@ -430,6 +430,30 @@
             border-radius: 8px;
             display: inline-block;
         }
+        
+        /* Toast消息样式 */
+        .toast-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            font-weight: 500;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: white;
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #e74c3c, #e67e22);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -482,12 +506,12 @@
                 <div class="encrypt-form">
                     <div class="form-group">
                         <label class="form-label">输入原始月卡号</label>
-                        <input type="text" id="originalCard" class="form-input" placeholder="">
+                        <input type="text" id="originalCard" class="form-input" placeholder="请输入月卡号码">
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label">加密密钥（留空使用默认）</label>
-                        <input type="text" id="customKey" class="form-input" placeholder="">
+                        <input type="text" id="customKey" class="form-input" placeholder="可选，用于增强安全性">
                     </div>
                     
                     <button id="generateEncryptBtn" class="encrypt-btn">生成加密月卡</button>
@@ -516,7 +540,7 @@
     <script>
         // ==================== 核心配置区域 ====================
         // 在这里修改中奖率 (0-100之间的数字)
-        const WIN_RATE = 100; // 中奖率设置为50%
+        const WIN_RATE = 100; // 中奖率设置为100%
         // ==================== 配置结束 ====================
         
         // ==================== 加密卡密设置 ====================
@@ -650,7 +674,7 @@
             const customKey = customKeyInput.value.trim() || ENCRYPTION_KEY;
             
             if (!originalCard) {
-                alert("请输入原始月卡号！");
+                showToast("请输入原始月卡号！", false);
                 originalCardInput.focus();
                 return;
             }
@@ -672,37 +696,145 @@
                 console.log("加密测试 - 解密:", decryptedTest);
                 console.log("加密测试 - 匹配:", originalCard === decryptedTest);
                 
-                // 显示成功消息
-                const successMsg = document.createElement('div');
-                successMsg.innerHTML = `<div style="color:#00b09b; margin-top:10px; font-size:14px;">✓ 加密成功！测试解密验证通过。</div>`;
-                encryptResult.appendChild(successMsg);
-                
-                setTimeout(() => successMsg.remove(), 3000);
+                showToast("✓ 加密成功！");
             } else {
-                alert("加密失败，请检查输入！");
+                showToast("加密失败，请检查输入！", false);
             }
         });
         
-        // 复制加密字符串
-        copyEncryptedBtn.addEventListener('click', async function() {
+        // ==================== 复制功能 ====================
+        /**
+         * 复制卡号功能（兼容所有环境）
+         */
+        function copyCardNumber() {
+            const cardNumber = cardNumberElement.textContent;
+            
+            // 如果卡号为空，提示用户
+            if (!cardNumber) {
+                showToast('卡号为空，无法复制', false);
+                return;
+            }
+            
+            // 现代剪贴板API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(cardNumber)
+                    .then(() => {
+                        showToast('卡号复制成功');
+                    })
+                    .catch(() => {
+                        // 如果现代API失败，尝试兼容方案
+                        fallbackCopyText(cardNumber);
+                    });
+            } else {
+                // 兼容旧方案
+                fallbackCopyText(cardNumber);
+            }
+        }
+        
+        /**
+         * 复制加密字符串功能（兼容所有环境）
+         */
+        function copyEncryptedText() {
             const encryptedText = encryptedOutput.textContent;
             
-            try {
-                await navigator.clipboard.writeText(encryptedText);
-                
-                // 显示复制成功反馈
-                const originalText = copyEncryptedBtn.textContent;
-                copyEncryptedBtn.textContent = "✅ 已复制";
-                copyEncryptedBtn.style.background = "linear-gradient(135deg, #00b894, #00cec9)";
-                
-                setTimeout(() => {
-                    copyEncryptedBtn.textContent = originalText;
-                    copyEncryptedBtn.style.background = "linear-gradient(135deg, #00b09b, #96c93d)";
-                }, 2000);
-            } catch (err) {
-                alert("复制失败，请手动选中加密字符串进行复制");
+            // 如果加密字符串为空，提示用户
+            if (!encryptedText) {
+                showToast('加密字符串为空，无法复制', false);
+                return;
             }
-        });
+            
+            // 现代剪贴板API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(encryptedText)
+                    .then(() => {
+                        showToast('加密字符串复制成功');
+                    })
+                    .catch(() => {
+                        // 如果现代API失败，尝试兼容方案
+                        fallbackCopyText(encryptedText);
+                    });
+            } else {
+                // 兼容旧方案
+                fallbackCopyText(encryptedText);
+            }
+        }
+        
+        /**
+         * 兼容旧版浏览器的复制方案
+         */
+        function fallbackCopyText(text) {
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            temp.setAttribute('readonly', '');
+            temp.style.position = 'absolute';
+            temp.style.left = '-9999px';
+            document.body.appendChild(temp);
+            temp.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('复制成功');
+                } else {
+                    showToast('复制失败', false);
+                }
+            } catch (error) {
+                showToast('复制失败', false);
+            } finally {
+                document.body.removeChild(temp);
+            }
+        }
+        
+        /**
+         * 显示Toast提示
+         */
+        function showToast(message, isSuccess = true) {
+            // 移除现有的Toast
+            const existingToast = document.querySelector('.toast-message');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // 创建Toast元素
+            const toast = document.createElement('div');
+            toast.className = `toast-message ${isSuccess ? 'toast-success' : 'toast-error'}`;
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${isSuccess ? '#00b09b' : '#e74c3c'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                z-index: 1000;
+                font-weight: 500;
+                transform: translateX(120%);
+                transition: transform 0.3s ease;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // 显示Toast
+            setTimeout(() => {
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                toast.style.transform = 'translateX(120%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // 更新按钮事件监听器
+        copyBtn.addEventListener('click', copyCardNumber);
+        copyEncryptedBtn.addEventListener('click', copyEncryptedText);
         
         // ==================== 抽奖功能 ====================
         // 初始化页面
@@ -753,7 +885,7 @@
         drawBtn.addEventListener('click', async function() {
             // 检查是否已抽过奖
             if (lotteryData.drawn) {
-                alert("您已经参与过抽奖！");
+                showToast("您已经参与过抽奖！", false);
                 return;
             }
             
@@ -815,27 +947,6 @@
             setTimeout(() => {
                 cardNumberElement.classList.remove('pulse');
             }, 2400);
-        });
-        
-        // 复制按钮事件
-        copyBtn.addEventListener('click', async function() {
-            const cardNumber = cardNumberElement.textContent;
-            
-            try {
-                await navigator.clipboard.writeText(cardNumber);
-                
-                // 显示复制成功反馈
-                const originalText = copyBtn.textContent;
-                copyBtn.textContent = "✅ 已复制";
-                copyBtn.style.background = "linear-gradient(135deg, #00b894, #00cec9)";
-                
-                setTimeout(() => {
-                    copyBtn.textContent = originalText;
-                    copyBtn.style.background = "linear-gradient(135deg, #00b09b, #96c93d)";
-                }, 2000);
-            } catch (err) {
-                alert("复制失败，请手动选中卡号进行复制");
-            }
         });
         
         // 页面加载完成后初始化
