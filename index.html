@@ -3,835 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>月卡抽奖</title>
+    <title>哈夫币计算器</title>
     <style>
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background: linear-gradient(135deg, #0c1a2d 0%, #142840 100%);
+            color: #e0e9ff;
             min-height: 100vh;
+            padding: 15px;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
         }
         
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
+        .calculator-card {
             width: 100%;
-            max-width: 500px;
-            padding: 40px 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 480px;
+            background-color: rgba(16, 30, 48, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 6px 20px rgba(0, 20, 50, 0.5);
+            border: 1px solid #2a4a75;
+        }
+        
+        .title {
             text-align: center;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #6a11cb, #2575fc);
-        }
-        
-        .card-header {
-            margin-bottom: 30px;
-        }
-        
-        .card-icon {
-            font-size: 60px;
-            margin-bottom: 15px;
-            display: block;
+            margin-bottom: 20px;
         }
         
         h1 {
-            color: #2d3436;
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
+            font-size: 1.5rem;
+            color: #7ab3ff;
+            margin-bottom: 4px;
         }
         
         .subtitle {
-            color: #636e72;
-            font-size: 16px;
-            font-weight: 500;
+            color: #b0d0ff;
+            font-size: 0.85rem;
         }
         
-        .prize-info {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 16px;
-            padding: 20px;
-            margin: 25px 0;
-            border: 2px solid #dee2e6;
+        .input-row {
+            margin-bottom: 15px;
         }
         
-        .prize-label {
-            font-size: 16px;
-            color: #495057;
-            margin-bottom: 10px;
+        .input-label {
             display: block;
-        }
-        
-        .prize-count {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .prize-number {
-            font-size: 36px;
-            font-weight: 800;
-            color: #6a11cb;
-            background: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.2);
-        }
-        
-        .prize-text {
-            font-size: 18px;
-            color: #495057;
+            margin-bottom: 6px;
+            color: #a0c8ff;
             font-weight: 600;
+            font-size: 0.9rem;
         }
         
-        .draw-btn {
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            padding: 22px;
-            font-size: 20px;
-            font-weight: 700;
-            cursor: pointer;
+        .amount-input {
             width: 100%;
-            margin: 10px 0 30px;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(106, 17, 203, 0.3);
-            letter-spacing: 1px;
-            position: relative;
+            padding: 10px 12px;
+            background-color: rgba(25, 45, 70, 0.8);
+            border: 2px solid #3a6ab9;
+            border-radius: 6px;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+        }
+        
+        .amount-input:focus {
+            outline: none;
+            border-color: #5a9aff;
+        }
+        
+        .unit-selector {
+            display: flex;
+            margin: 12px 0 15px;
+            background-color: rgba(25, 45, 70, 0.6);
+            border-radius: 6px;
             overflow: hidden;
         }
         
-        .draw-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: 0.5s;
+        .unit-option {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+            font-size: 0.9rem;
         }
         
-        .draw-btn:hover::before {
-            left: 100%;
+        .unit-option:hover {
+            background-color: rgba(58, 106, 185, 0.3);
         }
         
-        .draw-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(106, 17, 203, 0.4);
+        .unit-option.active {
+            background-color: rgba(58, 106, 185, 0.5);
+            border-bottom-color: #5a9aff;
+            color: white;
         }
         
-        .draw-btn:active {
-            transform: translateY(1px);
-        }
-        
-        .draw-btn:disabled {
-            background: #b2bec3;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .draw-btn:disabled::before {
-            display: none;
-        }
-        
-        .result-box {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            margin-top: 15px;
-            min-height: 160px;
+        .exchange-rate {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            border: 2px solid #e9ecef;
-            transition: all 0.3s;
-        }
-        
-        .result-message {
-            font-size: 22px;
-            font-weight: 600;
-            color: #2d3436;
-            margin-bottom: 15px;
-            text-align: center;
-            line-height: 1.5;
-        }
-        
-        .card-number {
-            font-size: 22px;
-            font-weight: 700;
-            color: #e74c3c;
-            background: linear-gradient(135deg, #fff5f5, #ffeaea);
-            padding: 18px 25px;
-            border-radius: 12px;
             margin: 15px 0;
-            letter-spacing: 2px;
-            word-break: break-all;
-            text-align: center;
-            border: 2px solid #ffcccc;
-            font-family: 'Courier New', monospace;
-            display: none;
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.1);
+            padding: 12px;
+            background-color: rgba(25, 45, 70, 0.6);
+            border-radius: 6px;
+            font-size: 0.9rem;
         }
         
-        .copy-btn {
-            background: linear-gradient(135deg, #00b09b, #96c93d);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 15px 35px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: none;
-            margin-top: 15px;
-            box-shadow: 0 4px 15px rgba(0, 176, 155, 0.3);
-        }
-        
-        .copy-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 176, 155, 0.4);
-        }
-        
-        .copy-btn:active {
-            transform: translateY(1px);
-        }
-        
-        .stats {
+        .rate-display {
             display: flex;
-            justify-content: space-around;
-            margin-top: 25px;
-            padding-top: 25px;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-label {
-            font-size: 14px;
-            color: #636e72;
+            align-items: center;
             margin-bottom: 8px;
+            color: #a0c8ff;
         }
         
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #6a11cb;
-        }
-        
-        .encrypt-section {
-            margin-top: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 16px;
-            border: 2px dashed #6a11cb;
-        }
-        
-        .encrypt-header {
+        .rate-input-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
-            cursor: pointer;
         }
         
-        .encrypt-icon {
-            font-size: 24px;
-            margin-right: 10px;
+        .rate-prefix {
+            margin-right: 6px;
+            color: #e0e9ff;
+            font-size: 0.9rem;
         }
         
-        .encrypt-title {
-            font-size: 18px;
+        .rate-number-input {
+            width: 70px;
+            padding: 7px 10px;
+            background-color: rgba(10, 25, 45, 0.8);
+            border: 2px solid #3a6ab9;
+            border-radius: 5px;
+            color: white;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .rate-unit {
+            margin-left: 6px;
+            color: #7ab3ff;
             font-weight: 600;
-            color: #6a11cb;
         }
         
-        .encrypt-content {
-            display: none;
-            text-align: left;
+        .rate-note {
+            font-size: 0.75rem;
+            color: #8ca3c7;
+            margin-top: 5px;
+            text-align: center;
         }
         
-        .encrypt-form {
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-label {
-            display: block;
-            font-size: 14px;
-            color: #495057;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #6a11cb;
-            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
-        }
-        
-        .encrypt-btn {
-            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-            color: #2d3436;
-            border: none;
-            border-radius: 12px;
-            padding: 15px 25px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-        
-        .encrypt-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 154, 158, 0.3);
-        }
-        
-        .encrypt-result {
-            background: white;
-            border-radius: 10px;
+        .results-box {
+            background-color: rgba(10, 25, 45, 0.8);
+            border-radius: 8px;
             padding: 15px;
             margin-top: 20px;
-            border: 2px solid #dee2e6;
-            display: none;
+            border: 1px solid #2a4a75;
         }
         
-        .result-label {
-            font-size: 14px;
-            color: #636e72;
-            margin-bottom: 10px;
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(58, 106, 185, 0.2);
+            font-size: 0.9rem;
         }
         
-        .encrypted-text {
-            font-family: 'Courier New', monospace;
-            background: #f8f9fa;
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-value {
+            font-weight: 700;
+            color: #7ab3ff;
+            font-size: 1rem;
+        }
+        
+        .quick-reference {
+            margin-top: 20px;
             padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            word-break: break-all;
-            font-size: 14px;
-            color: #2d3436;
-            margin-bottom: 15px;
+            background-color: rgba(58, 106, 185, 0.1);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            border-left: 3px solid #3a6ab9;
         }
         
-        .instructions {
-            font-size: 12px;
-            color: #6c757d;
-            line-height: 1.5;
-            margin-top: 10px;
-            text-align: left;
+        .warning {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(185, 80, 58, 0.1);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: #ffa07a;
+            text-align: center;
+            border: 1px solid rgba(185, 80, 58, 0.3);
         }
         
-        .instructions ol {
-            padding-left: 20px;
-            margin: 10px 0;
-        }
-        
-        .instructions li {
-            margin-bottom: 5px;
-        }
-        
-        @media (max-width: 480px) {
-            .card {
-                padding: 30px 20px;
-                border-radius: 20px;
+        @media (max-width: 600px) {
+            .calculator-card {
+                padding: 15px;
             }
             
             h1 {
-                font-size: 28px;
+                font-size: 1.3rem;
             }
-            
-            .draw-btn {
-                padding: 20px;
-                font-size: 18px;
-            }
-            
-            .card-number {
-                font-size: 20px;
-                padding: 15px 20px;
-            }
-            
-            .result-message {
-                font-size: 20px;
-            }
-        }
-        
-        .success {
-            color: #00b09b !important;
-        }
-        
-        .fail {
-            color: #e74c3c !important;
-        }
-        
-        .pulse {
-            animation: pulse 0.8s ease-in-out 3;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .toast-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            font-weight: 500;
-            transform: translateX(120%);
-            transition: transform 0.3s ease;
-        }
-        
-        .toast-success {
-            background: linear-gradient(135deg, #00b09b, #96c93d);
-            color: white;
-        }
-        
-        .toast-error {
-            background: linear-gradient(135deg, #e74c3c, #e67e22);
-            color: white;
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="card-header">
-            <span class="card-icon">🎁</span>
-            <h1>月卡抽奖</h1>
+    <div class="calculator-card">
+        <div class="title">
+            <h1>哈夫币计算器</h1>
+            <p class="subtitle">三角洲行动游戏货币换算</p>
         </div>
         
-        <div class="prize-info">
-            <span class="prize-label">本次奖品</span>
-            <div class="prize-count">
-                <div class="prize-text">1 张月卡</div>
-            </div>
+        <div class="input-row">
+            <label class="input-label">输入哈夫币数量</label>
+            <input type="number" id="amountInput" class="amount-input" value="" min="0" step="any">
         </div>
         
-        <button id="drawBtn" class="draw-btn">立即抽奖</button>
-        
-        <div class="result-box">
-            <div id="resultMessage" class="result-message">点击抽奖按钮开始</div>
-            <div id="cardNumber" class="card-number"></div>
-            <button id="copyBtn" class="copy-btn">复制卡号</button>
+        <div class="unit-selector">
+            <div class="unit-option" data-unit="1">个</div>
+            <div class="unit-option active" data-unit="1000">K (千)</div>
+            <div class="unit-option" data-unit="1000000">M (百万)</div>
         </div>
         
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-label">奖品总数</div>
-                <div class="stat-value" id="totalPrizes">1</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">剩余奖品</div>
-                <div class="stat-value success" id="remainingPrizes">1</div>
-            </div>
-        </div>
-        
-        <div class="encrypt-section">
-            <div class="encrypt-header" id="encryptToggle">
-                <span class="encrypt-icon">🔐</span>
-                <span class="encrypt-title">月卡加密工具</span>
+        <div class="exchange-rate">
+            <div class="rate-display">
+                <span class="rate-prefix">兑换比例：1元 =</span>
+                <span id="rateDisplay">35万</span>
+                <span class="rate-prefix">哈夫币</span>
             </div>
             
-            <div class="encrypt-content" id="encryptContent">
-                <div class="encrypt-form">
-                    <div class="form-group">
-                        <label class="form-label">输入原始月卡号</label>
-                        <input type="text" id="originalCard" class="form-input" placeholder="请输入月卡号码">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">加密密钥（留空使用默认）</label>
-                        <input type="text" id="customKey" class="form-input" placeholder="可选，用于增强安全性">
-                    </div>
-                    
-                    <button id="generateEncryptBtn" class="encrypt-btn">生成加密月卡</button>
-                </div>
-                
-                <div class="encrypt-result" id="encryptResult">
-                    <div class="result-label">加密后的月卡字符串：</div>
-                    <div class="encrypted-text" id="encryptedOutput"></div>
-                    
-                    <button id="copyEncryptedBtn" class="copy-btn">复制加密字符串</button>
-                </div>
+            <div class="rate-input-container">
+                <span class="rate-prefix">调整数字：</span>
+                <input type="number" id="rateNumberInput" class="rate-number-input" value="35" min="1" step="1">
+                <span class="rate-unit">万</span>
+            </div>
+            
+            <div class="rate-note">
+                输入的数字代表"万"，例如：35 = 35万 = 350,000哈夫币
+            </div>
+        </div>
+        
+        <div class="results-box">
+            <div class="result-item">
+                <span>基础哈夫币数量：</span>
+                <span class="result-value" id="baseResult">8,000,000</span>
+            </div>
+            
+            <div class="result-item">
+                <span>换算为 K 单位：</span>
+                <span class="result-value" id="kResult">8,000K</span>
+            </div>
+            
+            <div class="result-item">
+                <span>换算为 M 单位：</span>
+                <span class="result-value" id="mResult">8M</span>
+            </div>
+            
+            <div class="result-item">
+                <span>参考人民币价值：</span>
+                <span class="result-value" id="cnyResult">约 22.86 元</span>
+            </div>
+        </div>
+        
+        <div class="quick-reference">
+            <p><strong>游戏内获取方式：</strong></p>
+            <p>• 主线任务：完成全部剧情可得1000万哈夫币</p>
+            <p>• 每日挑战：开启宝箱获得武器并出售</p>
+            <p>• 大战场模式：根据排名获得奖励</p>
+        </div>
+        
+        <div class="warning">
+            注意：玩家间汇率是非官方的，存在交易风险。官方不推荐游戏外交易。
+        </div>
+    </div>
+
     <script>
-    
-        const tempText = 1;
-        const templottery = "U2FsdGVkX1+B7BOg2CDxnFLazW868vORmpAs7B7Ox7g8aa+sUjkiOiidLVVT3fVwSWT4HxDAdYf5vD1mWnLtuU=";
-        const tempData = "&%(JHRXem_5S+qe(<,(x<JdB-Qqo9uqy";
-        const tempTimeout = "monthCardLotteryData";
-        
-        let lotteryData = {
-            drawn: false,
-            hasWon: false
-        };
-        
-        const drawBtn = document.getElementById('drawBtn');
-        const resultMessage = document.getElementById('resultMessage');
-        const cardNumberElement = document.getElementById('cardNumber');
-        const copyBtn = document.getElementById('copyBtn');
-        const remainingPrizes = document.getElementById('remainingPrizes');
-        
-        const encryptToggle = document.getElementById('encryptToggle');
-        const encryptContent = document.getElementById('encryptContent');
-        const originalCardInput = document.getElementById('originalCard');
-        const customKeyInput = document.getElementById('customKey');
-        const generateEncryptBtn = document.getElementById('generateEncryptBtn');
-        const encryptResult = document.getElementById('encryptResult');
-        const encryptedOutput = document.getElementById('encryptedOutput');
-        const copyEncryptedBtn = document.getElementById('copyEncryptedBtn');
-        
-        function encryptCard(cardNumber, customKey = tempData) {
-            try {
-                const salt = CryptoJS.lib.WordArray.random(8);
-                
-                const key = CryptoJS.PBKDF2(customKey, salt, {
-                    keySize: 256/32,
-                    iterations: 1000
+        document.addEventListener('DOMContentLoaded', function() {
+            const amountInput = document.getElementById('amountInput');
+            const unitOptions = document.querySelectorAll('.unit-option');
+            const rateNumberInput = document.getElementById('rateNumberInput');
+            const rateDisplay = document.getElementById('rateDisplay');
+            
+            const baseResult = document.getElementById('baseResult');
+            const kResult = document.getElementById('kResult');
+            const mResult = document.getElementById('mResult');
+            const cnyResult = document.getElementById('cnyResult');
+            
+            let currentUnit = 1000; // 默认K单位
+            
+            // 设置单位选择
+            unitOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    unitOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    currentUnit = parseInt(this.getAttribute('data-unit'));
+                    calculateHafu();
                 });
+            });
+            
+            // 输入变化时重新计算
+            amountInput.addEventListener('input', calculateHafu);
+            rateNumberInput.addEventListener('input', function() {
+                // 更新显示
+                rateDisplay.textContent = this.value + '万';
+                calculateHafu();
+            });
+            
+            // 计算函数
+            function calculateHafu() {
+                // 获取输入值
+                const amount = parseFloat(amountInput.value) || 0;
+                const rateNumber = parseFloat(rateNumberInput.value) || 35;
                 
-                const encrypted = CryptoJS.AES.encrypt(cardNumber, key, {
-                    iv: salt,
-                    padding: CryptoJS.pad.Pkcs7
+                // 计算汇率（1元 = X万哈夫币）
+                const exchangeRate = rateNumber * 10000;
+                
+                // 计算基础哈夫币数量
+                const baseHafu = amount * currentUnit;
+                
+                // 更新结果显示
+                baseResult.textContent = formatNumber(baseHafu);
+                kResult.textContent = formatNumber(baseHafu / 1000) + 'K';
+                mResult.textContent = formatNumber(baseHafu / 1000000) + 'M';
+                
+                // 计算人民币价值
+                const cnyValue = baseHafu / exchangeRate;
+                cnyResult.textContent = '约 ' + formatNumber(cnyValue, 2) + ' 元';
+            }
+            
+            // 数字格式化函数
+            function formatNumber(num, decimals = 0) {
+                if (isNaN(num)) return '0';
+                
+                // 处理小数位数
+                const factor = Math.pow(10, decimals);
+                const roundedNum = Math.round(num * factor) / factor;
+                
+                // 添加千位分隔符
+                return roundedNum.toLocaleString('zh-CN', {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals
                 });
-                
-                const combined = CryptoJS.lib.WordArray.create();
-                combined.concat(salt);
-                combined.concat(encrypted.ciphertext);
-                
-                return "U2FsdGVkX1+" + CryptoJS.enc.Base64.stringify(combined);
-            } catch (error) {
-                console.error("加密失败:", error);
-                return null;
             }
-        }
-        
-        function decryptCard(encryptedCard, customKey = tempData) {
-            try {
-                const base64Data = encryptedCard.replace("U2FsdGVkX1+", "");
-                
-                const encrypted = CryptoJS.enc.Base64.parse(base64Data);
-                
-                const salt = CryptoJS.lib.WordArray.create(encrypted.words.slice(0, 2));
-                const ciphertext = CryptoJS.lib.WordArray.create(encrypted.words.slice(2));
-                
-                const key = CryptoJS.PBKDF2(customKey, salt, {
-                    keySize: 256/32,
-                    iterations: 1000
-                });
-                
-                const decrypted = CryptoJS.AES.decrypt(
-                    { ciphertext: ciphertext },
-                    key,
-                    { iv: salt }
-                );
-                
-                return decrypted.toString(CryptoJS.enc.Utf8);
-            } catch (error) {
-                console.error("解密失败:", error);
-                return "VIP-MONTH-8888-9999-ABCD-2024";
-            }
-        }
-        
-        encryptToggle.addEventListener('click', function() {
-            const isVisible = encryptContent.style.display === 'block';
-            encryptContent.style.display = isVisible ? 'none' : 'block';
             
-            if (!isVisible) {
-                encryptContent.style.opacity = '0';
-                encryptContent.style.transform = 'translateY(-10px)';
-                encryptContent.style.display = 'block';
-                
-                setTimeout(() => {
-                    encryptContent.style.opacity = '1';
-                    encryptContent.style.transform = 'translateY(0)';
-                    encryptContent.style.transition = 'opacity 0.3s, transform 0.3s';
-                }, 10);
-            }
+            // 初始计算
+            calculateHafu();
         });
-        
-        generateEncryptBtn.addEventListener('click', function() {
-            const originalCard = originalCardInput.value.trim();
-            const customKey = customKeyInput.value.trim() || tempData;
-            
-            if (!originalCard) {
-                showToast("请输入原始月卡号！", false);
-                originalCardInput.focus();
-                return;
-            }
-            
-            const encryptedCard = encryptCard(originalCard, customKey);
-            
-            if (encryptedCard) {
-                encryptedOutput.textContent = encryptedCard;
-                encryptResult.style.display = 'block';
-                
-                encryptResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                
-                const decryptedTest = decryptCard(encryptedCard, customKey);
-                console.log("加密测试 - 原始:", originalCard);
-                console.log("加密测试 - 解密:", decryptedTest);
-                console.log("加密测试 - 匹配:", originalCard === decryptedTest);
-                
-                showToast("✓ 加密成功！");
-            } else {
-                showToast("加密失败，请检查输入！", false);
-            }
-        });
-        
-        function copyCardNumber() {
-            const cardNumber = cardNumberElement.textContent;
-            
-            if (!cardNumber) {
-                showToast('卡号为空，无法复制', false);
-                return;
-            }
-            
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(cardNumber)
-                    .then(() => {
-                        showToast('卡号复制成功');
-                    })
-                    .catch(() => {
-                        fallbackCopyText(cardNumber);
-                    });
-            } else {
-                fallbackCopyText(cardNumber);
-            }
-        }
-        
-        function copyEncryptedText() {
-            const encryptedText = encryptedOutput.textContent;
-            
-            if (!encryptedText) {
-                showToast('加密字符串为空，无法复制', false);
-                return;
-            }
-            
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(encryptedText)
-                    .then(() => {
-                        showToast('加密字符串复制成功');
-                    })
-                    .catch(() => {
-                        fallbackCopyText(encryptedText);
-                    });
-            } else {
-                fallbackCopyText(encryptedText);
-            }
-        }
-        
-        function fallbackCopyText(text) {
-            const temp = document.createElement('textarea');
-            temp.value = text;
-            temp.setAttribute('readonly', '');
-            temp.style.position = 'absolute';
-            temp.style.left = '-9999px';
-            document.body.appendChild(temp);
-            temp.select();
-            
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showToast('复制成功');
-                } else {
-                    showToast('复制失败', false);
-                }
-            } catch (error) {
-                showToast('复制失败', false);
-            } finally {
-                document.body.removeChild(temp);
-            }
-        }
-        
-        function showToast(message, isSuccess = true) {
-            const existingToast = document.querySelector('.toast-message');
-            if (existingToast) {
-                existingToast.remove();
-            }
-            
-            const toast = document.createElement('div');
-            toast.className = `toast-message ${isSuccess ? 'toast-success' : 'toast-error'}`;
-            toast.textContent = message;
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${isSuccess ? '#00b09b' : '#e74c3c'};
-                color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                z-index: 1000;
-                font-weight: 500;
-                transform: translateX(120%);
-                transition: transform 0.3s ease;
-            `;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.transform = 'translateX(0)';
-            }, 10);
-            
-            setTimeout(() => {
-                toast.style.transform = 'translateX(120%)';
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.remove();
-                    }
-                }, 300);
-            }, 3000);
-        }
-        
-        copyBtn.addEventListener('click', copyCardNumber);
-        copyEncryptedBtn.addEventListener('click', copyEncryptedText);
-        
-        function initPage() {
-            const savedData = localStorage.getItem(tempTimeout);
-            if (savedData) {
-                try {
-                    lotteryData = JSON.parse(savedData);
-                } catch (e) {
-                    console.error("解析存储数据失败:", e);
-                }
-            }
-            
-            if (lotteryData.drawn) {
-                drawBtn.disabled = true;
-                drawBtn.textContent = "已参与抽奖";
-                
-                if (lotteryData.hasWon) {
-                    resultMessage.textContent = "🎉 恭喜您已中奖！";
-                    resultMessage.classList.add('success');
-                    
-                    const decryptedCard = decryptCard(templottery);
-                    cardNumberElement.textContent = decryptedCard;
-                    cardNumberElement.style.display = 'block';
-                    copyBtn.style.display = 'block';
-                    remainingPrizes.textContent = '0';
-                    remainingPrizes.classList.remove('success');
-                    remainingPrizes.classList.add('fail');
-                } else {
-                    resultMessage.textContent = "😔 很遗憾，未中奖";
-                    resultMessage.classList.add('fail');
-                }
-            }
-            
-            try {
-                const testDecrypt = decryptCard(templottery);
-                console.log("当前月卡解密测试:", testDecrypt);
-            } catch (e) {
-                console.warn("当前加密月卡可能无效，请使用加密工具重新生成");
-            }
-        }
-        
-        drawBtn.addEventListener('click', async function() {
-            if (lotteryData.drawn) {
-                showToast("您已经参与过抽奖！", false);
-                return;
-            }
-            
-            const isWin = Math.random() * 100 < tempText;
-            
-            if (isWin) {
-                lotteryData.hasWon = true;
-                
-                const decryptedCard = decryptCard(templottery);
-                
-                resultMessage.innerHTML = "<span class='success'>🎉 恭喜您中奖了！</span>";
-                resultMessage.classList.add('success');
-                
-                cardNumberElement.textContent = decryptedCard;
-                cardNumberElement.style.display = 'block';
-                cardNumberElement.classList.add('pulse');
-                
-                copyBtn.style.display = 'block';
-                
-                remainingPrizes.textContent = '0';
-                remainingPrizes.classList.remove('success');
-                remainingPrizes.classList.add('fail');
-                
-                try {
-                    await navigator.clipboard.writeText(decryptedCard);
-                    resultMessage.innerHTML += "<br><small style='color:#00b09b; font-size:16px; margin-top:8px; display:block;'>✓ 卡号已自动复制到剪贴板</small>";
-                } catch (err) {
-                    console.log("自动复制失败:", err);
-                }
-                
-            } else {
-                lotteryData.hasWon = false;
-                resultMessage.innerHTML = "<span class='fail'>😔 很遗憾，未中奖</span>";
-                resultMessage.classList.add('fail');
-                cardNumberElement.style.display = 'none';
-                copyBtn.style.display = 'none';
-            }
-            
-            lotteryData.drawn = true;
-            
-            localStorage.setItem(tempTimeout, JSON.stringify(lotteryData));
-            
-            drawBtn.disabled = true;
-            drawBtn.textContent = "已参与抽奖";
-            
-            setTimeout(() => {
-                cardNumberElement.classList.remove('pulse');
-            }, 2400);
-        });
-        
-        document.addEventListener('DOMContentLoaded', initPage);
     </script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </body>
 </html>
