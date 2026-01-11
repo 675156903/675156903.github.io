@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成年人体重指数计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.5;
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 14px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 20px;
+        }
+        
+        .subtitle {
+            color: #3498db;
+            font-size: 13px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 13px;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .gender-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .gender-option {
+            flex: 1;
+            text-align: center;
+            padding: 8px 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+        
+        .gender-option:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .gender-option.selected {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            transition: background-color 0.3s;
+            margin-top: 5px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            display: none;
+            background-color: #f9f9f9;
+            border-left: 4px solid #3498db;
+        }
+        
+        .bmi-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        
+        .bmi-category {
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .system-evaluation {
+            background-color: #fff9e6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 12px 0;
+            border-left: 3px solid #f1c40f;
+            text-align: left;
+            font-size: 13px;
+        }
+        
+        .evaluation-title {
+            font-weight: bold;
+            color: #e67e22;
+            margin-bottom: 5px;
+        }
+        
+        .additional-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .result-item {
+            background-color: white;
+            padding: 12px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .result-label {
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 3px;
+        }
+        
+        .result-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .result-unit {
+            font-size: 12px;
+            color: #777;
+            margin-left: 2px;
+        }
+        
+        .progress-container {
+            margin-top: 8px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            margin-top: 3px;
+            color: #777;
+        }
+        
+        .bmi-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        
+        .bmi-table th, .bmi-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .bmi-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .info-section {
+            margin-top: 20px;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            margin: 15px 0 8px 0;
+            font-size: 14px;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            line-height: 1.5;
+            font-size: 13px;
+        }
+        
+        .category-underweight {
+            color: #e74c3c;
+        }
+        
+        .category-normal {
+            color: #27ae60;
+        }
+        
+        .category-overweight {
+            color: #f39c12;
+        }
+        
+        .category-obese {
+            color: #c0392b;
+        }
+        
+        .progress-underweight {
+            background-color: #e74c3c;
+        }
+        
+        .progress-normal {
+            background-color: #27ae60;
+        }
+        
+        .progress-overweight {
+            background-color: #f39c12;
+        }
+        
+        .progress-obese {
+            background-color: #c0392b;
+        }
+        
+        .ideal-weight-range {
+            color: #3498db;
+        }
+        
+        .highlight {
+            background-color: #fffacd;
+            padding: 1px 3px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+        
+        .compact-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .compact-row .input-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .health-advice {
+            font-size: 12px;
+            color: #666;
+            text-align: left;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .note {
+            font-size: 11px;
+            color: #999;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 500px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 12px;
+            }
+            
+            .bmi-value {
+                font-size: 24px;
+            }
+            
+            .additional-results {
+                grid-template-columns: 1fr;
+            }
+            
+            .compact-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>成年人体重指数计算器</h1>
+        <p class="subtitle">体重指数 | 理想体重 | 体脂估算 | 幽默评价</p>
+    </header>
+    
+    <div class="container">
+        <h2>个人信息</h2>
+        <div class="compact-row">
+            <div class="input-group">
+                <label for="weight">体重 (kg)</label>
+                <input type="number" id="weight" placeholder="" min="1" step="0.1" value="55">
+            </div>
+            
+            <div class="input-group">
+                <label for="height">身高 (cm)</label>
+                <input type="number" id="height" placeholder="" min="1" step="0.1" value="150">
+            </div>
+        </div>
+        
+        <div class="compact-row">
+            <div class="input-group">
+                <label>性别</label>
+                <div class="gender-group">
+                    <div class="gender-option selected" id="male">男</div>
+                    <div class="gender-option" id="female">女</div>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="age">年龄</label>
+                <input type="number" id="age" placeholder="" min="1" max="120" step="1" value="25">
+            </div>
+        </div>
+        
+        <button id="calculate">开始计算</button>
+        
+        <div class="result" id="result">
+            <h2>健康报告</h2>
+            <div class="bmi-value" id="bmiValue">--</div>
+            <div class="bmi-category" id="bmiCategory">--</div>
+            
+            <div class="system-evaluation">
+                <div class="evaluation-title" id="evaluationTitle"></div>
+                <div id="evaluationText">--</div>
+            </div>
+            
+            <div class="additional-results">
+                <div class="result-item">
+                    <div class="result-label">理想体重范围</div>
+                    <div class="result-value" id="idealWeight">--<span class="result-unit">kg</span></div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-normal" id="idealWeightBar" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-labels">
+                            <span>18.5</span>
+                            <span>24</span>
+                        </div>
+                    </div>
+                    <div class="note"></div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">估算体脂率</div>
+                    <div class="result-value" id="bodyFat">--<span class="result-unit">%</span></div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="bodyFatBar" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-labels">
+                            <span id="fatMinLabel">--%</span>
+                            <span id="fatMaxLabel">--%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="health-advice">
+                <strong>健康建议：</strong> <span id="healthAdvice">--</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>BMI分类标准</h2>
+        <table class="bmi-table">
+            <thead>
+                <tr>
+                    <th>分类</th>
+                    <th>BMI范围</th>
+                    <th>健康风险</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="category-underweight">体重过轻</td>
+                    <td>&lt; 18.5</td>
+                    <td>营养不良风险</td>
+                </tr>
+                <tr>
+                    <td class="category-normal">正常范围</td>
+                    <td>18.5～23.9</td>
+                    <td>健康风险较低</td>
+                </tr>
+                <tr>
+                    <td class="category-overweight">超重</td>
+                    <td>24～27.9</td>
+                    <td>健康风险增加</td>
+                </tr>
+                <tr>
+                    <td class="category-obese">肥胖</td>
+                    <td>≥ 28</td>
+                    <td>高风险</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="container info-section">
+        <h2>关于本计算器</h2>
+        <p>本工具计算您的身体质量指数(BMI)，并提供理想体重范围、体脂率估算和健康幽默评价。</p>
+        <p><strong>注意：</strong> 理想体重范围基于18.5～23.9的BMI范围计算的。计算结果仅供参考，不能替代专业医疗建议。</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const weightInput = document.getElementById('weight');
+            const heightInput = document.getElementById('height');
+            const ageInput = document.getElementById('age');
+            const calculateBtn = document.getElementById('calculate');
+            const resultDiv = document.getElementById('result');
+            const bmiValue = document.getElementById('bmiValue');
+            const bmiCategory = document.getElementById('bmiCategory');
+            const evaluationTitle = document.getElementById('evaluationTitle');
+            const evaluationText = document.getElementById('evaluationText');
+            const idealWeight = document.getElementById('idealWeight');
+            const bodyFat = document.getElementById('bodyFat');
+            const healthAdvice = document.getElementById('healthAdvice');
+            
+            const idealWeightBar = document.getElementById('idealWeightBar');
+            const bodyFatBar = document.getElementById('bodyFatBar');
+            const fatMinLabel = document.getElementById('fatMinLabel');
+            const fatMaxLabel = document.getElementById('fatMaxLabel');
+            
+            const maleOption = document.getElementById('male');
+            const femaleOption = document.getElementById('female');
+            let gender = 'male';
+            
+            // 性别选择
+            maleOption.addEventListener('click', function() {
+                gender = 'male';
+                maleOption.classList.add('selected');
+                femaleOption.classList.remove('selected');
+            });
+            
+            femaleOption.addEventListener('click', function() {
+                gender = 'female';
+                femaleOption.classList.add('selected');
+                maleOption.classList.remove('selected');
+            });
+            
+            calculateBtn.addEventListener('click', calculateAll);
+            
+            // 允许按Enter键进行计算
+            [weightInput, heightInput, ageInput].forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') calculateAll();
+                });
+            });
+            
+            function calculateAll() {
+                const weight = parseFloat(weightInput.value);
+                const height = parseFloat(heightInput.value) / 100;
+                const age = parseInt(ageInput.value);
+                
+                // 验证输入
+                if (isNaN(weight) || weight <= 0) {
+                    alert('请输入有效的体重值');
+                    return;
+                }
+                
+                if (isNaN(height) || height <= 0) {
+                    alert('请输入有效的身高值');
+                    return;
+                }
+                
+                if (isNaN(age) || age <= 0 || age > 120) {
+                    alert('请输入有效的年龄 (1-120岁)');
+                    return;
+                }
+                
+                // 计算BMI，保留两位小数
+                const bmi = weight / (height * height);
+                const roundedBMI = bmi.toFixed(2);
+                
+                // 显示BMI结果
+                bmiValue.textContent = roundedBMI;
+                
+                // 根据BMI值分类（使用幽默评价系统）
+                let category, description, categoryClass, progressClass;
+                let evaluation = "";
+                
+                if (bmi < 18.5) {
+                    category = '体重过轻';
+                    description = '您的体重低于正常范围';
+                    categoryClass = 'category-underweight';
+                    progressClass = 'progress-underweight';
+                    
+                    // 针对体重过轻的不同程度给出幽默评价
+                    if (bmi < 16) {
+                        const randomQuotes = [
+                            "前胸贴后背一点肉都没有！！你这是准备随时起飞当风筝吗？",
+                            "啊，你还能买到衣服吗？是不是得去童装区逛逛？",
+                            "这身材，风大一点的日子建议随身带块砖头压压惊！",
+                            "瘦成一道闪电⚡️，但咱们是人间，不是天界啊！"
+                        ];
+                        evaluation = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
+                    } else if (bmi < 17) {
+                        const randomQuotes = [
+                            "啊，你还能买到衣服吗？可能需要定制了，太瘦啦！",
+                            "这位同学，请问你是如何做到在汉堡和奶茶的包围中保持如此'苗条'的？",
+                            "瘦得让人心疼，多吃点吧，不然连蚊子都嫌弃你没肉！",
+                            "你这身材，穿啥都像挂在衣架上，考虑下当模特？"
+                        ];
+                        evaluation = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
+                    } else if (bmi < 18) {
+                        const randomQuotes = [
+                            "太瘦了，风一吹就倒的节奏！赶紧囤点肉肉过冬吧！",
+                            "衣服都撑不起来的感觉，是不是该考虑加点'填充物'？",
+                            "瘦成一道风景线，但健康才是最美的风景哦！",
+                            "你这BMI，让汉堡和炸鸡情何以堪？给它们一个表现的机会吧！"
+                        ];
+                        evaluation = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
+                    } else {
+                        const randomQuotes = [
+                            "正常范围内，但偏瘦了一点点！是传说中的'吃不胖体质'吗？羡慕了！",
+                            "稍微多吃点也不会怎样，真的！我以薯片的名义发誓！",
+                            "瘦是瘦，有肌肉！考虑加点肌肉变成'穿衣显瘦，脱衣有肉'型？",
+                            "你这身材，奶茶和蛋糕看了都摇头：'主人，你怎么不吃我？'"
+                        ];
+                        evaluation = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
+                    }
+                    
+                } else if (bmi >= 18.5 && bmi < 24) {
+                    category = '正常范围';
+                    description = '体重在健康范围内';
+                    categoryClass = 'category-normal';
+                    progressClass = 'progress-normal';
+                    
+                    // 针对正常范围内的不同情况给出幽默评价
+                    if (bmi >= 18.5 && bmi < 20) {
+                        const randomQuotes = [
+                            "正常范围内，但偏瘦了一点！你这是故意气那些喝水都胖的人吗？",
+                            "瘦子中的战斗机！不过可以适当增肌，从'纸片人'升级为'3D立体人'！",
+                            "这身材，穿S码有余，穿XS码刚好，是来拉仇恨的吗？",
+                            "偏瘦美人是吧？考虑下健身房办卡，给肌肉一个亮相的机会？"
+                        ];
+                        evaluation = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
+                    } else if (bmi >= 20 && bmi < 21) {
+                        const randomQuotes = [
+                            "哇！您太苗条了！是标准身材！汉堡看了都想自动减肥！",
+                            "这是让体重秤都心动的数字！继续保持，你是体重管理界的学霸！",
+                            "标准身材认证✅ 可以放心吃火锅了（但别太过分哈）！",
+                            "你这BMI，堪称人体黄金比例，建议申请专利保护！"
+                        ];
+                        evaluation = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
+                    } else if (bmi >= 21 && bmi < 22) {
+                        const randomQuotes = [
+                            "好羡慕啊，这可是魔鬼身材啊！是偷偷在梦里健身了吗？",
+                            "完美体型比例！建议出门带保镖，防止被人羡慕的眼神'看伤'！",
+                            "这身材，披个麻袋都好看！不过还是建议穿点正经衣服～",
+                            "魔鬼身材认证👿 但你是天使体质，怎么吃都不胖，气人不？"
+                        ];
+                        evaluation = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
+                    } else if (bmi >= 22 && bmi < 23) {
+                        const randomQuotes = [
+                            "理想身材！不多不少刚刚好，堪称'人体工程学典范'！",
+                            "这BMI，健康与美感兼具！建议开班教学，拯救广大减肥群众！",
+                            "刚刚好，多一分则胖，少一分则瘦，你是懂拿捏的！",
+                            "理想型身材！汉堡和沙拉看了都得握手言和：'这身材，我们谁都不背锅！'"
+                        ];
+                        evaluation = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
+                    } else {
+                        const randomQuotes = [
+                            "正常范围内，但也注意别超标哦！奶茶已经在门口排队了，要忍住！",
+                            "维持现状就是最好的状态！毕竟减肥是场持久战，而你已提前胜利！",
+                            "完美平衡点！可以稍微放纵，但记得和跑步机保持友好关系～",
+                            "这体重，是经过汉堡和沙拉双方协商达成的一致结果！继续保持！"
+                        ];
+                        evaluation = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
+                    }
+                    
+                } else if (bmi >= 24 && bmi < 28) {
+                    category = '超重';
+                    description = '体重略高于正常范围';
+                    categoryClass = 'category-overweight';
+                    progressClass = 'progress-overweight';
+                    
+                    const randomQuotes = [
+                        "您的体重略高于理想范围，是不是和外卖软件感情太好了？",
+                        "体重超标警告⚠️ 建议和炸鸡暂时分居，和蔬菜重修旧好！",
+                        "超重一点点，问题不大！就像手机电量剩24%，赶紧充还来得及！",
+                        "体重：'我只是想离你更近一点' 你：'不，你不想！' 是时候保持距离了！",
+                        "您的体重略高，建议增加运动，比如：从沙发走到冰箱的次数减少一半？"
+                    ];
+                    evaluation = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
+                    
+                } else {
+                    category = '肥胖';
+                    description = '体重明显高于正常范围';
+                    categoryClass = 'category-obese';
+                    progressClass = 'progress-obese';
+                    
+                    const randomQuotes = [
+                        "您的体重明显偏高，建议咨询专业人士，毕竟专业的事要交给专业的人！",
+                        "肥胖警告🚨 您和理想体重之间，可能就差一个'管住嘴，迈开腿'！",
+                        "体重明显超标，但别灰心！每一个胖子都是潜力股，加油减！",
+                        "您的BMI在说：'是时候和夜宵分手了！' 建议制定科学的'分手计划'！",
+                        "体重明显偏高，但别怕！减肥就像玩游戏，只是你现在选择了困难模式！"
+                    ];
+                    evaluation = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
+                }
+                
+                bmiCategory.textContent = category;
+                bmiCategory.className = 'bmi-category ' + categoryClass;
+                
+                
+                evaluationTitle.textContent = "";
+                evaluationText.textContent = evaluation;
+                
+                // 计算并显示理想体重范围（不包含边界值18.5和24）
+                const minIdealWeight = ((18.5 + 0.1) * height * height).toFixed(1);
+                const maxIdealWeight = ((24 - 0.1) * height * height).toFixed(1);
+                idealWeight.textContent = `${minIdealWeight}～${maxIdealWeight}`;
+                
+                // 计算当前体重在理想范围内的百分比位置
+                let weightProgress = 0;
+                const minIdealWeightNum = parseFloat(minIdealWeight);
+                const maxIdealWeightNum = parseFloat(maxIdealWeight);
+                
+                if (weight < minIdealWeightNum) {
+                    weightProgress = (weight / minIdealWeightNum) * 33;
+                } else if (weight > maxIdealWeightNum) {
+                    weightProgress = 66 + ((weight - maxIdealWeightNum) / (maxIdealWeightNum * 0.5)) * 34;
+                    if (weightProgress > 100) weightProgress = 100;
+                } else {
+                    // 在理想范围内
+                    const range = maxIdealWeightNum - minIdealWeightNum;
+                    const position = weight - minIdealWeightNum;
+                    weightProgress = 33 + (position / range) * 33;
+                }
+                
+                idealWeightBar.style.width = weightProgress + '%';
+                
+                // 计算并显示估算体脂率，保留一位小数
+                const bodyFatPercentage = calculateBodyFat(bmi, age, gender).toFixed(1);
+                bodyFat.textContent = bodyFatPercentage;
+                
+                // 体脂率健康范围
+                let minHealthyFat, maxHealthyFat;
+                if (gender === 'male') {
+                    minHealthyFat = 8;
+                    maxHealthyFat = 20;
+                } else {
+                    minHealthyFat = 21;
+                    maxHealthyFat = 33;
+                }
+                
+                fatMinLabel.textContent = minHealthyFat + "%";
+                fatMaxLabel.textContent = maxHealthyFat + "%";
+                
+                // 计算体脂率进度条
+                let fatProgress = 0;
+                if (bodyFatPercentage < minHealthyFat) {
+                    fatProgress = (bodyFatPercentage / minHealthyFat) * 50;
+                } else if (bodyFatPercentage > maxHealthyFat) {
+                    fatProgress = 50 + ((bodyFatPercentage - maxHealthyFat) / (maxHealthyFat * 0.5)) * 50;
+                    if (fatProgress > 100) fatProgress = 100;
+                } else {
+                    // 在健康范围内
+                    const range = maxHealthyFat - minHealthyFat;
+                    const position = bodyFatPercentage - minHealthyFat;
+                    fatProgress = 50;
+                }
+                
+                bodyFatBar.style.width = fatProgress + '%';
+                bodyFatBar.className = 'progress-fill ' + progressClass;
+                
+                // 显示健康建议
+                let advice = "";
+                if (bmi < 18.5) {
+                    advice = "增加营养摄入，特别是优质蛋白质和健康脂肪。可以适当增加餐次，结合力量训练增加肌肉量。";
+                } else if (bmi >= 18.5 && bmi < 24) {
+                    advice = "继续保持均衡饮食和规律运动。建议每周至少进行150分钟中等强度有氧运动。";
+                } else if (bmi >= 24 && bmi < 28) {
+                    advice = "控制总热量摄入，减少高糖高脂食物。增加有氧运动时间。";
+                } else {
+                    advice = "建议咨询医生或营养师制定个性化减重计划。饮食控制结合规律运动，逐步减轻体重。";
+                }
+                healthAdvice.textContent = advice;
+                
+                // 显示结果区域
+                resultDiv.style.display = 'block';
+                
+                // 滚动到结果区域
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            // 计算体脂率的公式
+            function calculateBodyFat(bmi, age, gender) {
+                const genderCoefficient = (gender === 'male') ? 1 : 0;
+                let bodyFat = (1.2 * bmi) + (0.23 * age) - (10.8 * genderCoefficient) - 5.4;
+                
+                if (bodyFat < 3) bodyFat = 3;
+                if (bodyFat > 50) bodyFat = 50;
+                
+                return bodyFat;
+            }
+            
+            // 页面加载时自动计算示例数据
+            calculateAll();
+        });
+    </script>
+</body>
+</html>
