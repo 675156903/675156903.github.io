@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>完美人生-完美计算</title>
+    <title>完美人生﹣完美计算</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Microsoft YaHei', sans-serif; }
         body { background: #f0f2f5; color: #333; padding: 8px; max-width: 400px; margin: auto; font-size: 12px; }
@@ -325,8 +325,8 @@
             <tr><th>分类</th><th>BMI范围</th><th>健康风险</th><th>建议</th></tr>
             <tr><td class="red">体重过轻</td><td>&lt; 18.50</td><td>营养不良风险</td><td>增加营养摄入</td></tr>
             <tr><td class="green">正常范围</td><td>18.50～23.90</td><td>健康风险较低</td><td>保持良好习惯</td></tr>
-            <tr><td class="orange">超重</td><td>24.00～27.90</td><td>健康风险增加</td><td>控制体重</td></tr>
-            <tr><td class="dark-red">肥胖</td><td>≥ 28.00</td><td>高风险</td><td>建议就医咨询</td></tr>
+            <tr><td class="orange">超重</td><td>23.91～28.00</td><td>健康风险增加</td><td>控制体重</td></tr>
+            <tr><td class="dark-red">肥胖</td><td>> 28.00</td><td>高风险</td><td>建议就医咨询</td></tr>
         </table>
     </div>
 
@@ -471,18 +471,21 @@
             
             // 防止除零错误
             if (heightM === 0) {
-                bmiValue.textContent = "0.00";  // 修改为两位小数
+                bmiValue.textContent = "0.00";
                 bmiCategory.textContent = "数据无效";
                 bmiCategory.className = 'bmi-category red';
                 evaluationText.textContent = "身高不能为0";
                 return;
             }
             
-            // 计算BMI - 只修改这里，显示两位小数
+            // 计算BMI
             const bmi = weight / (heightM * heightM);
-            bmiValue.textContent = bmi.toFixed(2);  // 修改为toFixed(2) 显示两位小数
+            bmiValue.textContent = bmi.toFixed(2);
             
-            // BMI分类
+            // 根据指定规则进行BMI分类
+            // 正常：18.5 ≤ BMI ≤ 23.9
+            // 超重：23.9 < BMI ≤ 28
+            // 肥胖：BMI > 28
             let category, categoryClass, statusClass;
             if (bmi === 0) {
                 category = "体重为0";
@@ -492,15 +495,15 @@
                 category = '体重过轻';
                 categoryClass = 'red';
                 statusClass = 'status-blue';
-            } else if (bmi < 24) {
+            } else if (bmi <= 23.9) {  // 正常：18.5 ≤ BMI ≤ 23.9
                 category = '正常范围';
                 categoryClass = 'green';
                 statusClass = 'status-green';
-            } else if (bmi < 28) {
+            } else if (bmi <= 28) {    // 超重：23.9 < BMI ≤ 28
                 category = '超重';
                 categoryClass = 'orange';
                 statusClass = 'status-orange';
-            } else {
+            } else {                   // 肥胖：BMI > 28
                 category = '肥胖';
                 categoryClass = 'dark-red';
                 statusClass = 'status-red';
@@ -508,15 +511,6 @@
             
             bmiCategory.textContent = category;
             bmiCategory.className = 'bmi-category ' + categoryClass;
-            
-            // 如果BMI>=23.9则显示为超重（更严格的标准）
-            if (bmi >= 23.9) {
-                category = '超重';
-                categoryClass = 'orange';
-                statusClass = 'status-orange';
-                bmiCategory.textContent = category;
-                bmiCategory.className = 'bmi-category ' + categoryClass;
-            }
             
             // 幽默评价
             let quote = "";
@@ -529,21 +523,21 @@
                     "您需要更多的能量储备！建议增加健康饮食"
                 ];
                 quote = quotes[Math.floor(Math.random() * quotes.length)];
-            } else if (bmi < 24) {
+            } else if (bmi <= 23.9) {  // 正常范围
                 const quotes = [
                     "完美体型！继续保持健康生活习惯！💪",
                     "标准身材，为您点赞！继续保持～",
                     "理想体重指数，健康生活的典范！"
                 ];
                 quote = quotes[Math.floor(Math.random() * quotes.length)];
-            } else if (bmi < 28) {
+            } else if (bmi <= 28) {    // 超重范围
                 const quotes = [
                     "体重有点超标，注意控制哦！可以适当增加运动🏃",
                     "轻微超重，建议调整饮食结构，增加锻炼",
                     "是时候和夜宵说再见了！控制体重从现在开始"
                 ];
                 quote = quotes[Math.floor(Math.random() * quotes.length)];
-            } else {
+            } else {                   // 肥胖范围
                 const quotes = [
                     "体重明显偏高，建议咨询专业人士！",
                     "肥胖会增加健康风险，建议制定减重计划",
@@ -559,7 +553,7 @@
             const maxIdeal = idealRangeResult.max;
             const currentWeight = weight * 2; // 当前体重（斤）
             
-            idealWeight.textContent = `${currentWeight.toFixed(1)}`;  // 体重保持1位小数
+            idealWeight.textContent = `${currentWeight.toFixed(1)}`;
             idealRange.textContent = `体重范围: ${minIdeal.toFixed(1)} 至 ${maxIdeal.toFixed(1)} 斤`;
             
             // 体重进度条
@@ -607,7 +601,7 @@
                 bodyFatValue = (1.2 * bmi) + (0.23 * age) - (10.8 * genderCoefficient) - 5.4;
                 bodyFatValue = Math.max(3, Math.min(50, bodyFatValue));
             }
-            bodyFat.textContent = bodyFatValue > 0 ? `${bodyFatValue.toFixed(1)}` : "--";  // 体脂率保持1位小数
+            bodyFat.textContent = bodyFatValue > 0 ? `${bodyFatValue.toFixed(1)}` : "--";
             
             // 体脂率体脂范围
             const fatStandard = gender === 'male' ? { 
@@ -667,17 +661,12 @@
                 advice = "体重不能为0，请重新输入正确的体重值。";
             } else if (bmi < 18.5) {
                 advice = "建议增加优质蛋白摄入，如鸡蛋、牛奶、鱼肉等，适当进行力量训练增加肌肉量。";
-            } else if (bmi < 24) {
+            } else if (bmi <= 23.9) {  // 正常范围
                 advice = "继续保持均衡饮食和规律运动，每周至少150分钟中等强度有氧运动。";
-            } else if (bmi < 28) {
+            } else if (bmi <= 28) {    // 超重范围
                 advice = "控制总热量摄入，减少高糖高脂食物，增加有氧运动如快走、游泳、骑自行车。";
-            } else {
+            } else {                   // 肥胖范围
                 advice = "建议咨询营养师或医生，制定科学的减重计划，注意饮食控制和适度运动结合。";
-            }
-            
-            // 如果BMI>=23.9，给出超重建议
-            if (bmi >= 23.9) {
-                advice = "您的体重已接近或达到超重标准，建议控制总热量摄入，减少高糖高脂食物，增加有氧运动如快走、游泳、骑自行车。";
             }
             
             healthAdvice.textContent = advice;
